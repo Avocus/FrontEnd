@@ -1,5 +1,5 @@
 variables:
-  GITHUB_REPO_URL: 'https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git'
+  GITHUB_REPO_URL: 'https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEndAvocuss.git'
 
 
 trigger:
