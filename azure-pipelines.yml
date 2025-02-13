@@ -10,14 +10,26 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-  # Passo 1: Configurar o Git
+  - script: |
+     echo "Verificando o token do Vercel"
+     echo $(VERCEL_TOKEN)
+    displayName: 'Verificar VERCEL_TOKEN'
 
+    
+  # Passo 1: Configurar o Git
+  - script: |
+      git config --global user.email "avocuss@gmail.com"
+      git config --global user.name "Avocuss"
+    displayName: 'Configurar Git'
+
+  # Passo 2: Clonar o repositório do Azure
+  - checkout: self
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      echo "Verificando o token do Vercel"
-      echo $(GITHUB_TOKEN_ACESS)
-    displayName: 'Verificar $(GITHUB_TOKEN)'
+      git remote add github https://$(GITHUB_TOKEN_ACESS)@github.com/Avocus/FrontEnd.git
+      git fetch github
+    displayName: 'Adicionar GitHub como remote'
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
