@@ -7,34 +7,42 @@ pool:
   name: 'Default'
 
 steps:
-  # Passo 1: Checkout completo da branch main (sem clone superficial)
+  # 1. Checkout completo da branch main (sem clone superficial)
   - checkout: self
     fetchDepth: 0
 
-  # Passo 2: Configurar o Git com suas credenciais
+  # 2. Configurar o Git com suas credenciais
   - script: |
       echo Configurando Git...
       git config --global user.email "avocuss@gmail.com"
       git config --global user.name "Avocuss"
     displayName: 'Configurar Git'
 
-  # Passo 3: Exibir o commit atual para conferência
+  # 3. Exibir o commit atual (do DevOps)
   - script: |
-      echo Commit atual:
+      echo Commit atual (DevOps):
       git rev-parse HEAD
     displayName: 'Verificar commit atual'
 
-  # Passo 4: Adicionar o repositório do GitHub como remote
+  # 4. Adicionar o repositório do GitHub como remote
   - script: |
       echo Adicionando repositório GitHub como remote...
-      rem Remove remote 'github' se já existir (ignora erro, se não existir)
+      rem Remove remote 'github' se já existir
       git remote remove github 2>NUL || echo "Remote 'github' não existia"
       git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git
       git remote -v
     displayName: 'Adicionar GitHub como remote'
 
-  # Passo 5: Push da branch main para o GitHub
+  # 5. Push da branch main para o GitHub
   - script: |
       echo Enviando código para a branch main do GitHub...
       git push --force github main
     displayName: 'Push para o GitHub'
+
+  # 6. Verificar o commit atual no GitHub
+  - script: |
+      echo Verificando commit remoto no GitHub...
+      rem Faz um fetch do remote github e exibe o hash da branch main
+      git fetch github main
+      git rev-parse github/main
+    displayName: 'Verificar commit do GitHub'
