@@ -7,7 +7,7 @@ trigger:
       - main  # Executa o pipeline quando a branch 'main' for atualizada
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Teste'
 
 steps:
   - script: |
