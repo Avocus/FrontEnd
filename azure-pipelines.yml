@@ -43,10 +43,6 @@ steps:
       git status
       git log --oneline
     displayName: 'Verificar estado do repositório'
-  
-  - script: |
-      git push github main --force
-    displayName: 'Forçar push para o GitHub'
 
   - script: |
       git remote -v
