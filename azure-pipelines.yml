@@ -1,5 +1,6 @@
 variables:
-  GITHUB_TOKEN_ACESS: $(GITHUB_TOKEN)
+  GITHUB_REPO_URL: 'https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git'
+
 
 trigger:
   branches:
@@ -7,19 +8,48 @@ trigger:
       - main  # Executa o pipeline quando a branch 'main' for atualizada
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Default'
 
-steps:
+steps:    
   # Passo 1: Configurar o Git
+  - script: |
+      git config --global user.email "avocuss@gmail.com"
+      git config --global user.name "Avocuss"
+    displayName: 'Configurar Git'
+
+  # Passo 2: Clonar o repositório do Azure
+  - checkout: self
+
 
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      echo "Verificando o token do Vercel"
-      echo $(GITHUB_TOKEN_ACESS)
-    displayName: 'Verificar $(GITHUB_TOKEN)'
+      @echo off
+      REM Remove aspas duplas da variável GITHUB_REPO_URL
+      SET GITHUB_REPO_URL=%GITHUB_REPO_URL:"=%
+      REM Exibir o valor limpo (apenas para depuração, remova se necessário)
+      echo %GITHUB_REPO_URL%
+      REM Adicionar o repositório remoto usando a URL limpa
+      git remote add github %GITHUB_REPO_URL%
+      git fetch github
+    displayName: 'Adicionar GitHub como remote'
+
+
+  - script: |
+      git checkout main
+      git pull origin main --rebase
+    displayName: 'Checar a branch main e pegar atualizações'
+
+  - script: |
+      git status
+      git log --oneline
+    displayName: 'Verificar estado do repositório'
+
+  - script: |
+      git remote -v
+    displayName: 'Verificar repositórios remotos'
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
-      git push github main:main
+      git push github main --force
     displayName: 'Push para o GitHub'
