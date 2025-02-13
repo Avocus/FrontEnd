@@ -25,11 +25,12 @@ steps:
       git fetch github
     displayName: 'Adicionar GitHub como remote'
 
-  # Passo 4: Resetar o repositório local para o estado atual da Azure, limpando histórico
+  # Passo 4: Limpar o repositório local (remover arquivos não rastreados)
   - script: |
       git checkout main
       git fetch origin
-      git reset --hard origin/main  # Resetando completamente a branch local para o estado da Azure
+      git clean -fd  # Remover arquivos não rastreados
+      git reset --hard origin/main  # Garantir que o repositório local seja igual ao da Azure
     displayName: 'Limpar histórico local e atualizar com o conteúdo da Azure'
 
   # Passo 5: Forçar o envio do repositório da Azure para o GitHub, sobrescrevendo qualquer histórico
