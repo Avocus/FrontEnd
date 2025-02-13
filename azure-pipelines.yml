@@ -1,0 +1,19 @@
+trigger:
+  branches:
+    include:
+      - main  # Executa apenas quando a branch 'main' for atualizada
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x' # Use a versão do Node compatível com seu projeto
+
+  - script: |
+      npm install -g vercel
+      vercel pull --yes --environment=production --token=$(VERCEL_TOKEN)
+      vercel build --prod --token=$(VERCEL_TOKEN)
+      vercel deploy --prod --token=$(VERCEL_TOKEN)
+    displayName: 'Deploy no Vercel'
