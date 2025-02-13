@@ -11,19 +11,13 @@ pool:
 
 steps:
   # Passo 1: Configurar o Git
-  - script: |
-      git config --global user.email "seu-email@exemplo.com"
-      git config --global user.name "Seu Nome"
-    displayName: 'Configurar Git'
 
-  # Passo 2: Clonar o repositório do Azure
-  - checkout: self
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      git remote add github https://$(GITHUB_TOKEN_ACESS)@github.com/Avocus/FrontEnd.git
-      git fetch github
-    displayName: 'Adicionar GitHub como remote'
+      echo "Verificando o token do Vercel"
+      echo $(GITHUB_TOKEN_ACESS)
+    displayName: 'Verificar $(GITHUB_TOKEN)'
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
