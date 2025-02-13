@@ -41,6 +41,14 @@ steps:
       git remote -v
     displayName: 'Adicionar GitHub como remote'
 
+  # 5.1. Reescrever o commit para definir o autor como Avocuss
+  - script: |
+      echo "Reescrevendo o commit para definir o autor como Avocuss..."
+      git config user.email "avocuss@gmail.com"
+      git config user.name "Avocuss"
+      git commit --amend --no-edit --reset-author
+    displayName: 'Atualizar autor do commit'
+
   # 6. Push da branch main para o GitHub
   - script: |
       echo Enviando código para a branch main do GitHub...
