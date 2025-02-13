@@ -36,6 +36,7 @@ steps:
 
 
   - script: |
+      git fetch github
       git checkout main
       git pull origin main --rebase --allow-unrelated-histories
     displayName: 'Checar a branch main e pegar atualizações'
@@ -51,7 +52,7 @@ steps:
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
-      git pull
       git add .
+      git commit -m "Atualizando repositório via pipeline"
       git push github main
     displayName: 'Push para o GitHub'
