@@ -37,7 +37,8 @@ steps:
 
   - script: |
       git checkout main
-    displayName: 'Checar a branch main'
+      git pull origin main --rebase
+    displayName: 'Checar a branch main e pegar atualizações'
 
   - script: |
       git status
@@ -50,5 +51,5 @@ steps:
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
-      git push github main:main
+      git push github main --force
     displayName: 'Push para o GitHub'
