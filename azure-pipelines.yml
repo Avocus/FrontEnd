@@ -7,10 +7,9 @@ pool:
   name: 'Default'
 
 steps:
-  # Passo 1: Configurar o Git com logs detalhados
+  # Passo 1: Configurar o Git
   - script: |
-      set -x
-      echo "Configurando Git..."
+      echo Configurando Git...
       git config --global user.email "avocuss@gmail.com"
       git config --global user.name "Avocuss"
     displayName: 'Configurar Git'
@@ -18,49 +17,43 @@ steps:
   # Passo 2: Clonar o repositório do Azure
   - checkout: self
 
-  # Passo 3: Adicionar o repositório do GitHub como remote com logs
+  # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      set -x
-      echo "Adicionando GitHub como remote..."
+      echo Adicionando GitHub como remote...
       git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git || echo "Remote 'github' já existe"
       git remote -v
       git fetch github -v
     displayName: 'Adicionar GitHub como remote'
 
-  # Passo 4: Atualizar a branch main com logs detalhados
+  # Passo 4: Atualizar a branch main e pegar atualizações
   - script: |
-      set -x
-      echo "Atualizando branch main..."
+      echo Atualizando branch main...
       git fetch github -v
       git checkout main
       git reset --hard HEAD
     displayName: 'Checar a branch main e pegar atualizações'
 
-  # Passo 5: Verificar o estado do repositório com logs detalhados
+  # Passo 5: Verificar o estado do repositório
   - script: |
-      set -x
-      echo "Exibindo estado do repositório..."
+      echo Exibindo estado do repositório...
       git status
       git log --oneline --graph --decorate
     displayName: 'Verificar estado do repositório'
 
   # Passo 6: Verificar os repositórios remotos
   - script: |
-      set -x
-      echo "Listando repositórios remotos..."
+      echo Listando repositórios remotos...
       git remote -v
     displayName: 'Verificar repositórios remotos'
 
-  # Passo 7: Fazer push da branch main para o GitHub com logs
+  # Passo 7: Fazer push da branch main para o GitHub
   - script: |
-      set -x
-      echo "Realizando push force para o GitHub..."
+      echo Realizando push force para o GitHub...
       git push --force -v github main
     displayName: 'Push para o GitHub'
 
   # Passo 8: Verificar o estado final do repositório após o push
   - script: |
-      set -x
-      echo "Estado final do repositório:"
+      echo Estado final do repositório:
       git status
     displayName: 'Status final do repositório'
