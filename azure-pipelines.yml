@@ -24,25 +24,32 @@ steps:
       git rev-parse HEAD
     displayName: 'Verificar commit atual'
 
-  # 4. Adicionar o repositório do GitHub como remote
+  # 4. Garantir que a branch main local esteja atualizada
+  - script: |
+      echo Atualizando a referência da branch main para o commit atual...
+      git checkout -B main
+      echo Nova referência da branch main:
+      git rev-parse main
+    displayName: 'Atualizar branch main local'
+
+  # 5. Adicionar o repositório do GitHub como remote
   - script: |
       echo Adicionando repositório GitHub como remote...
-      rem Remove remote 'github' se já existir
+      rem Remove remote 'github' se já existir (ignora erro, se não existir)
       git remote remove github 2>NUL || echo "Remote 'github' não existia"
       git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git
       git remote -v
     displayName: 'Adicionar GitHub como remote'
 
-  # 5. Push da branch main para o GitHub
+  # 6. Push da branch main para o GitHub
   - script: |
       echo Enviando código para a branch main do GitHub...
       git push --force github main
     displayName: 'Push para o GitHub'
 
-  # 6. Verificar o commit atual no GitHub
+  # 7. Verificar o commit atual no GitHub
   - script: |
       echo Verificando commit remoto no GitHub...
-      rem Faz um fetch do remote github e exibe o hash da branch main
       git fetch github main
       git rev-parse github/main
     displayName: 'Verificar commit do GitHub'
