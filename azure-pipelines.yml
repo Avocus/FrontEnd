@@ -1,6 +1,3 @@
-variables:
-- group: VercelSecrets
-
 trigger:
   branches:
     include:
@@ -12,7 +9,7 @@ pool:
 steps:
   - task: NodeTool@0
     inputs:
-      versionSpec: '18.x' # Use a versão do Node compatível com seu projeto
+      versionSpec: '20.17.0' # Use a versão do Node compatível com seu projeto
 
   - script: |
       npm install -g vercel
