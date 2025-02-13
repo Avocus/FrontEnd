@@ -1,5 +1,5 @@
 variables:
-  GITHUB_REPO_URL: 'https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEndAvocuss.git'
+  GITHUB_REPO_URL: 'https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git'
 
 
 trigger:
@@ -38,7 +38,7 @@ steps:
   - script: |
       git fetch github
       git checkout main
-      git pull origin main --rebase --allow-unrelated-histories
+      git pull github origin main --rebase --allow-unrelated-histories
     displayName: 'Checar a branch main e pegar atualizações'
 
   - script: |
@@ -52,7 +52,5 @@ steps:
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
-      git add .
-      git commit -m "Atualizando repositório via pipeline"
       git push github main
     displayName: 'Push para o GitHub'
