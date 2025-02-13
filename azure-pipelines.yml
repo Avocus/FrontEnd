@@ -22,8 +22,13 @@ steps:
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      CLEANED_URL=$(echo $GITHUB_REPO_URL | sed "s/[\"']//g")
-      git remote add github $CLEANED_URL
+      @echo off
+      REM Remove aspas duplas da variável GITHUB_REPO_URL
+      SET GITHUB_REPO_URL=%GITHUB_REPO_URL:"=%
+      REM Exibir o valor limpo (apenas para depuração, remova se necessário)
+      echo %GITHUB_REPO_URL%
+      REM Adicionar o repositório remoto usando a URL limpa
+      git remote add github %GITHUB_REPO_URL%
       git fetch github
     displayName: 'Adicionar GitHub como remote'
 
