@@ -29,7 +29,7 @@ steps:
   - script: |
       git checkout main
       git fetch origin
-      git reset --hard origin/main  # Garantir que o repositório local esteja igual ao da Azure, sem histórico antigo
+      git reset --hard origin/main  # Resetando completamente a branch local para o estado da Azure
     displayName: 'Limpar histórico local e atualizar com o conteúdo da Azure'
 
   # Passo 5: Forçar o envio do repositório da Azure para o GitHub, sobrescrevendo qualquer histórico
