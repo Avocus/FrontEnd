@@ -1,46 +1,36 @@
 trigger:
-  branches:
-    include:
-      - main  # Executa o pipeline quando a branch 'main' for atualizada
+- main
 
 pool:
-  name: 'Default'
+  vmImage: 'ubuntu-latest'
 
-steps:    
-  # Passo 1: Configurar o Git
-  - script: |
-      git config --global user.email "avocuss@gmail.com"
-      git config --global user.name "Avocuss"
-    displayName: 'Configurar Git'
+steps:
+- script: |
+    # Limpa o workspace
+    echo "Limpando o workspace..."
+    rm -rf *
+    rm -rf .git
 
-  # Passo 2: Clonar o repositório do Azure
-  - checkout: self
+    # Clona o repositório
+    echo "Clonando o repositório..."
+    git clone https://github.com/Avocus/FrontEnd2.git .
+    git checkout FrontEnd2
 
+    # Configura o Git
+    echo "Configurando o Git..."
+    git config --global user.name "Seu Nome"
+    git config --global user.email "seu.email@example.com"
 
+    # Faz as alterações necessárias (exemplo: criar um arquivo)
+    echo "Criando um arquivo de exemplo..."
+    echo "Este é um arquivo de teste." > teste.txt
 
-  # Passo 3: Adicionar o repositório do GitHub como remote
-  - script: |
-      git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd2.git
-      git fetch github
-    displayName: 'Adicionar GitHub como remote'
+    # Adiciona e commita as alterações
+    echo "Adicionando e commitando as alterações..."
+    git add .
+    git commit -m "Atualizações automáticas via Azure DevOps Pipeline"
 
-
-  - script: |
-      git fetch github
-      git checkout main
-      git reset --hard HEAD
-    displayName: 'Checar a branch main e pegar atualizações'
-
-  - script: |
-      git status
-      git log --oneline
-    displayName: 'Verificar estado do repositório'
-
-  - script: |
-      git remote -v
-    displayName: 'Verificar repositórios remotos'
-
-  # Passo 4: Fazer push da branch main para o GitHub
-  - script: |
-      git push --force github main
-    displayName: 'Push para o GitHub'
+    # Força o push para o GitHub
+    echo "Enviando alterações para o GitHub..."
+    git push --force origin FrontEnd2
+  displayName: 'Limpar, clonar, modificar e enviar para o GitHub'
