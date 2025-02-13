@@ -1,3 +1,7 @@
+variables:
+- name: VERCEL_TOKEN
+  value: initialValue 
+
 trigger:
   branches:
     include:
@@ -13,7 +17,7 @@ steps:
 
   - script: |
       npm install -g vercel
-      vercel pull --yes --environment=production --token=$(VERCEL_TOKEN)
-      vercel build --prod --token=$(VERCEL_TOKEN)
-      vercel deploy --prod --token=$(VERCEL_TOKEN)
+      vercel pull --yes --environment=production --token=${{ variables.VERCEL_TOKEN }}
+      vercel build --prod --token=${{ variables.VERCEL_TOKEN }}
+      vercel deploy --prod --token=${{ variables.VERCEL_TOKEN }}
     displayName: 'Deploy no Vercel'
