@@ -7,7 +7,7 @@ trigger:
       - main  # Executa o pipeline quando a branch 'main' for atualizada
 
 pool:
-  name: 'Teste'
+  name: 'Default'
 
 steps:
   - script: |
