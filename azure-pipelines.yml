@@ -20,6 +20,8 @@ steps:
   # Passo 2: Clonar o repositório do Azure
   - checkout: self
 
+
+
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
       @echo off
@@ -31,6 +33,24 @@ steps:
       git remote add github %GITHUB_REPO_URL%
       git fetch github
     displayName: 'Adicionar GitHub como remote'
+
+
+  - script: |
+      git checkout main
+    displayName: 'Checar a branch main'
+
+  - script: |
+      git status
+      git log --oneline
+    displayName: 'Verificar estado do repositório'
+  
+  - script: |
+      git push github main --force
+    displayName: 'Forçar push para o GitHub'
+
+  - script: |
+      git remote -v
+    displayName: 'Verificar repositórios remotos'
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
