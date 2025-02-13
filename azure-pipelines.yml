@@ -43,6 +43,7 @@ steps:
   - script: |
       git status
       git log --oneline
+      git pull
     displayName: 'Verificar estado do repositório'
 
   - script: |
