@@ -27,13 +27,13 @@ steps:
 
   # Passo 4: Criar nova branch a partir da branch main
   - script: |
-      git checkout -b nova-branch  # Cria uma nova branch a partir de 'main'
+      git checkout -b nova-branch
       git fetch origin
-      git reset --hard origin/main  # Garantir que o repositório local esteja limpo e igual à Azure
+      git reset --hard origin/main
       git clean -fd  # Remover arquivos não rastreados
     displayName: 'Criar e atualizar nova branch'
 
   # Passo 5: Forçar o envio da nova branch para o GitHub
   - script: |
-      git push --force github nova-branch  # Enviar a nova branch para o GitHub, forçando a substituição do histórico
+      git push --force github nova-branch
     displayName: 'Push forçado para o GitHub'
