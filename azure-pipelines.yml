@@ -1,3 +1,6 @@
+variables:
+  GITHUB_TOKEN_ACESS: $(GITHUB_TOKEN)
+
 trigger:
   branches:
     include:
@@ -18,7 +21,7 @@ steps:
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git
+      git remote add github https://$(GITHUB_TOKEN_ACESS)@github.com/Avocus/FrontEnd.git
       git fetch github
     displayName: 'Adicionar GitHub como remote'
 
