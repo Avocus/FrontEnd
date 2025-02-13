@@ -38,7 +38,7 @@ steps:
   - script: |
       git fetch github
       git checkout main
-      git pull github origin main --rebase --allow-unrelated-histories
+      git pull origin main --allow-unrelated-histories
     displayName: 'Checar a branch main e pegar atualizações'
 
   - script: |
