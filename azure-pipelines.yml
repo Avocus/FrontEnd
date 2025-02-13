@@ -24,7 +24,6 @@ steps:
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      git remote remove github
       @echo off
       REM Remove aspas duplas da variável GITHUB_REPO_URL
       SET GITHUB_REPO_URL=%GITHUB_REPO_URL:"=%
