@@ -37,13 +37,12 @@ steps:
 
   - script: |
       git checkout main
-      git pull origin main --rebase
+      git pull origin main --rebase --allow-unrelated-histories
     displayName: 'Checar a branch main e pegar atualizações'
 
   - script: |
       git status
       git log --oneline
-      git pull
     displayName: 'Verificar estado do repositório'
 
   - script: |
