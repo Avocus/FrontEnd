@@ -6,7 +6,7 @@ trigger:
 pool:
   name: 'Default'
 
-steps:    
+steps:
   # Passo 1: Configurar o Git com logs detalhados
   - script: |
       set -x
@@ -32,16 +32,16 @@ steps:
       set -x
       echo "Atualizando branch main..."
       git fetch github -v
-      git checkout main -v
-      git reset --hard HEAD -v
+      git checkout main
+      git reset --hard HEAD
     displayName: 'Checar a branch main e pegar atualizações'
 
   # Passo 5: Verificar o estado do repositório com logs detalhados
   - script: |
       set -x
       echo "Exibindo estado do repositório..."
-      git status -v
-      git log --oneline --graph --decorate -v
+      git status
+      git log --oneline --graph --decorate
     displayName: 'Verificar estado do repositório'
 
   # Passo 6: Verificar os repositórios remotos
@@ -62,5 +62,5 @@ steps:
   - script: |
       set -x
       echo "Estado final do repositório:"
-      git status -v
+      git status
     displayName: 'Status final do repositório'
