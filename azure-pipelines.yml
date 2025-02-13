@@ -46,7 +46,5 @@ steps:
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
-      git gc --prune=now
-      git repack -a -f -d
       git push --force github main
     displayName: 'Push para o GitHub'
