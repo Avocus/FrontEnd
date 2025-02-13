@@ -24,6 +24,7 @@ steps:
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
+      git remote remove github
       @echo off
       REM Remove aspas duplas da variável GITHUB_REPO_URL
       SET GITHUB_REPO_URL=%GITHUB_REPO_URL:"=%
@@ -52,5 +53,7 @@ steps:
 
   # Passo 4: Fazer push da branch main para o GitHub
   - script: |
+      git gc --prune=now
+      git repack -a -f -d
       git push --force github main
     displayName: 'Push para o GitHub'
