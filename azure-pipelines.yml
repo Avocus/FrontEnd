@@ -1,6 +1,3 @@
-variables:
-  GITHUB_REPO_URL: 'https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git'
-
 trigger:
   branches:
     include:
@@ -16,24 +13,34 @@ steps:
       git config --global user.name "Avocuss"
     displayName: 'Configurar Git'
 
-  # Passo 2: Clonar o repositório da Azure (código atual)
+  # Passo 2: Clonar o repositório do Azure
   - checkout: self
+
+
 
   # Passo 3: Adicionar o repositório do GitHub como remote
   - script: |
-      git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git
+      git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd2.git
       git fetch github
     displayName: 'Adicionar GitHub como remote'
 
-  # Passo 4: Criar nova branch a partir da branch main
-  - script: |
-      git checkout -b nova-branch
-      git fetch origin
-      git reset --hard origin/main
-      git clean -fd  # Remover arquivos não rastreados
-    displayName: 'Criar e atualizar nova branch'
 
-  # Passo 5: Forçar o envio da nova branch para o GitHub
   - script: |
-      git push --force github nova-branch
-    displayName: 'Push forçado para o GitHub'
+      git fetch github
+      git checkout main
+      git reset --hard HEAD
+    displayName: 'Checar a branch main e pegar atualizações'
+
+  - script: |
+      git status
+      git log --oneline
+    displayName: 'Verificar estado do repositório'
+
+  - script: |
+      git remote -v
+    displayName: 'Verificar repositórios remotos'
+
+  # Passo 4: Fazer push da branch main para o GitHub
+  - script: |
+      git push --force github main
+    displayName: 'Push para o GitHub'
