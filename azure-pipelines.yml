@@ -1,23 +1,28 @@
-variables:
-- name: VERCEL_TOKEN
-  value: initialValue 
-
 trigger:
   branches:
     include:
-      - main  # Executa apenas quando a branch 'main' for atualizada
+      - main  # Executa o pipeline quando a branch 'main' for atualizada
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '20.17.0' # Use a versão do Node compatível com seu projeto
-
+  # Passo 1: Configurar o Git
   - script: |
-      npm install -g vercel
-      vercel pull --yes --environment=production --token=${{ variables.VERCEL_TOKEN }}
-      vercel build --prod --token=${{ variables.VERCEL_TOKEN }}
-      vercel deploy --prod --token=${{ variables.VERCEL_TOKEN }}
-    displayName: 'Deploy no Vercel'
+      git config --global user.email "seu-email@exemplo.com"
+      git config --global user.name "Seu Nome"
+    displayName: 'Configurar Git'
+
+  # Passo 2: Clonar o repositório do Azure
+  - checkout: self
+
+  # Passo 3: Adicionar o repositório do GitHub como remote
+  - script: |
+      git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git
+      git fetch github
+    displayName: 'Adicionar GitHub como remote'
+
+  # Passo 4: Fazer push da branch main para o GitHub
+  - script: |
+      git push github main:main
+    displayName: 'Push para o GitHub'
