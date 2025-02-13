@@ -1,59 +1,40 @@
 trigger:
   branches:
     include:
-      - main  # Executa o pipeline quando a branch 'main' for atualizada
+      - main  # Aciona o pipeline quando a branch 'main' for atualizada
 
 pool:
   name: 'Default'
 
 steps:
-  # Passo 1: Configurar o Git
+  # Passo 1: Checkout completo da branch main (sem clone superficial)
+  - checkout: self
+    fetchDepth: 0
+
+  # Passo 2: Configurar o Git com suas credenciais
   - script: |
       echo Configurando Git...
       git config --global user.email "avocuss@gmail.com"
       git config --global user.name "Avocuss"
     displayName: 'Configurar Git'
 
-  # Passo 2: Clonar o repositório do Azure
-  - checkout: self
-
-  # Passo 3: Adicionar o repositório do GitHub como remote
+  # Passo 3: Exibir o commit atual para conferência
   - script: |
-      echo Adicionando GitHub como remote...
-      git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git || echo "Remote 'github' já existe"
+      echo Commit atual:
+      git rev-parse HEAD
+    displayName: 'Verificar commit atual'
+
+  # Passo 4: Adicionar o repositório do GitHub como remote
+  - script: |
+      echo Adicionando repositório GitHub como remote...
+      rem Remove remote 'github' se já existir (ignora erro, se não existir)
+      git remote remove github 2>NUL || echo "Remote 'github' não existia"
+      git remote add github https://$(GITHUB_TOKEN)@github.com/Avocus/FrontEnd.git
       git remote -v
-      git fetch github -v
     displayName: 'Adicionar GitHub como remote'
 
-  # Passo 4: Atualizar a branch main e pegar atualizações
+  # Passo 5: Push da branch main para o GitHub
   - script: |
-      echo Atualizando branch main...
-      git fetch github -v
-      git checkout main
-      git reset --hard HEAD
-    displayName: 'Checar a branch main e pegar atualizações'
-
-  # Passo 5: Verificar o estado do repositório
-  - script: |
-      echo Exibindo estado do repositório...
-      git status
-      git log --oneline --graph --decorate
-    displayName: 'Verificar estado do repositório'
-
-  # Passo 6: Verificar os repositórios remotos
-  - script: |
-      echo Listando repositórios remotos...
-      git remote -v
-    displayName: 'Verificar repositórios remotos'
-
-  # Passo 7: Fazer push da branch main para o GitHub
-  - script: |
-      echo Realizando push force para o GitHub...
-      git push --force -v github main
+      echo Enviando código para a branch main do GitHub...
+      git push --force github main
     displayName: 'Push para o GitHub'
-
-  # Passo 8: Verificar o estado final do repositório após o push
-  - script: |
-      echo Estado final do repositório:
-      git status
-    displayName: 'Status final do repositório'
