@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { cn } from "../../utils/utils"
+import { cn } from "../../lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -18,6 +18,7 @@ import { auth, provider, signInWithPopup, signInWithEmailAndPassword, sendPasswo
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServiceTerms } from "./serviceTerms";
 import { PrivacyPolicy } from "./privacyPolicy";
+import { useRouter } from "next/navigation"
 
 export function LoginForm({
   className,
@@ -31,6 +32,7 @@ export function LoginForm({
   });
   const [loginError, setLoginError] = useState<string | null>(null);
   const [resetEmailSent, setResetEmailSent] = useState<boolean>(false);
+  const router = useRouter()
 
   const handleLoginEmail = useCallback(async (data: any) => {
     try {
@@ -48,7 +50,8 @@ export function LoginForm({
     }
   }, []);
 
-  const handleGoogleLogin = useCallback(async () => {
+  const handleGoogleLogin = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -74,8 +77,8 @@ export function LoginForm({
   }, []);
 
   const handleRegister = useCallback(() => {
-    console.log("Cadastrar usuário");
-  }, []);
+    router.push("/cadastro")
+  }, [router])
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
