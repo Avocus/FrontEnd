@@ -1,24 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 
-import { cn } from "../../lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "../../lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useCallback, useState } from "react"
-import { useForm } from "react-hook-form"
-import { auth, provider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } from "../../../firebaseConfig";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useCallback, useState } from "react";
+import { useForm } from "react-hook-form";
+import { auth, sendPasswordResetEmail } from "../../../firebaseConfig";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServiceTerms } from "./serviceTerms";
 import { PrivacyPolicy } from "./privacyPolicy";
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
+import { loginWithEmailServer } from '../../services/login.service';
+// import { loginWithEmail} from '../../services/login.service';
+// import { loginWithEmail, loginWithGoogle } from '../../services/login.service';
+// import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 export function LoginForm({
   className,
@@ -32,17 +36,21 @@ export function LoginForm({
   });
   const [loginError, setLoginError] = useState<string | null>(null);
   const [resetEmailSent, setResetEmailSent] = useState<boolean>(false);
-  const router = useRouter()
+  const router = useRouter();
 
   const handleLoginEmail = useCallback(async (data: any) => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      const user = userCredential.user;
+      const user = await loginWithEmailServer(data.email, data.password);
       console.log("Usuário logado:", user);
+      if (user.isClient) {
+        router.push("/homeCliente");
+      } else {
+        router.push("/homeAdvogado");
+      }
       setLoginError(null);
     } catch (error: any) {
-      if (error.code === "auth/invalid-credential") {
-        setLoginError("Usuário ou Senha inválidos.");
+      if (error.response && error.response.data && error.response.data.error) {
+        setLoginError(error.response.data.error);
       } else {
         console.error("Erro no login com email:", error);
         setLoginError("Erro ao fazer login. Tente novamente.");
@@ -50,20 +58,28 @@ export function LoginForm({
     }
   }, []);
 
-  const handleGoogleLogin = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log("Usuário logado:", user);
-    } catch (error) {
-      if ((error as any).code === 'auth/popup-closed-by-user') {
-        console.log("O pop-up foi fechado pelo usuário antes de concluir o login.");
-      } else {
-        console.error("Erro no login com Google:", error);
-      }
-    }
-  }, []);
+  // const handleGoogleLogin = useCallback(async (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     const provider = new GoogleAuthProvider();
+  //     const result = await signInWithPopup(auth, provider);
+  //     const idToken = await result.user?.getIdToken();
+  //     const accessToken = GoogleAuthProvider.credentialFromResult(result)?.idToken;
+
+  //     if (idToken && accessToken) {
+  //       const user = await loginWithGoogle(idToken, accessToken);
+  //       console.log("Usuário logado com Google:", user);
+  //     } else {
+  //       console.error("Erro no login com Google: idToken ou accessToken está indefinido");
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response && error.response.data && error.response.data.error) {
+  //       console.error("Erro no login com Google:", error.response.data.error);
+  //     } else {
+  //       console.error("Erro no login com Google:", error);
+  //     }
+  //   }
+  // }, []);
 
   const handleForgotPassword = useCallback(async (data: any) => {
     try {
@@ -77,8 +93,8 @@ export function LoginForm({
   }, []);
 
   const handleRegister = useCallback(() => {
-    router.push("/cadastro")
-  }, [router])
+    router.push("/cadastro");
+  }, [router]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -93,6 +109,7 @@ export function LoginForm({
           <form onSubmit={handleSubmit(handleLoginEmail)}>
             <div className="grid gap-6">
               {loginError && <span className="text-red-500 text-sm">{loginError}</span>}
+              {/*
               <div className="flex flex-col gap-4">
                 <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -108,7 +125,7 @@ export function LoginForm({
                 <span className="relative z-10 bg-background px-2 text-muted-foreground">
                   Ou continue com
                 </span>
-              </div>
+              </div>*/}
               <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
@@ -197,5 +214,5 @@ export function LoginForm({
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

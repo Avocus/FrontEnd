@@ -28,6 +28,14 @@ export default {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
   			},
+  			tertiary: {
+  				DEFAULT: 'hsl(var(--tertiary))',
+  				foreground: 'hsl(var(--tertiary-foreground))'
+  			},
+  			quaternary: {
+  				DEFAULT: 'hsl(var(--quaternary))',
+  				foreground: 'hsl(var(--quaternary-foreground))'
+  			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
@@ -40,6 +48,9 @@ export default {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
+			reverse: {
+				DEFAULT: 'hsl(var(--reverse))'
+			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
