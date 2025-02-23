@@ -19,12 +19,13 @@ import { useForm } from "react-hook-form"
 import { cadastrarUsuario } from '../../services/cadastro.service';
 import { useRouter } from "next/navigation"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ModeToggle } from "../ui/modeToggle"
 
 export function CadastroForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const { register, handleSubmit, formState: { errors, isValid } } = useForm({
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, watch } = useForm({
     mode: "onChange"
   });
 
@@ -56,17 +57,22 @@ export function CadastroForm({
 
   const handleVoltarLogin = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    router.push('/login');
+    router.push('/');
   }, []);
 
   const isStrongPassword = (password: string) => {
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
   };
 
+  const selectedRole = watch("role");
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <CardHeader className="text-center">
+      <div className="mt-2 ml-2">
+        <ModeToggle />
+      </div>
+        <CardHeader className="text-center p-4">
           <CardTitle className="text-xl">AVOCUSS</CardTitle>
           <CardDescription>
             Cadastre-se com seu email ou faça cadastro com Google.
@@ -106,22 +112,22 @@ export function CadastroForm({
                   })} />
                   {errors.password && <span className="text-red-500 text-sm">{String(errors.password.message)}</span>}
                 </div>
-                <div className="grid gap-2">
+                <div className="grid gap-2 text-secondary-foreground">
                   <Label>Tipo de Usuário</Label>
-                  <RadioGroup {...register("role", { required: "Selecione um tipo de usuário" })}>
+                  <RadioGroup onValueChange={(value) => setValue("role", value)}>
                     <div className="flex gap-4">
-                      <RadioGroupItem value="cliente" id="cliente" />
+                      <RadioGroupItem value="cliente" id="cliente" className="bg-secondary text-secondary-foreground"/>
                       <Label htmlFor="cliente">Cliente</Label>
-                      <RadioGroupItem value="advogado" id="advogado" />
+                      <RadioGroupItem value="advogado" id="advogado" className="bg-secondary text-secondary-foreground"/>
                       <Label htmlFor="advogado">Advogado</Label>
                     </div>
                   </RadioGroup>
                   {errors.role && <span className="text-red-500 text-sm">{String(errors.role.message)}</span>}
                 </div>
-                <Button type="submit" className="w-full" disabled={!isValid}>
+                <Button type="submit" className="w-full bg-secondary text-secondary-foreground" disabled={!isValid || !selectedRole}>
                   Cadastrar
                 </Button>
-                <Button variant="link" className="w-full mt-2" onClick={handleVoltarLogin}>
+                <Button variant="link" className="w-full mt-2 text-secondary-foreground" onClick={handleVoltarLogin}>
                   Voltar ao Login
                 </Button>
               </div>

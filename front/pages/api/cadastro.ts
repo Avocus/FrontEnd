@@ -5,7 +5,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { name, isClient, username, password } = req.body;
 
         try {
-            const response = await fetch('http://localhost:8080/user', {
+            const response = await fetch('https://avocuss.duckdns.org/user/registrar', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
