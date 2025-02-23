@@ -42,11 +42,9 @@ export function LoginForm({
     try {
       const user = await loginWithEmailServer(data.email, data.password);
       console.log("Usuário logado:", user);
-      if (user.isClient) {
-        router.push("/homeCliente");
-      } else {
-        router.push("/homeAdvogado");
-      }
+      sessionStorage.setItem("usuario", JSON.stringify(user));
+      sessionStorage.setItem("token", user.data);
+      router.push("/home");
       setLoginError(null);
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.error) {
@@ -151,7 +149,7 @@ export function LoginForm({
                   <Input id="password" type="password" {...register("password", { required: "Senha é obrigatória" })} />
                   {errors.password && <span className="text-red-500 text-sm">{String(errors.password.message)}</span>}
                 </div>
-                <Button type="submit" className="w-full" disabled={!isValid}>
+                <Button type="submit" className="w-full bg-secondary text-secondary-foreground" disabled={!isValid}>
                   Entrar
                 </Button>
               </div>
@@ -199,7 +197,7 @@ export function LoginForm({
                 />
                 {errorsReset.resetEmail && <span className="text-red-500 text-sm">{String(errorsReset.resetEmail.message)}</span>}
               </div>
-              <Button type="submit" size="sm" className="px-3" disabled={!isValidReset}>
+              <Button type="submit" size="sm" className="px-3 bg-secondary text-secondary-foreground" disabled={!isValidReset}>
                 Enviar
               </Button>
             </div>

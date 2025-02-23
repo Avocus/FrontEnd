@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       let userCredential;
       if (method === 'server') {
-        await fetch('http://localhost:8080/user/login', {
+        await fetch('https://avocuss.duckdns.org/user/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

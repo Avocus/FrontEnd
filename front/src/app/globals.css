@@ -8,7 +8,7 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 196, 100%, 96%;
     --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
     --card-foreground: 224 71.4% 4.1%;
@@ -16,10 +16,10 @@ body {
     --popover-foreground: 224 71.4% 4.1%;
     --reverse:  rgba(182, 182, 182, 0.648);
     --primary: 210 20% 98%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
+    --primary-foreground: 220 14.3% 95.9%;
+    --secondary: 195, 58%, 68%;
     --secondary-foreground: 220.9 39.3% 11%;
-    --tertiary: 220 20% 85%; /* Um tom mais claro que o secondary, mas ainda perceptível */
+    --tertiary: 195, 100%, 91%; /* Um tom mais claro que o secondary, mas ainda perceptível */
     --tertiary-foreground: 220.9 39.3% 11%; /* Mesmo foreground do primary para consistência */
     --quaternary: 220 10% 90%; /* Um tom mais claro e neutro */
     --quaternary-foreground: 220.9 39.3% 11%; /* Mesmo foreground do primary para consistência */
@@ -47,11 +47,11 @@ body {
     --popover: 224 71.4% 4.1%;
     --popover-foreground: 210 20% 98%;
     --reverse:  rgba(60, 60, 60, 0.648);
-    --primary: 210 20% 98%;
+    --primary: 224, 62%, 10%;
     --primary-foreground: 220.9 39.3% 11%;
-    --secondary: 215 27.9% 16.9%;
+    --secondary: 195, 48%, 25%;
     --secondary-foreground: 210 20% 98%;
-    --tertiary: 215 20% 25%; /* Um tom mais escuro que o secondary, mas ainda contrastante */
+    --tertiary: 195, 36%, 17%; /* Um tom mais escuro que o secondary, mas ainda contrastante */
     --tertiary-foreground: 210 20% 98%; /* Mesmo foreground do primary para consistência */
     --quaternary: 215 15% 30%; /* Um tom mais escuro que o tertiary, mas ainda contrastante */
     --quaternary-foreground: 210 20% 98%; /* Mesmo foreground do primary para consistência */
@@ -75,6 +75,17 @@ body {
 @layer base {
   * {
     @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
