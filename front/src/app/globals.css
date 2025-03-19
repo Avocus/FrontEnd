@@ -91,3 +91,39 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* app/globals.css */
+.rbc-calendar {
+  @apply bg-background text-foreground rounded-lg border;
+}
+
+.rbc-header {
+  @apply bg-secondary text-secondary-foreground py-2 font-medium;
+}
+
+.rbc-event {
+  @apply border-none shadow-sm;
+}
+
+.rbc-today {
+  @apply bg-accent/20;
+}
+
+/* Estilo responsivo */
+@media (max-width: 768px) {
+  .rbc-calendar {
+    @apply h-[400px]; /* Altura menor para dispositivos móveis */
+  }
+
+  .rbc-toolbar {
+    @apply flex-col gap-2; /* Botões em coluna para telas pequenas */
+  }
+
+  .rbc-toolbar button {
+    @apply w-full; /* Botões ocupam toda a largura */
+  }
+
+  .rbc-event-content {
+    @apply text-sm; /* Texto menor para eventos */
+  }
+}

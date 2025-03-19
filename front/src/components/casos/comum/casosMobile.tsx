@@ -1,10 +1,10 @@
 import { NavbarMobile } from "@/components/comum/navbarMobile";
-import { HomeMobileAdvogado } from "../homeAdvogado/homeMobileAdvogado";
-import { HomeMobileCliente } from "../homeCliente/homeMobileCliente";
 import { FooterMobile } from "@/components/comum/footerMobile";
+import { ListaCasosAdvogadoMobile } from "../advogado/listaCasosAdvogadoMobile";
+import { ListaCasosClienteMobile } from "../cliente/listaCasosClienteMobile";
 
 
-export function HomeMobile() {
+export function CasosMobile() {
     const usuario = JSON.parse(sessionStorage.getItem("usuario")!);
     const isClient = usuario.userCredential.data.client === true;
 
@@ -13,7 +13,7 @@ export function HomeMobile() {
             <div>
                 <NavbarMobile />
                 <div className="mt-16 mb-16">
-                    <HomeMobileCliente />
+                    <ListaCasosClienteMobile />
                 </div>
                 <FooterMobile />
             </div>
@@ -22,7 +22,7 @@ export function HomeMobile() {
         return (
             <div>
                 <NavbarMobile />
-                <HomeMobileAdvogado />
+                <ListaCasosAdvogadoMobile />
                 <FooterMobile />
             </div>
         );

@@ -1,9 +1,9 @@
 import { NavbarWeb } from "@/components/comum/navbarWeb";
-import { HomeWebAdvogado } from "../homeAdvogado/homeWebAdvogado";
-import { HomeWebCliente } from "../homeCliente/homeWebCliente";
+import { ListaCasosAdvogadoWeb } from "../advogado/listaCasosAdvogadoWeb";
+import { ListaCasosClienteWeb } from "../cliente/listaCasosClienteWeb";
 
 
-export function HomeWeb() {
+export function CasosWeb() {
     const usuario = JSON.parse(sessionStorage.getItem("usuario")!);
     const isClient = usuario.userCredential.data.client === true;
 
@@ -11,14 +11,16 @@ export function HomeWeb() {
         return (
             <div>
                 <NavbarWeb />
-                <HomeWebCliente />
+                <div className="mt-16 mb-16">
+                    <ListaCasosClienteWeb />
+                </div>
             </div>
         );
     } else {
         return (
             <div>
                 <NavbarWeb />
-                <HomeWebAdvogado />
+                <ListaCasosAdvogadoWeb />
             </div>
         );
     }

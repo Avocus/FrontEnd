@@ -5,9 +5,12 @@ import { FooterMobile } from "@/components/comum/footerMobile";
 import { NavbarMobile } from "@/components/comum/navbarMobile";
 import { NavbarWeb } from "@/components/comum/navbarWeb";
 import { useState, useEffect } from "react";
+import { AcessoNegado } from "../acesso-negado/acessoNegado";
 
 export default function Videoteca() {
     const [isMobile, setIsMobile] = useState(false);
+    const usuario = JSON.parse(sessionStorage.getItem("usuario")!);
+    const isClient = usuario.userCredential.data.client === true;
 
     useEffect(() => {
         const mediaQuery = window.matchMedia("(max-width: 768px)");
@@ -23,17 +26,19 @@ export default function Videoteca() {
         return () => mediaQuery.removeEventListener("change", handleMediaChange);
     }, []);
 
-    return isMobile ?
-        <div>
-            <NavbarMobile />
-            <div className="mt-16 mb-16">
-                <VideotecaMobile />
-            </div>
-            <FooterMobile />
+    return isClient ? (isMobile ?
+    <div>
+        <NavbarMobile />
+        <div className="mt-16 mb-16">
+            <VideotecaMobile />
         </div>
-        :
-        <div>
-            <NavbarWeb />
-            <VideotecaWeb />
-        </div>;
+        <FooterMobile />
+    </div>
+    :
+    <div>
+        <NavbarWeb />
+        <VideotecaWeb />
+    </div>) : <div>
+        <AcessoNegado />
+    </div>
 }
