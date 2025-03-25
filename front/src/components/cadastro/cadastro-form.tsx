@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { cn } from "../../lib/utils"
@@ -14,64 +13,87 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useCallback, useState } from "react"
 import { useForm } from "react-hook-form"
-// import { auth, createUserWithEmailAndPassword } from "../../../firebaseConfig";
-// import { auth, provider, signInWithPopup, createUserWithEmailAndPassword } from "../../../firebaseConfig";
-import { cadastrarUsuario } from '../../services/cadastro.service';
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { cadastrarUsuario } from '../../services/user/cadastroService';
 import { useRouter } from "next/navigation"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ModeToggle } from "../ui/modeToggle"
+import { User, Scale } from "lucide-react"
+
+// Esquema de validação com Zod
+const cadastroSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório"),
+  email: z.string().email("Email inválido"),
+  password: z.string().refine(
+    value => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value), 
+    "Senha fraca. Deve conter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial."
+  ),
+  role: z.enum(["cliente", "advogado"], {
+    required_error: "Selecione o tipo de usuário",
+  })
+});
+
+// Tipo inferido do esquema Zod
+type CadastroFormData = z.infer<typeof cadastroSchema>;
 
 export function CadastroForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const { register, handleSubmit, formState: { errors, isValid }, setValue, watch } = useForm({
-    mode: "onChange"
-  });
-
   const [cadastroError, setCadastroError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleCadastroServer = useCallback(async (data: any) => {
-    const isClient = data.role === "cliente";
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    setValue,
+    watch
+  } = useForm<CadastroFormData>({
+    resolver: zodResolver(cadastroSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    }
+  });
+
+  const selectedRole = watch("role");
+
+  const handleUserTypeChange = (type: string) => {
+    setValue("role", type === "client" ? "cliente" : "advogado", { shouldValidate: true });
+  };
+
+  const onSubmit = useCallback(async (data: CadastroFormData) => {
     const cadastroData = {
       name: data.name,
-      isClient,
+      client: data.role === "cliente",
       username: data.email,
       password: data.password
     };
 
     try {
-      const user = await cadastrarUsuario(cadastroData);
-      console.log("Usuário cadastrado:", user);
+      await cadastrarUsuario(cadastroData);
       setCadastroError(null);
+      router.push('/login');
     } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.error) {
+      if (error.response?.data?.error) {
         setCadastroError(error.response.data.error);
       } else {
-        console.error("Erro no cadastro com email:", error);
+        console.error("Erro no cadastro:", error);
         setCadastroError("Erro ao fazer cadastro. Tente novamente.");
       }
     }
-  }, []);
+  }, [router]);
 
   const handleVoltarLogin = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     router.push('/');
-  }, []);
-
-  const isStrongPassword = (password: string) => {
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
-  };
-
-  const selectedRole = watch("role");
+  }, [router]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-      <div className="mt-2 ml-2">
-        <ModeToggle />
-      </div>
         <CardHeader className="text-center p-4">
           <CardTitle className="text-xl">AVOCUSS</CardTitle>
           <CardDescription>
@@ -79,55 +101,94 @@ export function CadastroForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(handleCadastroServer)}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-6">
               {cadastroError && <span className="text-red-500 text-sm">{cadastroError}</span>}
               <div className="grid gap-6">
+                {/* Campo Nome */}
                 <div className="grid gap-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="text">Nome</Label>
-                    </div>
-                    <Input id="name" type="text" {...register("name", { 
-                      required: "Nome é obrigatório"
-                    })} />
-                    {errors.name && <span className="text-red-500 text-sm">{String(errors.name.message)}</span>}
+                  <Label htmlFor="name">Nome</Label>
+                  <Input 
+                    id="name" 
+                    type="text" 
+                    {...register("name")} 
+                  />
+                  {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
+
+                {/* Campo Email */}
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="m@example.com"
-                    {...register("email", { required: "Email é obrigatório", pattern: { value: /^\S+@\S+$/i, message: "Email inválido" } })}
+                    {...register("email")}
                   />
-                  {errors.email && <span className="text-red-500 text-sm">{String(errors.email.message)}</span>}
+                  {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
                 </div>
+
+                {/* Campo Senha */}
                 <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
-                  </div>
-                  <Input id="password" type="password" {...register("password", { 
-                    required: "Senha é obrigatória",
-                    validate: value => isStrongPassword(value) || "Senha fraca. Deve conter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial."
-                  })} />
-                  {errors.password && <span className="text-red-500 text-sm">{String(errors.password.message)}</span>}
+                  <Label htmlFor="password">Senha</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    {...register("password")} 
+                  />
+                  {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
                 </div>
-                <div className="grid gap-2 text-secondary-foreground">
+
+                {/* Seleção de Tipo de Usuário */}
+                <div className="space-y-2">
                   <Label>Tipo de Usuário</Label>
-                  <RadioGroup onValueChange={(value) => setValue("role", value)}>
-                    <div className="flex gap-4">
-                      <RadioGroupItem value="cliente" id="cliente" className="bg-secondary text-secondary-foreground"/>
-                      <Label htmlFor="cliente">Cliente</Label>
-                      <RadioGroupItem value="advogado" id="advogado" className="bg-secondary text-secondary-foreground"/>
-                      <Label htmlFor="advogado">Advogado</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div
+                      className={`border rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer transition-all ${
+                        selectedRole === "cliente"
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => handleUserTypeChange("client")}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="h-6 w-6 text-primary" />
+                      </div>
+                      <span className="font-medium">Cliente</span>
+                      <span className="text-sm text-muted-foreground text-center">Procuro assistência jurídica</span>
                     </div>
-                  </RadioGroup>
-                  {errors.role && <span className="text-red-500 text-sm">{String(errors.role.message)}</span>}
+
+                    <div
+                      className={`border rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer transition-all ${
+                        selectedRole === "advogado"
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => handleUserTypeChange("lawyer")}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Scale className="h-6 w-6 text-primary" />
+                      </div>
+                      <span className="font-medium">Advogado</span>
+                      <span className="text-sm text-muted-foreground text-center">Ofereço serviços jurídicos</span>
+                    </div>
+                  </div>
+                  {errors.role && <span className="text-red-500 text-sm">{errors.role.message}</span>}
                 </div>
-                <Button type="submit" className="w-full bg-secondary text-secondary-foreground" disabled={!isValid || !selectedRole}>
+
+                {/* Botões */}
+                <Button 
+                  type="submit" 
+                  className="w-full bg-secondary text-secondary-foreground" 
+                  disabled={!isValid}
+                >
                   Cadastrar
                 </Button>
-                <Button variant="link" className="w-full mt-2 text-secondary-foreground" onClick={handleVoltarLogin}>
+                <Button 
+                  variant="link" 
+                  className="w-full text-secondary-foreground" 
+                  onClick={handleVoltarLogin}
+                >
                   Voltar ao Login
                 </Button>
               </div>

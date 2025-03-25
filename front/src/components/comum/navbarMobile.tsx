@@ -23,7 +23,7 @@ export function NavbarMobile() {
     };
     const handleDadosPerilClick = () => {
         if (router) {
-            router.push('/dados');
+            router.push('/conta');
         }
     };
 

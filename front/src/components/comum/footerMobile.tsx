@@ -20,6 +20,11 @@ export function FooterMobile() {
             router.push('/home');
         }
     };
+    const handleCasosClick = () => {
+        if (router) {
+            router.push('/casos');
+        }
+    };
 
 
     return (
@@ -41,7 +46,9 @@ export function FooterMobile() {
                 <Home className="w-8 h-8 text-secondary-foreground" />
                 <span className="text-xs text-secondary-foreground">Home</span>
             </Button>
-            <Button variant="ghost" className="flex flex-col items-center p-6 bg-tertiary rounded-3xl">
+            <Button variant="ghost" className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
+                onClick={handleCasosClick}  // Adiciona a navegação para a rota home
+            >
                 <User className="w-8 h-8 text-secondary-foreground" />
                 <span className="text-xs text-secondary-foreground">Casos</span>
             </Button>

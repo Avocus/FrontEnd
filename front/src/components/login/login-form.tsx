@@ -12,17 +12,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { auth, sendPasswordResetEmail } from "../../../firebaseConfig";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServiceTerms } from "./serviceTerms";
 import { PrivacyPolicy } from "./privacyPolicy";
 import { useRouter } from "next/navigation";
-import { loginWithEmailServer } from '../../services/login.service';
-// import { loginWithEmail} from '../../services/login.service';
-// import { loginWithEmail, loginWithGoogle } from '../../services/login.service';
-// import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { useAuthStore, useProfileStore } from "@/store";
+import { ArrowLeft } from "lucide-react";
 
 export function LoginForm({
   className,
@@ -34,61 +32,47 @@ export function LoginForm({
   const { register: registerReset, handleSubmit: handleSubmitReset, formState: { errors: errorsReset, isValid: isValidReset } } = useForm({
     mode: "onChange"
   });
-  const [loginError, setLoginError] = useState<string | null>(null);
   const [resetEmailSent, setResetEmailSent] = useState<boolean>(false);
   const router = useRouter();
+  
+  // Usar o useAuthStore para autenticação
+  const { login, error: loginError, isAuthenticated, isLoading, setError } = useAuthStore();
+  // Usar o useProfileStore para verificar o status do perfil
+  const { checkProfileCompletion } = useProfileStore();
+
+  // Redirecionar para a página principal se já estiver autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkProfileCompletion();
+      router.push("/home");
+    }
+  }, [isAuthenticated, router, checkProfileCompletion]);
 
   const handleLoginEmail = useCallback(async (data: any) => {
     try {
-      const user = await loginWithEmailServer(data.email, data.password);
-      console.log("Usuário logado:", user);
-      sessionStorage.setItem("usuario", JSON.stringify(user));
-      sessionStorage.setItem("token", user.data);
-      router.push("/home");
-      setLoginError(null);
+      // Usar a função login do useAuthStore
+      await login({
+        email: data.email,
+        password: data.password
+      });
+
+      // O redirecionamento será feito pelo useEffect acima quando isAuthenticated mudar
     } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.error) {
-        setLoginError(error.response.data.error);
-      } else {
-        console.error("Erro no login com email:", error);
-        setLoginError("Erro ao fazer login. Tente novamente.");
-      }
+      // O erro já será gerenciado pelo useAuthStore
+      console.error("Erro no login:", error);
     }
-  }, []);
-
-  // const handleGoogleLogin = useCallback(async (e: React.MouseEvent) => {
-  //   e.preventDefault();
-  //   try {
-  //     const provider = new GoogleAuthProvider();
-  //     const result = await signInWithPopup(auth, provider);
-  //     const idToken = await result.user?.getIdToken();
-  //     const accessToken = GoogleAuthProvider.credentialFromResult(result)?.idToken;
-
-  //     if (idToken && accessToken) {
-  //       const user = await loginWithGoogle(idToken, accessToken);
-  //       console.log("Usuário logado com Google:", user);
-  //     } else {
-  //       console.error("Erro no login com Google: idToken ou accessToken está indefinido");
-  //     }
-  //   } catch (error: any) {
-  //     if (error.response && error.response.data && error.response.data.error) {
-  //       console.error("Erro no login com Google:", error.response.data.error);
-  //     } else {
-  //       console.error("Erro no login com Google:", error);
-  //     }
-  //   }
-  // }, []);
+  }, [login]);
 
   const handleForgotPassword = useCallback(async (data: any) => {
     try {
       await sendPasswordResetEmail(auth, data.resetEmail);
       setResetEmailSent(true);
-      setLoginError(null);
+      setError(null); // Limpar erros anteriores
     } catch (error: any) {
       console.error("Erro na recuperação de senha:", error);
-      setLoginError("Erro ao enviar email de recuperação. Verifique o email e tente novamente.");
+      setError("Erro ao enviar email de recuperação. Verifique o email e tente novamente.");
     }
-  }, []);
+  }, [setError]);
 
   const handleRegister = useCallback(() => {
     router.push("/cadastro");
@@ -96,7 +80,16 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="relative">
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="icon"
+          className="absolute top-4 left-4" 
+          onClick={() => router.push("/")}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">AVOCUSS</CardTitle>
           <CardDescription>
@@ -107,23 +100,6 @@ export function LoginForm({
           <form onSubmit={handleSubmit(handleLoginEmail)}>
             <div className="grid gap-6">
               {loginError && <span className="text-red-500 text-sm">{loginError}</span>}
-              {/*
-              <div className="flex flex-col gap-4">
-                <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Login com Google
-                </Button>
-              </div>
-              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                <span className="relative z-10 bg-background px-2 text-muted-foreground">
-                  Ou continue com
-                </span>
-              </div>*/}
               <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
@@ -137,7 +113,7 @@ export function LoginForm({
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Senha</Label>
                     <a
                       href="#"
                       className="ml-auto text-sm underline-offset-4 hover:underline"
@@ -149,9 +125,15 @@ export function LoginForm({
                   <Input id="password" type="password" {...register("password", { required: "Senha é obrigatória" })} />
                   {errors.password && <span className="text-red-500 text-sm">{String(errors.password.message)}</span>}
                 </div>
-                <Button type="submit" className="w-full bg-secondary text-secondary-foreground" disabled={!isValid}>
-                  Entrar
-                </Button>
+                <div className="grid gap-2">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-secondary text-secondary-foreground" 
+                    disabled={!isValid || isLoading}
+                  >
+                    {isLoading ? "Entrando..." : "Entrar"}
+                  </Button>
+                </div>
               </div>
               <div className="text-center text-sm">
                 Não possui conta?{" "}
