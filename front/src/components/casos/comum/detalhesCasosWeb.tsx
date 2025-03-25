@@ -3,19 +3,20 @@
 import { NavbarWeb } from "@/components/comum/navbarWeb";
 import { DetalheCasosAdvogadoWeb } from "../advogado/detalheCasosAdvogadoWeb";
 import { DetalheCasosClienteWeb } from "../cliente/detalheCasosClienteWeb";
+import { useAuthStore } from "@/store";
 
 interface DetalhesCasosWebProps {
     casoId: string;
 }
 
 export function DetalhesCasosWeb ({ casoId }: DetalhesCasosWebProps) {
-    const usuario = JSON.parse(sessionStorage.getItem("usuario")!);
-    const isClient = usuario.userCredential.data.client === true;
+
+    const { user } = useAuthStore();
 
     return (
         <div>
             <NavbarWeb />
-            {isClient ? (
+            {user?.client ? (
                 <DetalheCasosClienteWeb casoId={casoId} />
             ) : (
                 <DetalheCasosAdvogadoWeb casoId={casoId} />

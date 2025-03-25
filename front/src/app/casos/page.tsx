@@ -1,25 +1,27 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import { CasosMobile } from "@/components/casos/comum/casosMobile";
-import { CasosWeb } from "@/components/casos/comum/casosWeb";
+import { useEffect } from "react";
+import { Casos } from "@/components/casos/Casos";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { useLayout } from "@/contexts/LayoutContext";
+import AuthGuard from "@/components/auth/AuthGuard";
 
-export default function Dados() {
-    const [isMobile, setIsMobile] = useState(false);
+export default function CasosPage() {
+    const { updateConfig, isAdvogado } = useLayout();
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia("(max-width: 768px)");
-        
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const handleMediaChange = (event: any) => {
-            setIsMobile(event.matches);
-        };
+        updateConfig({
+            showNavbar: true,
+            showSidebar: isAdvogado,
+            showFooter: true
+        });
+    }, [updateConfig, isAdvogado]);
 
-        handleMediaChange(mediaQuery);
-        mediaQuery.addEventListener("change", handleMediaChange);
-
-        return () => mediaQuery.removeEventListener("change", handleMediaChange);
-    }, []);
-
-    return isMobile ? <CasosMobile /> : <CasosWeb />;
+    return (
+        <AuthGuard>
+            <AppLayout>
+                <Casos />
+            </AppLayout>
+        </AuthGuard>
+    );
 }

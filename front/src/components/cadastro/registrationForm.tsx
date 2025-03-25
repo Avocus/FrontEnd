@@ -84,7 +84,6 @@ export function RegistrationForm({ userType }: RegistrationFormProps) {
       delete data.faculdade;
       delete data.bio;
     }
-    console.log(JSON.stringify(data, null, 2));
     // Aqui você pode enviar o JSON para o backend
   };
 

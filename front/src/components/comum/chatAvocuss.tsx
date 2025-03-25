@@ -33,13 +33,39 @@ interface Message {
 }
 
 interface ChatAvocussProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
 }
 
-export function ChatAvocuss({ open, onOpenChange }: ChatAvocussProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
+  const [inputMessage, setInputMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      sender: "bot",
+      text: "Olá! Sou a Avocuss, assistente virtual da plataforma. Como posso ajudar você hoje?",
+    },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(open || false);
+
+  useEffect(() => {
+    if (open !== undefined) {
+      setDialogOpen(open);
+    }
+  }, [open]);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setDialogOpen(newOpen);
+    
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    }
+    
+    if (!newOpen && onClose) {
+      onClose();
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -53,13 +79,13 @@ export function ChatAvocuss({ open, onOpenChange }: ChatAvocussProps) {
   }, [open]);
 
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    if (!inputMessage.trim()) return;
 
-    const userMessage: Message = { sender: "user", text: input };
+    const userMessage: Message = { sender: "user", text: inputMessage };
     setMessages([...messages, userMessage]);
-    setInput("");
+    setInputMessage("");
 
-    const botResponse = await getBotResponse(input);
+    const botResponse = await getBotResponse(inputMessage);
     setMessages((prev) => [...prev, { sender: "bot", text: botResponse }]);
   };
 
@@ -77,7 +103,7 @@ export function ChatAvocuss({ open, onOpenChange }: ChatAvocussProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md bg-primary text-secondary-foreground rounded-2xl p-4">
         <DialogHeader className="flex justify-between items-center mb-4">
           <DialogTitle className="text-lg font-bold">Chat com Sr. Avocuss</DialogTitle>
@@ -106,8 +132,8 @@ export function ChatAvocuss({ open, onOpenChange }: ChatAvocussProps) {
           <Input
             className="flex-1 bg-primary text-secondary-foreground border-border rounded-lg shadow-sm focus:ring focus:ring-ring focus:border-border"
             placeholder="Digite sua mensagem..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
           <Button

@@ -6,22 +6,26 @@ import { useRouter } from "next/navigation";
 import { PrivacyPolicy } from "../login/privacyPolicy";
 import { ServiceTerms } from "../login/serviceTerms";
 import { ModeToggle } from "../ui/modeToggle";
+import { useAuthStore } from "@/store";
 
 export function Configs() {
   const router = useRouter();
+  const { logout } = useAuthStore();
 
   const handleEditProfileClick = () => {
     router.push("/editar");
   };
 
   const handleLogout = () => {
-    // Lógica para sair do app
-    console.log("Usuário saiu do app");
+    // Limpar token e estado de autenticação
+    sessionStorage.removeItem('token');
+    logout();
+    router.push('/login');
   };
 
   const handleResetPassword = () => {
     // Lógica para redefinir senha
-    console.log("Redefinir senha");
+    router.push('/recuperar-senha');
   };
 
   return (
@@ -47,20 +51,6 @@ export function Configs() {
           <div className="space-y-2 flex justify-start items-center">
             <Label className="text-lg mr-10">Tema</Label>
             <ModeToggle />
-            {/* <div className="flex items-center space-x-2">
-              <Switch
-                checked={theme === "dark"}
-                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-              />
-              <span>{theme === "dark" ? "Tema Escuro" : "Tema Claro"}</span>
-            </div>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setTheme("system")}
-            >
-              Usar Tema do Sistema
-            </Button> */}
           </div>
 
           {/* Redefinir Senha */}

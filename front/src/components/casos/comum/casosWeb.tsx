@@ -1,13 +1,13 @@
 import { NavbarWeb } from "@/components/comum/navbarWeb";
 import { ListaCasosAdvogadoWeb } from "../advogado/listaCasosAdvogadoWeb";
 import { ListaCasosClienteWeb } from "../cliente/listaCasosClienteWeb";
-
+import { useAuthStore } from "@/store";
 
 export function CasosWeb() {
-    const usuario = JSON.parse(sessionStorage.getItem("usuario")!);
-    const isClient = usuario.userCredential.data.client === true;
 
-    if (isClient) {
+    const { user } = useAuthStore();
+
+    if (user?.client) {
         return (
             <div>
                 <NavbarWeb />

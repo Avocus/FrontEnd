@@ -2,78 +2,153 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bell } from "lucide-react";
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import { ChatAvocuss } from "./chatAvocuss"; // Importação do ChatAvocuss
 import { Notificacoes } from "./notificacoes";
+import { ThemeToggle } from "./ThemeToggle"; // Importação do ThemeToggle
+import { NotificationButton } from "./NotificationButton"; // Importação do NotificationButton
+import { useNotificationStore, useAuthStore } from "@/store";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export function NavbarWeb() {
+type NavItem = {
+  label: string;
+  href?: string;
+  onClick?: () => void;
+};
+
+interface NavbarWebProps {
+  showFullNavigation?: boolean;
+  showLogo?: boolean;
+}
+
+// Usar memo para evitar re-renderizações desnecessárias
+export const NavbarWeb = memo(function NavbarWeb({ showFullNavigation = true, showLogo = true }: NavbarWebProps) {
   const [chatOpen, setChatOpen] = useState(false);
   const [notificacoesOpen, setNotificacoesOpen] = useState(false);
+  const { notificacoes } = useNotificationStore();
+  const unreadCount = notificacoes.filter(n => !n.lida).length;
+  const { logout, user } = useAuthStore();
+  const router = useRouter();
 
+  const navItems: NavItem[] = [
+    { label: "Agenda", href: "/agenda" },
+    { label: "Serviços", href: "#" },
+    { label: "Chat", onClick: () => setChatOpen(true) },
+    { label: "Biblioteca", href: "/biblioteca" },
+    { label: "Videoteca", href: "/videoteca" },
+    { label: "Casos", href: "/casos" },
+  ];
+
+  const profileItems = [
+    { label: "Conta", href: "/conta" },
+    { label: "Configurações", href: "/configuracoes" },
+    { label: "Sair", onClick: () => handleLogout() },
+  ];
+
+  const handleLogout = useCallback(() => {
+    logout(); // Chama a função de logout do useAuthStore
+    router.push("/login"); // Redireciona para a página de login
+  }, [logout, router]);
+
+  const formatName = useCallback((name: string) => {
+    if (!name) return 'Usuário';
+
+    const firstName = name.split(" ")[0];
+
+    return firstName.length > 20 ? firstName.slice(0, 20) + "..." : firstName;
+  }, []);
+
+  const goToHome = useCallback(() => {
+    router.push("/home");
+  }, [router]);
 
   return (
     <nav className="flex items-center justify-between p-4 border-b">
       {/* Nome no canto esquerdo */}
-      <div className="text-xl font-bold flex-1 text-start cursor-pointer" onClick={() => window.location.href = "/home"}>Avocuss</div>
+      {showLogo ? (
+        <div className="text-xl font-bold flex-1 text-start cursor-pointer" onClick={goToHome}>Avocuss</div>
+      ) : (
+        <div className="flex-1"></div> /* Espaçador para manter o layout quando o logo está escondido */
+      )}
 
       {/* Abas de navegação no centro */}
-      <NavigationMenu className="flex-1 text-center">
-        <NavigationMenuList className="inline-flex">
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/agenda" className="px-4 py-2">
-              Agenda
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="#" className="px-4 py-2">
-              Serviços
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem onClick={() => setChatOpen(true)}>
-            <NavigationMenuLink className="px-4 py-2">
-              Chat
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/biblioteca" className="px-4 py-2">
-              Biblioteca
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/videoteca" className="px-4 py-2">
-              Videoteca
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/casos" className="px-4 py-2">
-              Casos
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
+      {showFullNavigation && (
+        <NavigationMenu className="flex-1 text-center">
+          <NavigationMenuList className="inline-flex">
+            {navItems.map((item, index) => (
+              <NavigationMenuItem key={index}>
+                {item.onClick ? (
+                  <div onClick={item.onClick} className="px-4 py-2 cursor-pointer">
+                    {item.label}
+                  </div>
+                ) : (
+                  <Link href={item.href || "#"} legacyBehavior passHref>
+                    <NavigationMenuLink className="px-4 py-2">
+                      {item.label}
+                    </NavigationMenuLink>
+                  </Link>
+                )}
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+      )}
       <ChatAvocuss open={chatOpen} onOpenChange={setChatOpen} />
 
       {/* Seção do perfil no canto direito */}
       <div className="flex items-center gap-4 flex-1 justify-end text-center">
-        {/* Ícone de notificações */}
-        <Button variant="ghost" size="icon" onClick={() => setNotificacoesOpen(true)}>
-          <Bell className="h-5 w-5" />
-        </Button>
-        <Notificacoes open={notificacoesOpen} onOpenChange={setNotificacoesOpen} />
-        
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-2 cursor-pointer">
-              <span className="font-medium">Nome do Usuário</span>
+        {user ? (
+          <>
+            {/* Botão de demonstração de notificações */}
+            <NotificationButton />
+            
+            {/* Ícone de notificações */}
+            <div className="relative">
+              <Button variant="ghost" size="icon" onClick={() => setNotificacoesOpen(true)}>
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Button>
             </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => window.location.href = "/dados"}>Conta</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => window.location.href = "/configuracoes"}>Configurações</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Notificacoes open={notificacoesOpen} onOpenChange={setNotificacoesOpen} />
+            
+            {/* Toggle de tema */}
+            <ThemeToggle />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <span className="font-medium">{formatName(user?.nome || '')}</span>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {profileItems.map((item, index) => (
+                  <DropdownMenuItem 
+                    key={index} 
+                    onClick={item.onClick || (item.href ? () => router.push(item.href) : undefined)}
+                  >
+                    {item.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        ) : (
+          <>
+            {/* Toggle de tema */}
+            <ThemeToggle />
+            
+            {/* Botão de login */}
+            <Button onClick={() => router.push("/login")}>
+              Entrar
+            </Button>
+          </>
+        )}
       </div>
     </nav>
   );
-}
+});
