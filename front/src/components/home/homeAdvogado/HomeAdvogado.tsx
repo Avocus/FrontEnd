@@ -1,8 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { Progress } from "@radix-ui/react-progress";
 import { useResponsive } from "@/hooks/useResponsive";
 

@@ -3,10 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@
 import { useNotificationStore } from "@/store";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, Trash2, AlertCircle, Info, CheckCircle, AlertTriangle, X, Eye, EyeOff } from "lucide-react";
+import { Check, Trash2, AlertCircle, Info, CheckCircle, AlertTriangle, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { useState } from "react";
-import { Switch } from "../ui/switch";
 import { Notificacao, NotificacaoTipo } from "@/types";
 
 interface NotificacoesProps {
@@ -56,7 +54,7 @@ export function Notificacoes({ open, onOpenChange }: NotificacoesProps) {
         clearAll
     } = useNotificationStore();
     
-    const [showScrollbar, setShowScrollbar] = useState(false);
+    const showScrollbar = false;
     const scrollbarClass = showScrollbar ? "scrollbar-thin" : "scrollbar-hide";
 
     const unreadCount = notificacoes.filter(n => !n.lida).length;

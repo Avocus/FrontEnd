@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter }
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User } from "lucide-react";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PerfilCliente } from "@/types/entities/Cliente";
@@ -225,11 +226,14 @@ export function DadosUsuario() {
                     <Avatar className="h-32 w-32 border-4 border-background">
                         <div className="h-full w-full flex items-center justify-center">
                             {profile.fotoPerfil ? (
-                                <img 
-                                    src={profile.fotoPerfil} 
-                                    alt={profile.nome} 
-                                    className="h-full w-full object-cover"
-                                />
+                                <div className="relative h-full w-full">
+                                    <Image
+                                        src={profile.fotoPerfil} 
+                                        alt={profile.nome} 
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
                             ) : (
                                 <div className="text-4xl bg-primary/10 h-full w-full flex items-center justify-center">
                                     {profile?.nome?.charAt(0) ?? ''}

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useResponsive } from "@/hooks/useResponsive";
+import Image from "next/image";
 
 interface Content {
     id: number;
@@ -50,7 +51,7 @@ export function Videoteca() {
                                 <CardTitle>{video.titulo}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <img
+                                <Image
                                     src={video.thumbnail}
                                     alt={video.titulo}
                                     className="w-full h-32 object-cover rounded-lg"
@@ -72,7 +73,7 @@ export function Videoteca() {
                                 <CardTitle>{video.titulo}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <img
+                                <Image
                                     src={video.thumbnail}
                                     alt={video.titulo}
                                     className="w-full h-48 object-cover rounded-lg"

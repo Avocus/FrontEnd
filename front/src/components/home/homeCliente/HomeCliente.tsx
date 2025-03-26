@@ -140,7 +140,7 @@ function DesktopView() {
                                 </div>
                             </div>
                             <p className="text-muted-foreground">
-                                "Encontrei o advogado perfeito para meu caso através da plataforma. O processo foi rápido e o atendimento excelente!"
+                                &apos;Encontrei o advogado perfeito para meu caso através da plataforma. O processo foi rápido e o atendimento excelente!&apos;
                             </p>
                         </CardContent>
                     </Card>
@@ -157,7 +157,7 @@ function DesktopView() {
                                 </div>
                             </div>
                             <p className="text-muted-foreground">
-                                "A consultoria jurídica me ajudou a resolver questões que pareciam impossíveis. Recomendo fortemente."
+                                &apos;A consultoria jurídica me ajudou a resolver questões que pareciam impossíveis. Recomendo fortemente.&apos;
                             </p>
                         </CardContent>
                     </Card>
@@ -174,7 +174,7 @@ function DesktopView() {
                                 </div>
                             </div>
                             <p className="text-muted-foreground">
-                                "O acompanhamento processual foi essencial para o sucesso do meu caso. Sempre me mantiveram informada sobre cada etapa."
+                                &apos;O acompanhamento processual foi essencial para o sucesso do meu caso. Sempre me mantiveram informada sobre cada etapa.&apos;
                             </p>
                         </CardContent>
                     </Card>
@@ -283,7 +283,7 @@ function MobileView() {
                                             </div>
                                         </div>
                                         <p className="text-sm text-muted-foreground">
-                                            "Encontrei o advogado perfeito para meu caso. O processo foi rápido e eficiente!"
+                                            &apos;Encontrei o advogado perfeito para meu caso. O processo foi rápido e eficiente!&apos;
                                         </p>
                                     </CardContent>
                                 </Card>
@@ -301,7 +301,7 @@ function MobileView() {
                                             </div>
                                         </div>
                                         <p className="text-sm text-muted-foreground">
-                                            "A consultoria jurídica resolveu questões que pareciam impossíveis. Recomendo!"
+                                            &apos;A consultoria jurídica resolveu questões que pareciam impossíveis. Recomendo!&apos;
                                         </p>
                                     </CardContent>
                                 </Card>

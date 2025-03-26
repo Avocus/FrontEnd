@@ -6,6 +6,11 @@ interface UseResponsiveOptions {
   defaultBreakpoint?: number;
 }
 
+interface LegacyMediaQueryList extends MediaQueryList {
+  addListener: (listener: (event: MediaQueryListEvent) => void) => void;
+  removeListener: (listener: (event: MediaQueryListEvent) => void) => void;
+}
+
 export function useResponsive(options: UseResponsiveOptions = {}) {
   const { defaultBreakpoint = 768 } = options;
   const [isMobile, setIsMobile] = useState(false);
@@ -19,7 +24,7 @@ export function useResponsive(options: UseResponsiveOptions = {}) {
     setIsMobile(window.innerWidth <= defaultBreakpoint);
     setWidth(window.innerWidth);
 
-    const mediaQuery = window.matchMedia(`(max-width: ${defaultBreakpoint}px)`);
+    const mediaQuery = window.matchMedia(`(max-width: ${defaultBreakpoint}px)`) as MediaQueryList & LegacyMediaQueryList;
     
     const handleMediaChange = (event: MediaQueryListEvent | MediaQueryList) => {
       setIsMobile(event.matches);
@@ -32,13 +37,11 @@ export function useResponsive(options: UseResponsiveOptions = {}) {
 
     handleMediaChange(mediaQuery);
     
-    // Usar a API correta com fallback para compatibilidade
     try {
       mediaQuery.addEventListener("change", handleMediaChange);
-    } catch (e) {
-      // Fallback para navegadores mais antigos
+    } catch {
+      console.log('Erro ao adicionar listener para o mediaQuery');
       try {
-        // @ts-ignore - Para browsers antigos
         mediaQuery.addListener(handleMediaChange);
       } catch (error) {
         console.error("Não foi possível adicionar listener para o mediaQuery:", error);
@@ -50,9 +53,8 @@ export function useResponsive(options: UseResponsiveOptions = {}) {
     return () => {
       try {
         mediaQuery.removeEventListener("change", handleMediaChange);
-      } catch (e) {
+      } catch {
         try {
-          // @ts-ignore - Para browsers antigos
           mediaQuery.removeListener(handleMediaChange);
         } catch (error) {
           console.error("Não foi possível remover listener do mediaQuery:", error);

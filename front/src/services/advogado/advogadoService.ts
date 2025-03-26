@@ -37,29 +37,3 @@ export const getAdvogadoProfile = async (): Promise<AdvogadoProfile> => {
 
   return response.json();
 };
-
-/**
- * Atualiza informações do perfil do advogado
- */
-export const updateAdvogadoProfile = async (data: Partial<AdvogadoProfile>): Promise<AdvogadoProfile> => {
-  const token = getToken();
-  
-  if (!token) {
-    throw new Error('Usuário não autenticado');
-  }
-
-  const response = await fetch('/api/user/profile', {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    throw new Error('Erro ao atualizar perfil do advogado');
-  }
-
-  return response.json();
-}; 

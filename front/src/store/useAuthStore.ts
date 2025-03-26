@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { User, Credentials, AuthState } from '@/types';
 
-// Função para verificar o estado inicial de autenticação
 const checkInitialAuth = (): boolean => {
   if (typeof window === 'undefined') return false;
   return !!sessionStorage.getItem('token');
@@ -39,10 +38,8 @@ export const useAuthStore = create<AuthState>()(
             const token: string = data.jwt;
 
             const user: User = {
-              id: data.id,
               nome: data.name,
-              email: data.email,
-              roles: data.roles || [],
+              client: data.client,
               token
             }
             
@@ -61,18 +58,14 @@ export const useAuthStore = create<AuthState>()(
           set({ user: null, isAuthenticated: false, error: null });
         },
         setError: (error: string | null) => set({ error }),
-        // Método para sincronizar o estado com o sessionStorage
         syncAuth: () => {
           const hasToken = checkInitialAuth();
           const { isAuthenticated } = get();
           
-          // Se há inconsistência entre o token e o estado
           if (hasToken !== isAuthenticated) {
             if (hasToken) {
-              // Tem token mas não está autenticado no estado
               set({ isAuthenticated: true });
             } else {
-              // Não tem token mas está autenticado no estado
               set({ user: null, isAuthenticated: false });
             }
           }

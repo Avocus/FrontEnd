@@ -9,10 +9,9 @@ export default function AgendaPage() {
   const { updateConfig, isAdvogado } = useLayout();
 
   useEffect(() => {
-    // Configuração específica para a página Agenda
     updateConfig({
       showNavbar: true,
-      showSidebar: isAdvogado, // Mostrar sidebar apenas para advogados
+      showSidebar: isAdvogado,
       showFooter: true
     });
   }, [updateConfig, isAdvogado]);

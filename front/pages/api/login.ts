@@ -1,21 +1,11 @@
 // pages/api/logar.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import admin from '../../firebaseAdminConfig'; // Importe o Firebase Admin
-import { auth, db, signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from '../../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
 import { AUTH_ROUTES, UserApiResponse, ApiErrorResponse, UserResponse } from '../../lib/api-routes';
 
 // Interfaces para tipagem
 interface LoginCredentials {
   username: string;
   password: string;
-}
-
-interface FirebaseUserData {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  data: Record<string, any>;
 }
 
 // Função para autenticação pelo servidor
@@ -43,39 +33,6 @@ async function serverLogin(email: string, password: string): Promise<UserRespons
   }
 }
 
-// Função para autenticação por email/senha no Firebase
-async function emailLogin(email: string, password: string): Promise<FirebaseUserData> {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  return await getUserData(userCredential.user);
-}
-
-// Função para autenticação pelo Google
-async function googleLogin(idToken: string, accessToken: string): Promise<FirebaseUserData> {
-  
-  const decodedToken = await admin.auth().verifyIdToken(idToken);
-  
-  const credential = GoogleAuthProvider.credential(accessToken);
-  const userCredential = await signInWithCredential(auth, credential);
-  
-  return await getUserData(userCredential.user);
-}
-
-// Função para obter dados do usuário do Firestore
-async function getUserData(user: any): Promise<FirebaseUserData> {
-  const userDoc = await getDoc(doc(db, "USER", user.uid));
-  
-  if (userDoc.exists()) {
-    return {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      data: userDoc.data(),
-    };
-  } else {
-    throw new Error("Nenhum dado encontrado para este usuário.");
-  }
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -83,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const { method, email, password, idToken, accessToken } = req.body;
+  const { method, email, password } = req.body;
 
   try {
     let result;
@@ -91,12 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     switch (method) {
       case 'server':
         result = await serverLogin(email, password);
-        break;
-      case 'email':
-        result = { user: await emailLogin(email, password) };
-        break;
-      case 'google':
-        result = { user: await googleLogin(idToken, accessToken) };
         break;
       default:
         throw new Error('Método de login inválido');

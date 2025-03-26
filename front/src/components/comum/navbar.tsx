@@ -1,7 +1,7 @@
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bell, Menu, MessageCircle, Settings, Home, User, X } from "lucide-react";
+import { Bell, Menu, MessageCircle, Home, User } from "lucide-react";
 import { useState, memo, useCallback } from "react";
 import { ChatAvocuss } from "./chatAvocuss";
 import { Notificacoes } from "./notificacoes";
@@ -71,7 +71,7 @@ export const Navbar = memo(function Navbar() {
           <div className="flex items-center gap-2">
             <div className="bg-tertiary rounded-full p-2">
               <h1 className="text-lg font-bold cursor-pointer" onClick={() => navigateTo('/conta')}>
-                {user ? formatName(user.nome) : 'Usuário'}
+                {user ? formatName(user.nome || '') : 'Usuário'}
               </h1>
             </div>
           </div>

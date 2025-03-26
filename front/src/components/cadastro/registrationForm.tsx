@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,17 +33,29 @@ interface FormData {
 }
 
 export function RegistrationForm({ userType }: RegistrationFormProps) {
-  const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>();
   const [step, setStep] = useState(1);
   const [isNextDisabled, setIsNextDisabled] = useState(true);
-
+  const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>();
   const formData = watch();
+
+  const getRequiredFieldsForStep = useCallback((step: number) => {
+    switch (step) {
+      case 1:
+        return ["nomeCompleto", "telefone", "cpf", "dataNascimento"];
+      case 2:
+        return ["cep", "logradouro", "numero", "bairro", "cidade", "estado"];
+      case 3:
+        return userType === "lawyer" ? ["oab", "areaAtuacao", "formacao", "faculdade"] : [];
+      default:
+        return [];
+    }
+  }, [userType]);
 
   useEffect(() => {
     const requiredFields = getRequiredFieldsForStep(step);
     const isStepValid = requiredFields.every((field) => formData[field as keyof FormData] !== "");
     setIsNextDisabled(!isStepValid);
-  }, [step, formData]);
+  }, [step, formData, getRequiredFieldsForStep]);
 
   useEffect(() => {
     if (formData.cep?.length === 8) {
@@ -59,19 +71,6 @@ export function RegistrationForm({ userType }: RegistrationFormProps) {
         });
     }
   }, [formData.cep, setValue]);
-
-  const getRequiredFieldsForStep = (step: number) => {
-    switch (step) {
-      case 1:
-        return ["nomeCompleto", "telefone", "cpf", "dataNascimento"];
-      case 2:
-        return ["cep", "logradouro", "numero", "bairro", "cidade", "estado"];
-      case 3:
-        return userType === "lawyer" ? ["oab", "areaAtuacao", "formacao", "faculdade"] : [];
-      default:
-        return [];
-    }
-  };
 
   const handleNext = () => setStep((prev) => prev + 1);
   const handlePrevious = () => setStep((prev) => prev - 1);

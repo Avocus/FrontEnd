@@ -11,6 +11,7 @@ export const useProfileStore = create<ProfileState>()(
       isComplete: false,
       isLoading: false,
       error: null,
+      pendente: false,
 
       // Carregar perfil do usuário
       loadProfile: async () => {
