@@ -19,16 +19,16 @@ import { Badge } from "@/components/ui/badge"
 import { useAgendaStore } from "@/store/useAgendaStore"
 import { TimePicker } from "@/components/ui/time-picker"
 import { Evento, EventoTipo } from "@/types"
+import { useEffect } from "react"
 
 export function Calendario() {
   const [date, setDate] = React.useState<Date | undefined>(undefined)
   const [newEventTitle, setNewEventTitle] = React.useState("")
   const [selectedTime, setSelectedTime] = React.useState<Date | undefined>(undefined)
-  const { eventos, addEvento, removeEvento, loadEventos, getEventosByDate } = useAgendaStore()
+  const { eventos, addEvento, removeEvento, getEventosByDate } = useAgendaStore()
   const [selectedDateEvents, setSelectedDateEvents] = React.useState<Evento[]>([])
 
-  // Inicializa as datas apenas no cliente
-  React.useEffect(() => {
+  useEffect(() => {
     setDate(new Date())
     setSelectedTime(new Date())
   }, [])
@@ -57,15 +57,15 @@ export function Calendario() {
     }
   }
 
-  const updateSelectedDateEvents = (selectedDate: Date | undefined) => {
-    if (!selectedDate) return
-    const events = getEventosByDate(selectedDate)
-    setSelectedDateEvents(events)
-  }
+  const updateSelectedDateEvents = React.useCallback((selectedDate: Date | undefined) => {
+    if (!selectedDate) return;
+    const events = getEventosByDate(selectedDate);
+    setSelectedDateEvents(events);
+  }, [getEventosByDate]);
 
   React.useEffect(() => {
-    updateSelectedDateEvents(date)
-  }, [date, eventos])
+    updateSelectedDateEvents(date);
+  }, [date, updateSelectedDateEvents]);
 
   const isEventOnDate = (eventDate: string, date: Date) => {
     const eventDateTime = new Date(eventDate)
@@ -77,7 +77,7 @@ export function Calendario() {
   }
 
   if (!date || !selectedTime) {
-    return null // ou um componente de loading
+    return null
   }
 
   return (

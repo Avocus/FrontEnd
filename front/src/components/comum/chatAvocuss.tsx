@@ -46,7 +46,6 @@ export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
       text: "Olá! Sou a Avocuss, assistente virtual da plataforma. Como posso ajudar você hoje?",
     },
   ]);
-  const [isLoading, setIsLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(open || false);
 
   useEffect(() => {
@@ -76,7 +75,7 @@ export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
     } else {
       localStorage.setItem("chatHistory", JSON.stringify(messages));
     }
-  }, [open]);
+  }, [open, messages]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;

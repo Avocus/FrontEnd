@@ -4,11 +4,11 @@ import { Role } from './Role';
  * Interface que representa um usuário do sistema
  */
 export interface User {
-  id: string;
-  nome: string;
-  email: string;
+  id?: string;
+  nome?: string;
+  email?: string;
   roles?: Role[];
-  tipo?: UserTipo;
+  client?: boolean;
   token?: string;
   foto?: string;
   isAtivo?: boolean;
@@ -22,16 +22,6 @@ export interface Credentials {
   email: string;
   password: string;
   remember?: boolean;
-}
-
-/**
- * Enum com os tipos de usuário
- */
-export enum UserTipo {
-  ADVOGADO = 'ADVOGADO',
-  CLIENTE = 'CLIENTE',
-  ADMIN = 'ADMIN',
-  STAFF = 'STAFF'
 }
 
 /**
@@ -60,5 +50,4 @@ export interface RegisterCredentials {
   email: string;
   senha: string;
   confirmarSenha: string;
-  tipoUsuario: 'CLIENTE' | 'ADVOGADO';
 } 

@@ -23,7 +23,7 @@ export default function AuthGuard({
   requireAuth = true,
   redirectTo = '/login',
 }: AuthGuardProps) {
-  const { isAuthenticated, user, logout, syncAuth } = useAuthStore();
+  const { isAuthenticated, logout, syncAuth } = useAuthStore();
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -46,7 +46,6 @@ export default function AuthGuard({
       // Armazenar a URL atual para redirecionamento após login
       const currentPath = window.location.pathname;
       if (currentPath !== redirectTo) {
-        console.log(`Redirecionando de ${currentPath} para ${redirectTo} (não autenticado)`);
         sessionStorage.setItem('redirectAfterLogin', currentPath);
         setIsRedirecting(true);
         router.push(redirectTo);
@@ -55,7 +54,6 @@ export default function AuthGuard({
     // Se está na página de login ou cadastro mas já está autenticado
     else if (!requireAuth && isLoggedIn) {
       const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/home';
-      console.log(`Redirecionando de ${redirectTo} para ${redirectPath} (já autenticado)`);
       sessionStorage.removeItem('redirectAfterLogin');
       setIsRedirecting(true);
       router.push(redirectPath);

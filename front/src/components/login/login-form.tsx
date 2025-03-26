@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { cn } from "../../lib/utils";
@@ -21,15 +20,25 @@ import { PrivacyPolicy } from "./privacyPolicy";
 import { useRouter } from "next/navigation";
 import { useAuthStore, useProfileStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface ResetPasswordData {
+  resetEmail: string;
+}
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const { register, handleSubmit, formState: { errors, isValid } } = useForm({
+  const { register, handleSubmit, formState: { errors, isValid } } = useForm<LoginData>({
     mode: "onChange"
   });
-  const { register: registerReset, handleSubmit: handleSubmitReset, formState: { errors: errorsReset, isValid: isValidReset } } = useForm({
+  const { register: registerReset, handleSubmit: handleSubmitReset, formState: { errors: errorsReset, isValid: isValidReset } } = useForm<ResetPasswordData>({
     mode: "onChange"
   });
   const [resetEmailSent, setResetEmailSent] = useState<boolean>(false);
@@ -48,7 +57,7 @@ export function LoginForm({
     }
   }, [isAuthenticated, router, checkProfileCompletion]);
 
-  const handleLoginEmail = useCallback(async (data: any) => {
+  const handleLoginEmail = useCallback(async (data: LoginData) => {
     try {
       // Usar a função login do useAuthStore
       await login({
@@ -57,18 +66,18 @@ export function LoginForm({
       });
 
       // O redirecionamento será feito pelo useEffect acima quando isAuthenticated mudar
-    } catch (error: any) {
+    } catch (error) {
       // O erro já será gerenciado pelo useAuthStore
       console.error("Erro no login:", error);
     }
   }, [login]);
 
-  const handleForgotPassword = useCallback(async (data: any) => {
+  const handleForgotPassword = useCallback(async (data: ResetPasswordData) => {
     try {
       await sendPasswordResetEmail(auth, data.resetEmail);
       setResetEmailSent(true);
       setError(null); // Limpar erros anteriores
-    } catch (error: any) {
+    } catch (error) {
       console.error("Erro na recuperação de senha:", error);
       setError("Erro ao enviar email de recuperação. Verifique o email e tente novamente.");
     }
@@ -114,13 +123,13 @@ export function LoginForm({
                 <div className="grid gap-2">
                   <div className="flex items-center">
                     <Label htmlFor="password">Senha</Label>
-                    <a
+                    <Link
                       href="#"
                       className="ml-auto text-sm underline-offset-4 hover:underline"
                       onClick={() => document.getElementById("dialog-trigger")?.click()}
                     >
                       Esqueci minha senha
-                    </a>
+                    </Link>
                   </div>
                   <Input id="password" type="password" {...register("password", { required: "Senha é obrigatória" })} />
                   {errors.password && <span className="text-red-500 text-sm">{String(errors.password.message)}</span>}
@@ -137,13 +146,13 @@ export function LoginForm({
               </div>
               <div className="text-center text-sm">
                 Não possui conta?{" "}
-                <a
-                  href="#"
+                <Link
+                  href="/cadastro"
                   className="underline underline-offset-4"
                   onClick={handleRegister}
                 >
                   Cadastrar
-                </a>
+                </Link>
               </div>
             </div>
           </form>

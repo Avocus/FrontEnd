@@ -15,5 +15,5 @@ export interface ResponseContent<T> {
   status: number;
   message?: string;
   timestamp?: string;
-  params?: any;
+  params?: Record<string, unknown>;
 } 

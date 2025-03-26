@@ -166,20 +166,18 @@ export function CasosAdvogado() {
 export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
   const { isMobile } = useLayout();
   
-  // Tentar converter para número, mas com tratamento de erros
   let casoIdNumerico: number;
   try {
     casoIdNumerico = parseInt(casoId);
-    // Verificar se o resultado é um número válido
     if (isNaN(casoIdNumerico)) {
       throw new Error("ID inválido");
     }
-  } catch (error) {
+  } catch {
     return (
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Caso não encontrado</h1>
         <p className="text-muted-foreground mb-4">O identificador do caso é inválido.</p>
-        <a href="/casos" className="text-primary underline">Voltar para lista de casos</a>
+        <Link href="/casos" className="text-primary underline">Voltar para lista de casos</Link>
       </div>
     );
   }
@@ -191,7 +189,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Caso não encontrado</h1>
         <p className="text-muted-foreground mb-4">Não foi possível encontrar o caso solicitado.</p>
-        <a href="/casos" className="text-primary underline">Voltar para lista de casos</a>
+        <Link href="/casos" className="text-primary underline">Voltar para lista de casos</Link>
       </div>
     );
   }

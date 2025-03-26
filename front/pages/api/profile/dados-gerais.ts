@@ -1,11 +1,26 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import axios from 'axios';
 import { USER_ROUTES } from '../../../lib/api-routes';
+
+type ProfileData = {
+  id: string;
+  name: string;
+  email: string;
+  [key: string]: unknown;
+}
 
 type ResponseData = {
   success: boolean;
-  data?: any;
+  data?: ProfileData;
   error?: string;
+}
+
+interface ApiError {
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+    };
+  };
 }
 
 /**
@@ -17,7 +32,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
 ) {
-  // Verifica se é um método GET
   if (req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Método não permitido' });
   }
@@ -29,8 +43,6 @@ export default async function handler(
   }
 
   const token = authHeader.replace('Bearer ', '');
-
-  console.log(USER_ROUTES.PROFILE_GENERAL_DATA)
 
   try {
     const response = await fetch(USER_ROUTES.PROFILE_GENERAL_DATA, {
@@ -48,14 +60,14 @@ export default async function handler(
 
     // Retorna os dados para o frontend
     return res.status(200).json({ success: true, data: responseData.data });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('Erro ao buscar dados do perfil:', error);
     
     // Tratamento simplificado de erro
-    const status = error.response?.status || 500;
+    const status = (error as ApiError)?.response?.status || 500;
     const errorMessage = 
-      error.response?.data?.message || 
-      error.message || 
+      (error as ApiError)?.response?.data?.message || 
+      (error as Error)?.message || 
       'Erro ao buscar dados do perfil';
     
     return res.status(status).json({ 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface Content {
     id: number;
@@ -45,7 +46,7 @@ export function VideotecaMobile () {
                             <CardTitle>{video.titulo}</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <img
+                            <Image
                                 src={video.thumbnail}
                                 alt={video.titulo}
                                 className="w-full h-32 object-cover rounded-lg"

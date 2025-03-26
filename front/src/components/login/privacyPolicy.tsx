@@ -2,14 +2,15 @@
 
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function PrivacyPolicy() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <a href="#" className="underline underline-offset-4 hover:text-primary">
+        <Link href="#" className="underline underline-offset-4 hover:text-primary">
           Política de Privacidade
-        </a>
+        </Link>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>

@@ -76,9 +76,9 @@ export function CadastroForm({
       await cadastrarUsuario(cadastroData);
       setCadastroError(null);
       router.push('/login');
-    } catch (error: any) {
-      if (error.response?.data?.error) {
-        setCadastroError(error.response.data.error);
+    } catch (error: unknown) {
+      if ((error as { response?: { data?: { error?: string } } })?.response?.data?.error) {
+        setCadastroError((error as { response: { data: { error: string } } }).response.data.error);
       } else {
         console.error("Erro no cadastro:", error);
         setCadastroError("Erro ao fazer cadastro. Tente novamente.");
