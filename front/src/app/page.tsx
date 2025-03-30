@@ -1,7 +1,6 @@
 'use client'
 
 import { HomeCliente } from "@/components/home/homeCliente/HomeCliente";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
 
@@ -18,8 +17,6 @@ export default function Home() {
   }, [updateConfig, isAdvogado]);
 
   return (
-    <AppLayout>
-      <HomeCliente />
-    </AppLayout>
+    <HomeCliente />
   );
 }

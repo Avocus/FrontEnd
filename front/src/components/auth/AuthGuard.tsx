@@ -4,26 +4,22 @@ import { useAuthStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import LoadingScreen from '@/components/common/LoadingScreen';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  requireAuth?: boolean;
-  redirectTo?: string;
 }
 
 /**
  * Componente que protege rotas que necessitam de autenticação
  * 
  * @param props.children - O conteúdo a ser renderizado se autenticado
- * @param props.requireAuth - Se true, redireciona para login caso não autenticado (default: true)
- * @param props.redirectTo - Para onde redirecionar caso não autenticado (default: '/login')
  */
 export default function AuthGuard({
   children,
-  requireAuth = true,
-  redirectTo = '/login',
 }: AuthGuardProps) {
   const { isAuthenticated, logout, syncAuth } = useAuthStore();
+  const { config } = useAuth();
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -42,17 +38,17 @@ export default function AuthGuard({
     }
 
     // Se precisamos de autenticação e não está autenticado
-    if (requireAuth && !isLoggedIn) {
+    if (config.requireAuth && !isLoggedIn) {
       // Armazenar a URL atual para redirecionamento após login
       const currentPath = window.location.pathname;
-      if (currentPath !== redirectTo) {
+      if (currentPath !== config.redirectTo) {
         sessionStorage.setItem('redirectAfterLogin', currentPath);
         setIsRedirecting(true);
-        router.push(redirectTo);
+        router.push(config.redirectTo || '/login');
       }
     } 
     // Se está na página de login ou cadastro mas já está autenticado
-    else if (!requireAuth && isLoggedIn) {
+    else if (!config.requireAuth && isLoggedIn) {
       const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/home';
       sessionStorage.removeItem('redirectAfterLogin');
       setIsRedirecting(true);
@@ -60,7 +56,7 @@ export default function AuthGuard({
     }
     
     setIsChecking(false);
-  }, [isAuthenticated, requireAuth, redirectTo, router, logout, isRedirecting, syncAuth]);
+  }, [isAuthenticated, config, router, logout, isRedirecting, syncAuth]);
 
   // Mostra tela de carregamento enquanto verifica autenticação
   if (isChecking) {
