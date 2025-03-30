@@ -61,8 +61,6 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
     if (!isMounted) return;
     
     setConfig(prevConfig => {
-      // Manter as configurações atuais e apenas atualizar o que for necessário
-      // Isso é importante para não causar re-renders desnecessários
       const newConfig = { ...prevConfig };
       
       // Só atualizar se mudou para evitar re-renders em cascata

@@ -1,6 +1,7 @@
 "use client";
 import { Home, User, MessageCircle } from "lucide-react";
 import { Button } from "../ui/button";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ChatAvocuss } from "./chatAvocuss"; // Importação do ChatAvocuss
@@ -15,18 +16,6 @@ export function FooterMobile() {
         }
     }, [router]);
 
-    const handleHomeClick = () => {
-        if (router) {
-            router.push('/home');
-        }
-    };
-    const handleCasosClick = () => {
-        if (router) {
-            router.push('/casos');
-        }
-    };
-
-
     return (
         <footer className="w-full fixed bottom-0 bg-secondary text-secondary-foreground flex justify-around p-2 rounded-t-xl">
             <Button 
@@ -38,20 +27,21 @@ export function FooterMobile() {
                 <span className="text-xs text-secondary-foreground">Chat</span>
             </Button>
             <ChatAvocuss open={chatOpen} onOpenChange={setChatOpen} />
-            <Button 
-                variant="ghost" 
-                className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
-                onClick={handleHomeClick}  // Adiciona a navegação para a rota home
-            >
-                <Home className="w-8 h-8 text-secondary-foreground" />
-                <span className="text-xs text-secondary-foreground">Home</span>
-            </Button>
-            <Button variant="ghost" className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
-                onClick={handleCasosClick}  // Adiciona a navegação para a rota home
-            >
-                <User className="w-8 h-8 text-secondary-foreground" />
-                <span className="text-xs text-secondary-foreground">Casos</span>
-            </Button>
+            <Link href="/home" className="flex flex-col items-center">
+                <Button 
+                    variant="ghost" 
+                    className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
+                >
+                    <Home className="w-8 h-8 text-secondary-foreground" />
+                    <span className="text-xs text-secondary-foreground">Home</span>
+                </Button>
+            </Link>
+            <Link href="/casos" className="flex flex-col items-center">
+                <Button variant="ghost" className="flex flex-col items-center p-6 bg-tertiary rounded-3xl">
+                    <User className="w-8 h-8 text-secondary-foreground" />
+                    <span className="text-xs text-secondary-foreground">Casos</span>
+                </Button>
+            </Link>
         </footer>
     );
 }

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "../utils/theme-provider";
-import { LayoutProvider } from "@/contexts/LayoutContext";
-import { AuthProvider } from "@/providers/AuthProvider";
+import { ClientLayout } from "@/components/layout/ClientLayout";
+import { metadata as rootMetadata } from "./metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,10 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Avocuss",
-  description: "Plataforma jurídica Avocuss",
-};
+export const metadata: Metadata = rootMetadata;
 
 export default function RootLayout({
   children,
@@ -30,15 +26,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-auto`}
       >
-        <ThemeProvider>
-          <LayoutProvider>
-            <AuthProvider>
-              <div className="min-h-screen">
-                {children}
-              </div>
-            </AuthProvider>
-          </LayoutProvider>
-        </ThemeProvider>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

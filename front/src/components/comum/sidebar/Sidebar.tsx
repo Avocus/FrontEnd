@@ -57,7 +57,7 @@ const SidebarItem = ({ label, href, icon, active, onClick, collapsed }: SidebarI
   );
 };
 
-interface AdvogadoSidebarProps {
+interface SidebarProps {
   className?: string;
   activePath?: string;
   setChatOpen?: (open: boolean) => void;
@@ -65,13 +65,13 @@ interface AdvogadoSidebarProps {
   onCollapsedChange?: (collapsed: boolean) => void;
 }
 
-export function AdvogadoSidebar({ 
+export function Sidebar({ 
   className, 
   activePath = "", 
   setChatOpen,
   collapsed: externalCollapsed,
   onCollapsedChange 
-}: AdvogadoSidebarProps) {
+}: SidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   
   // Use o estado controlado externamente se fornecido, caso contrário use o interno

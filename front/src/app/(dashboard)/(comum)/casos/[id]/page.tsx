@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { DetalheCaso } from "@/components/casos/Casos";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,11 +21,11 @@ export default function DetalheCasoPage() {
     }, [updateConfig, isAdvogado]);
 
     return (
-        <AppLayout>
+        <>
             <Link href="/casos" className="">
                 <Button variant="outline" size="sm">← Voltar para casos</Button>
             </Link>
             <DetalheCaso casoId={casoId} />
-        </AppLayout>
+        </>
     );
 }

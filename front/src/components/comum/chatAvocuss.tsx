@@ -72,7 +72,11 @@ export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
       if (savedMessages) {
         setMessages(JSON.parse(savedMessages));
       }
-    } else {
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
       localStorage.setItem("chatHistory", JSON.stringify(messages));
     }
   }, [open, messages]);

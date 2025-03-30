@@ -1,9 +1,7 @@
 "use client";
 import { Configs } from "@/components/perfil/configs";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
-import AuthGuard from "@/components/auth/AuthGuard";
 
 export default function Configuracoes() {
     const { updateConfig, isAdvogado } = useLayout();
@@ -18,10 +16,6 @@ export default function Configuracoes() {
     }, [updateConfig, isAdvogado]);
 
     return (
-        <AuthGuard>
-            <AppLayout>
-                <Configs />
-            </AppLayout>
-        </AuthGuard>
+        <Configs />
     );
 }

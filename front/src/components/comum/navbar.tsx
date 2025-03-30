@@ -104,40 +104,63 @@ export const Navbar = memo(function Navbar() {
               <SheetContent side="right" className="w-[250px] sm:w-[300px]">
                 <div className="flex flex-col gap-4 mt-8">
                   {navItems.map((item, index) => (
-                    <Button
-                      key={index}
-                      variant="ghost"
-                      className="flex items-center justify-start"
-                      onClick={() => {
-                        if (item.onClick) {
-                          item.onClick();
-                        } else if (item.href) {
-                          navigateTo(item.href);
-                        }
-                        setMenuOpen(false);
-                      }}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </Button>
+                    item.onClick ? (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        className="flex items-center justify-start"
+                        onClick={() => {
+                          item?.onClick?.();
+                          setMenuOpen(false);
+                        }}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </Button>
+                    ) : (
+                      <Link
+                        key={index}
+                        href={item.href || "#"}
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Button
+                          variant="ghost"
+                          className="flex items-center justify-start w-full"
+                        >
+                          {item.icon}
+                          {item.label}
+                        </Button>
+                      </Link>
+                    )
                   ))}
                   <div className="h-px bg-border my-4" />
                   {profileItems.map((item, index) => (
-                    <Button
-                      key={index}
-                      variant="ghost"
-                      className="flex items-center justify-start"
-                      onClick={() => {
-                        if (item.onClick) {
+                    item.onClick ? (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        className="flex items-center justify-start"
+                        onClick={() => {
                           item.onClick();
-                        } else if (item.href) {
-                          navigateTo(item.href);
-                        }
-                        setMenuOpen(false);
-                      }}
-                    >
-                      {item.label}
-                    </Button>
+                          setMenuOpen(false);
+                        }}
+                      >
+                        {item.label}
+                      </Button>
+                    ) : (
+                      <Link
+                        key={index}
+                        href={item.href || "#"}
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Button
+                          variant="ghost"
+                          className="flex items-center justify-start w-full"
+                        >
+                          {item.label}
+                        </Button>
+                      </Link>
+                    )
                   ))}
                 </div>
               </SheetContent>
@@ -155,23 +178,25 @@ export const Navbar = memo(function Navbar() {
             <span className="text-xs text-secondary-foreground">Chat</span>
           </Button>
           
-          <Button 
-            variant="ghost" 
-            className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
-            onClick={() => navigateTo('/home')}
-          >
-            <Home className="w-8 h-8 text-secondary-foreground" />
-            <span className="text-xs text-secondary-foreground">Home</span>
-          </Button>
+          <Link href="/home" className="flex flex-col items-center">
+            <Button 
+              variant="ghost" 
+              className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
+            >
+              <Home className="w-8 h-8 text-secondary-foreground" />
+              <span className="text-xs text-secondary-foreground">Home</span>
+            </Button>
+          </Link>
           
-          <Button 
-            variant="ghost" 
-            className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
-            onClick={() => navigateTo('/casos')}
-          >
-            <User className="w-8 h-8 text-secondary-foreground" />
-            <span className="text-xs text-secondary-foreground">Casos</span>
-          </Button>
+          <Link href="/casos" className="flex flex-col items-center">
+            <Button 
+              variant="ghost" 
+              className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
+            >
+              <User className="w-8 h-8 text-secondary-foreground" />
+              <span className="text-xs text-secondary-foreground">Casos</span>
+            </Button>
+          </Link>
         </footer>
         
         <ChatAvocuss open={chatOpen} onOpenChange={setChatOpen} />
@@ -182,9 +207,9 @@ export const Navbar = memo(function Navbar() {
   // Versão Web
   return (
     <nav className="flex items-center justify-between p-4 border-b">
-      <div className="text-xl font-bold flex-1 text-start cursor-pointer" onClick={() => navigateTo('/home')}>
+      <Link href="/home" className="text-xl font-bold flex-1 text-start cursor-pointer">
         Avocuss
-      </div>
+      </Link>
 
       <NavigationMenu className="flex-1 text-center">
         <NavigationMenuList className="inline-flex">
@@ -235,9 +260,15 @@ export const Navbar = memo(function Navbar() {
                 {profileItems.map((item, index) => (
                   <DropdownMenuItem 
                     key={index} 
-                    onClick={item.onClick || (item.href ? () => navigateTo(item.href) : undefined)}
+                    onClick={item.onClick}
                   >
-                    {item.label}
+                    {item.href ? (
+                      <Link href={item.href} className="w-full">
+                        {item.label}
+                      </Link>
+                    ) : (
+                      item.label
+                    )}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -247,9 +278,11 @@ export const Navbar = memo(function Navbar() {
           <>
             <ThemeToggle />
             
-            <Button onClick={() => navigateTo("/login")}>
-              Entrar
-            </Button>
+            <Link href="/login">
+              <Button>
+                Entrar
+              </Button>
+            </Link>
           </>
         )}
       </div>

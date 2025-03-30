@@ -1,6 +1,5 @@
 "use client"
 
-import { AppLayout } from "@/components/layout/AppLayout";
 import { DadosUsuario } from "@/components/perfil/infosPerfil/dados/dadosUsuario";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
@@ -11,14 +10,12 @@ export default function Dados() {
     useEffect(() => {
         updateConfig({
             showNavbar: true,
-            showSidebar: isAdvogado,
+            showSidebar: true,
             showFooter: true
         });
     }, [updateConfig, isAdvogado]);
 
     return (
-        <AppLayout>
-            <DadosUsuario />
-        </AppLayout>
+        <DadosUsuario />
     );
 }

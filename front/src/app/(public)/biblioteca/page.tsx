@@ -1,5 +1,4 @@
 "use client";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
 
@@ -130,8 +129,8 @@ export default function BibliotecaPage() {
   }, [updateConfig, isAdvogado]);
   
   return (
-    <AppLayout>
+    <>
       {isMobile ? <BibliotecaMobile /> : <BibliotecaWeb />}
-    </AppLayout>
+    </>
   );
 }

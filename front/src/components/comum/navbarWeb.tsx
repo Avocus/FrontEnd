@@ -22,7 +22,6 @@ interface NavbarWebProps {
   showLogo?: boolean;
 }
 
-// Usar memo para evitar re-renderizações desnecessárias
 export const NavbarWeb = memo(function NavbarWeb({ showFullNavigation = true, showLogo = true }: NavbarWebProps) {
   const [chatOpen, setChatOpen] = useState(false);
   const [notificacoesOpen, setNotificacoesOpen] = useState(false);
