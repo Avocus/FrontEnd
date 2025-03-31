@@ -12,10 +12,6 @@ export function Configs() {
   const router = useRouter();
   const { logout } = useAuthStore();
 
-  const handleEditProfileClick = () => {
-    router.push("/editar");
-  };
-
   const handleLogout = () => {
     // Limpar token e estado de autenticação
     sessionStorage.removeItem('token');
@@ -29,23 +25,12 @@ export function Configs() {
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto mt-16 mb-16">
+    <div>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Configurações</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Editar Perfil */}
-          <div className="space-y-2">
-            <Label className="text-lg">Editar Perfil</Label>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleEditProfileClick}
-            >
-              Editar Perfil
-            </Button>
-          </div>
 
           {/* Mudar Tema */}
           <div className="space-y-2 flex justify-start items-center">
@@ -76,7 +61,7 @@ export function Configs() {
           {/* Sair do App */}
           <div className="space-y-2">
             <Label className="text-lg">Conta</Label>
-            <Button variant="destructive" className="w-full" onClick={handleLogout}>
+            <Button variant="secondary" className="w-full text-primary hover:bg-destructive" onClick={handleLogout}>
               Sair do App
             </Button>
           </div>

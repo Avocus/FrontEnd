@@ -25,7 +25,7 @@ export interface PerfilCliente {
   cidade: string;
   estado: string;
   dataNascimento: string;
-  fotoPerfil: string;
+  fotoPerfil?: string;
   processosAtivos: number;
   processosFinalizados: number;
 }

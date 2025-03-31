@@ -10,7 +10,7 @@ export default function Configuracoes() {
         // Configuração específica para a página de Configurações
         updateConfig({
             showNavbar: true,
-            showSidebar: isAdvogado, // Mostrar sidebar apenas para advogados
+            showSidebar: true, // Mostrar sidebar apenas para advogados
             showFooter: true
         });
     }, [updateConfig, isAdvogado]);

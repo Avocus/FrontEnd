@@ -54,6 +54,8 @@ export function Videoteca() {
                                 <Image
                                     src={video.thumbnail}
                                     alt={video.titulo}
+                                    width={640} // Largura padrão para thumbnails
+                                    height={360} // Altura padrão para thumbnails
                                     className="w-full h-32 object-cover rounded-lg"
                                 />
                             </CardContent>
@@ -76,6 +78,8 @@ export function Videoteca() {
                                 <Image
                                     src={video.thumbnail}
                                     alt={video.titulo}
+                                    width={640} // Largura padrão para thumbnails
+                                    height={360} // Altura padrão para thumbnails
                                     className="w-full h-48 object-cover rounded-lg"
                                 />
                             </CardContent>
@@ -189,4 +193,4 @@ const videos = [
         "url": "https://www.youtube.com/embed/XOGTYxoNsBI",
         "thumbnail": "https://img.youtube.com/vi/XOGTYxoNsBI/hqdefault.jpg"
     }
-]; 
+];

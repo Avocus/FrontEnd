@@ -9,9 +9,9 @@ interface LoadingScreenProps {
 
 export default function LoadingScreen({ message = 'Carregando...' }: LoadingScreenProps) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-primary-foreground">
       <Spinner size="lg" className="mb-4" />
-      <p className="text-muted-foreground">{message}</p>
+      <p className="text-chart-1">{message}</p>
     </div>
   );
 } 

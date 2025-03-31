@@ -8,7 +8,7 @@ export function PrivacyPolicy() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+        <Link href="#" className="underline underline-offset-4 hover:text-chart-4">
           Política de Privacidade
         </Link>
       </DialogTrigger>

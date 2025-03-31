@@ -84,21 +84,21 @@ export function DadosUsuario() {
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex items-start gap-3">
-                        <MailIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <MailIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium">Email</p>
                             <p className="text-muted-foreground">{profile.email}</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
-                        <PhoneIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <PhoneIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium">Telefone</p>
                             <p className="text-muted-foreground">{profile.telefone || "Não informado"}</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
-                        <CalendarIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <CalendarIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium">Data de Nascimento</p>
                             <p className="text-muted-foreground">
@@ -109,7 +109,7 @@ export function DadosUsuario() {
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
-                        <User className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium">CPF</p>
                             <p className="text-muted-foreground">{profile.cpf || "Não informado"}</p>
@@ -120,7 +120,7 @@ export function DadosUsuario() {
                 <div className="pt-4 border-t">
                     <h3 className="text-lg font-medium mb-4">Endereço</h3>
                     <div className="flex items-start gap-3">
-                        <MapPinIcon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <MapPinIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                         <div>
                             <p className="font-medium">Localização</p>
                             <p className="text-muted-foreground">
@@ -160,7 +160,7 @@ export function DadosUsuario() {
                                     <span className="text-sm text-muted-foreground">{processo.data}</span>
                                 </div>
                             </div>
-                            <Badge variant={processo.status === "Ativo" ? "default" : "secondary"}>
+                            <Badge variant={processo.status === "Ativo" ? "ghost" : "default"}>
                                 {processo.status}
                             </Badge>
                         </div>
@@ -185,7 +185,7 @@ export function DadosUsuario() {
                     {cliente.documentos.map((documento) => (
                         <div key={documento.id} className="flex items-center justify-between p-4 rounded-lg border">
                             <div className="flex items-center gap-3">
-                                <FileIcon className="h-8 w-8 text-primary" />
+                                <FileIcon className="h-8 w-8 text-secondary" />
                                 <div>
                                     <h3 className="font-medium">{documento.nome}</h3>
                                     <p className="text-sm text-muted-foreground">Enviado via aplicativo</p>
@@ -220,7 +220,7 @@ export function DadosUsuario() {
     // Função para renderizar o cabeçalho de perfil
     const renderProfileHeader = () => (
         <Card className="overflow-hidden">
-            <div className="h-32 bg-gradient-to-r from-primary to-primary/60"></div>
+            <div className="h-24 bg-gradient-to-r from-primary to-primary/60"></div>
             <CardContent className="-mt-16 pb-6">
                 <div className="flex flex-col items-center">
                     <Avatar className="h-32 w-32 border-4 border-background">
@@ -241,14 +241,14 @@ export function DadosUsuario() {
                             )}
                         </div>
                     </Avatar>
-                    <h2 className="mt-4 text-2xl font-bold">{profile.nome}</h2>
+                    <h2 className="mt-3 text-2xl font-bold">{profile.nome}</h2>
                     <p className="text-muted-foreground">Cliente</p>
 
-                    <div className="flex gap-3 mt-6">
+                    <div className="flex gap-3 mt-4">
                         <Button size="sm" variant="outline" asChild>
                             <Link href="/perfil/editar">Editar Perfil</Link>
                         </Button>
-                        <Button size="sm" variant="default">Mensagens</Button>
+                        <Button size="sm" variant="outline">Mensagens</Button>
                     </div>
                 </div>
             </CardContent>
@@ -282,7 +282,7 @@ export function DadosUsuario() {
             <button
                 onClick={() => setActiveTab("informacoes")}
                 className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "informacoes" 
-                    ? "border-b-2 border-primary text-primary" 
+                    ? "border-b-2 border-primary text-secondary" 
                     : "text-muted-foreground hover:text-foreground"}`}
             >
                 Informações
@@ -290,7 +290,7 @@ export function DadosUsuario() {
             <button
                 onClick={() => setActiveTab("processos")}
                 className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "processos" 
-                    ? "border-b-2 border-primary text-primary" 
+                    ? "border-b-2 border-primary text-secondary" 
                     : "text-muted-foreground hover:text-foreground"}`}
             >
                 Processos
@@ -298,7 +298,7 @@ export function DadosUsuario() {
             <button
                 onClick={() => setActiveTab("documentos")}
                 className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "documentos" 
-                    ? "border-b-2 border-primary text-primary" 
+                    ? "border-b-2 border-primary text-secondary" 
                     : "text-muted-foreground hover:text-foreground"}`}
             >
                 Documentos
@@ -307,7 +307,7 @@ export function DadosUsuario() {
     );
 
     return (
-        <div className="p-6 bg-background">
+        <div className="p-3 pt-0 bg-background">
             {error && (
                 <div className="mb-4 p-3 bg-destructive/20 text-destructive rounded-md">
                     {error}

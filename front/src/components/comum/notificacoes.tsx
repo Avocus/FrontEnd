@@ -74,13 +74,13 @@ export function Notificacoes({ open, onOpenChange }: NotificacoesProps) {
                         <DialogTitle className="text-lg font-semibold">
                             Notificações {unreadCount > 0 && `(${unreadCount})`}
                         </DialogTitle>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap sm:flex-nowrap sm:flex-row sm:gap-2 sm:justify-end">
                             <Button 
                                 variant="outline" 
                                 size="sm" 
                                 onClick={markAllAsRead}
                                 disabled={unreadCount === 0}
-                                className="h-9 px-3 text-xs"
+                                className="h-9 px-3 text-xs w-full sm:w-auto"
                             >
                                 <Check className="h-4 w-4 mr-1.5" />
                                 Marcar todas como lidas
@@ -90,7 +90,7 @@ export function Notificacoes({ open, onOpenChange }: NotificacoesProps) {
                                 size="sm" 
                                 onClick={clearAll}
                                 disabled={notificacoes.length === 0}
-                                className="h-9 px-3 text-xs"
+                                className="h-9 px-3 text-xs w-full sm:w-auto"
                             >
                                 <Trash2 className="h-4 w-4 mr-1.5" />
                                 Limpar todas
@@ -110,9 +110,9 @@ export function Notificacoes({ open, onOpenChange }: NotificacoesProps) {
                                 return (
                                     <div
                                         key={notificacao.id}
-                                        className={`p-4 rounded-lg border ${styles.bg}`}
+                                        className={`p-4 rounded-lg border ${styles.bg} flex flex-col sm:flex-row`}
                                     >
-                                        <div className="flex items-start gap-4">
+                                        <div className="flex items-start gap-4 w-full sm:w-auto">
                                             {/* Ícone de status */}
                                             {!notificacao.lida && <div className="pt-1">{styles.icon}</div>}
 
@@ -133,13 +133,13 @@ export function Notificacoes({ open, onOpenChange }: NotificacoesProps) {
                                                     {notificacao.mensagem}
                                                 </p>
                                                 
-                                                <div className="flex justify-between mt-2">
+                                                <div className="flex flex-col sm:flex-row justify-between mt-2 gap-2">
                                                     {!notificacao.lida ? (
                                                         <Button 
                                                             variant="ghost" 
                                                             size="sm" 
                                                             onClick={() => markAsRead(notificacao.id)}
-                                                            className="h-8 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 mr-2"
+                                                            className="h-8 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 sm:w-auto"
                                                         >
                                                             Marcar como lida
                                                         </Button>
@@ -150,7 +150,7 @@ export function Notificacoes({ open, onOpenChange }: NotificacoesProps) {
                                                         variant="ghost" 
                                                         size="sm" 
                                                         onClick={() => removeNotification(notificacao.id)}
-                                                        className="h-8 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2"
+                                                        className="h-8 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2 sm:w-auto"
                                                     >
                                                         Remover
                                                     </Button>

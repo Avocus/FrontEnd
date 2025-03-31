@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { useLayout } from "@/contexts/LayoutContext";
 import Link from "next/link";
+import { NovoCaso } from "./NovoCaso";
 
 // Dados mockados - em um ambiente real isso viria de uma API
 const casosCliente = [
@@ -65,13 +66,17 @@ function CasosClienteWeb() {
       <h1 className="text-3xl font-bold mb-6">Meus Casos</h1>
 
       {/* Filtro de busca */}
-      <div className="mb-6">
+      <div className="mb-6 flex gap-5">
         <Input
           placeholder="Buscar por título do caso ou status..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full max-w-md"
         />
+
+        <div>
+          <NovoCaso></NovoCaso>
+        </div>
       </div>
 
       {/* Listagem de casos */}
@@ -127,6 +132,10 @@ function CasosClienteMobile() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full"
         />
+      </div>
+
+      <div>
+        <NovoCaso></NovoCaso>
       </div>
 
       {/* Listagem de casos */}
