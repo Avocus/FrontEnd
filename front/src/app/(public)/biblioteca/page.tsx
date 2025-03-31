@@ -4,7 +4,15 @@ import { useLayout } from "@/contexts/LayoutContext";
 import { Input } from "@/components/ui/input"; // Adjust the path to match your project structure
 import { useEffect, useState } from "react";
 import { Button } from "react-day-picker";
-import { Content } from "@/types";
+
+interface Content {
+    id: number;
+    titulo: string;
+    categoria: string;
+    imagem: string;
+    subTitulo: string;
+    conteudo: string;
+    }
 
 export default function BibliotecaPage() {
   const { updateConfig, isMobile, isAdvogado } = useLayout();
