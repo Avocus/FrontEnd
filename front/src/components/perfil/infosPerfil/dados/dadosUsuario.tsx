@@ -160,7 +160,7 @@ export function DadosUsuario() {
                                     <span className="text-sm text-muted-foreground">{processo.data}</span>
                                 </div>
                             </div>
-                            <Badge variant={processo.status === "Ativo" ? "default" : "secondary"}>
+                            <Badge variant={processo.status === "Ativo" ? "outline" : "default"}>
                                 {processo.status}
                             </Badge>
                         </div>

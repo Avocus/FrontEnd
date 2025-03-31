@@ -19,6 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+// import { NovoCaso } from "@/components/casos/NovoCaso";
 
 type SidebarItemProps = {
   label: string;

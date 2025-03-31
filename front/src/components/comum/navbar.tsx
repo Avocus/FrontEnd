@@ -1,7 +1,7 @@
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bell, Menu, MessageCircle, Home, User } from "lucide-react";
+import { Bell, Menu, Home, User, Calendar, BookOpen, Video } from "lucide-react";
 import { useState, memo, useCallback } from "react";
 import { ChatAvocuss } from "./chatAvocuss";
 import { Notificacoes } from "./notificacoes";
