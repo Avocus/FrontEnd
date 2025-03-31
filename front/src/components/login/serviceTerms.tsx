@@ -8,7 +8,7 @@ export function ServiceTerms() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+        <Link href="#" className="underline underline-offset-4 hover:text-chart-4">
           Termos de Serviço
         </Link>
       </DialogTrigger>

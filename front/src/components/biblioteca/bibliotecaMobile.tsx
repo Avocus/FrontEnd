@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 
 interface Content {
     id: number;
@@ -67,7 +66,7 @@ export function BibliotecaMobile () {
                             <p className="text-sm text-secondary-foreground">{selectedContent.subTitulo}</p>
                         </CardHeader>
                         <CardContent>
-                            <Image src={selectedContent.imagem} alt={selectedContent.titulo} className="w-full h-32 object-cover mb-4" />
+                            <img src={selectedContent.imagem} alt={selectedContent.titulo} className="w-full h-32 object-cover mb-4" />
                             <p>{selectedContent.conteudo}</p>
                             <Button onClick={() => setSelectedContent(null)} className="mt-4">
                                 Fechar

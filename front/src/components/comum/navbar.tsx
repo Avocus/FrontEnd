@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useResponsive } from "@/hooks/useResponsive";
 import Link from "next/link";
+import { FooterMobile } from "./footerMobile";
 
 type NavItem = {
   label: string;
@@ -34,11 +35,11 @@ export const Navbar = memo(function Navbar() {
 
   const navItems: NavItem[] = [
     { label: "Home", href: "/home", icon: <Home className="h-5 w-5 mr-2" /> },
-    { label: "Agenda", href: "/agenda" },
-    { label: "Serviços", href: "#" },
-    { label: "Chat", onClick: () => setChatOpen(true), icon: <MessageCircle className="h-5 w-5 mr-2" /> },
-    { label: "Biblioteca", href: "/biblioteca" },
-    { label: "Videoteca", href: "/videoteca" },
+    { label: "Agenda", href: "/agenda", icon: <Calendar className="h-5 w-5" /> },
+    // { label: "Serviços", href: "#" },
+    // { label: "Chat", onClick: () => setChatOpen(true), icon: <MessageCircle className="h-5 w-5 mr-2" /> },
+    { label: "Biblioteca", href: "/biblioteca", icon: <BookOpen className="h-5 w-5" /> },
+    { label: "Videoteca", href: "/videoteca", icon: <Video className="h-5 w-5" /> },
     { label: "Casos", href: "/casos", icon: <User className="h-5 w-5 mr-2" /> },
   ];
 
@@ -67,11 +68,11 @@ export const Navbar = memo(function Navbar() {
   if (isMobile) {
     return (
       <>
-        <nav className="w-full fixed top-0 p-2 bg-secondary text-secondary-foreground flex justify-between items-center rounded-b-2xl z-50">
+        <nav className="w-full fixed top-0 p-2 bg-secondary text-secondary-foreground flex justify-between items-center z-50">
           <div className="flex items-center gap-2">
-            <div className="bg-tertiary rounded-full p-2">
-              <h1 className="text-lg font-bold cursor-pointer" onClick={() => navigateTo('/conta')}>
-                {user ? formatName(user.nome || '') : 'Usuário'}
+            <div className="bg-secondary rounded-2xl p-1 text-primary">
+              <h1 className="text-lg font-bold" onClick={() => navigateTo('/conta')}>
+                Mr. {user ? formatName(user.nome || '') : 'Usuário'}
               </h1>
             </div>
           </div>
@@ -79,12 +80,13 @@ export const Navbar = memo(function Navbar() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
+              className="flex flex-col items-center p-6 bg-tertiary rounded-2xl"
               onClick={() => setNotificacoesOpen(true)}
             >
               <Bell />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute top-1 right-16
+                 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -96,7 +98,7 @@ export const Navbar = memo(function Navbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
+                  className="flex flex-col items-center p-6 bg-tertiary rounded-2xl"
                 >
                   <Menu />
                 </Button>
@@ -167,40 +169,9 @@ export const Navbar = memo(function Navbar() {
             </Sheet>
           </div>
         </nav>
-        
-        <footer className="w-full fixed bottom-0 bg-secondary text-secondary-foreground flex justify-around p-2 rounded-t-xl">
-          <Button 
-            variant="ghost" 
-            className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
-            onClick={() => setChatOpen(true)}
-          >
-            <MessageCircle className="w-8 h-8 text-secondary-foreground" />
-            <span className="text-xs text-secondary-foreground">Chat</span>
-          </Button>
-          
-          <Link href="/home" className="flex flex-col items-center">
-            <Button 
-              variant="ghost" 
-              className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
-            >
-              <Home className="w-8 h-8 text-secondary-foreground" />
-              <span className="text-xs text-secondary-foreground">Home</span>
-            </Button>
-          </Link>
-          
-          <Link href="/casos" className="flex flex-col items-center">
-            <Button 
-              variant="ghost" 
-              className="flex flex-col items-center p-6 bg-tertiary rounded-3xl"
-            >
-              <User className="w-8 h-8 text-secondary-foreground" />
-              <span className="text-xs text-secondary-foreground">Casos</span>
-            </Button>
-          </Link>
-        </footer>
-        
-        <ChatAvocuss open={chatOpen} onOpenChange={setChatOpen} />
-      </>
+        <FooterMobile />
+
+[]      </>
     );
   }
 

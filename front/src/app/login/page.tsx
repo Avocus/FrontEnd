@@ -33,7 +33,7 @@ function LoginContent() {
   useEffect(() => {
     updateConfig({
       showNavbar: false,
-      showSidebar: true,
+      showSidebar: false,
       showFooter: false
     });
   }, [updateConfig]); 

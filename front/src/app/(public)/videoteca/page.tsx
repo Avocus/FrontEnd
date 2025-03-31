@@ -10,7 +10,7 @@ export default function VideotecaPage() {
         // Configuração específica para a página de Videoteca
         updateConfig({
             showNavbar: true,
-            showSidebar: false,
+            showSidebar: true,
             showFooter: false
         });
     }, [updateConfig, isAdvogado]);
