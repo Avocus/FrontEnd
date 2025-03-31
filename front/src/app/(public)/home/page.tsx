@@ -9,7 +9,7 @@ export default function Home() {
   useEffect(() => {
     updateConfig({
       showNavbar: true,
-      showSidebar: false,
+      showSidebar: true,
       showFooter: true
     });
   }, [updateConfig]);

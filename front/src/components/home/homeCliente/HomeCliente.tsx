@@ -4,20 +4,47 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Book, Briefcase, Video } from "lucide-react";
 import { useResponsive } from "@/hooks/useResponsive";
-import { ChatAvocuss } from "../../comum/chatAvocuss";
-import { Dialog } from "@/components/ui/dialog";
+import AuthGuard from "@/components/auth/AuthGuard";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLayout } from "@/contexts/LayoutContext";
+// import { ChatAvocuss } from "../../comum/chatAvocuss";
+// import { Dialog } from "@/components/ui/dialog";
 
 export function HomeCliente() {
+
+    const { updateConfig } = useLayout();
+
+    const { updateAuth } = useAuth();
+    useEffect(() => {
+        updateAuth({
+            requireAuth: true,
+            redirectTo: "/login"
+        });
+    }, [updateAuth]);
+
+    useEffect(() => {
+        updateConfig({
+            showNavbar: true,
+            showSidebar: false,
+            showFooter: true
+        });
+    }, [updateConfig]);
+
+
     const { isMobile } = useResponsive();
 
     if (isMobile) {
-        return <MobileView />;
+        return <AuthGuard>
+                <MobileView />
+               </AuthGuard>
     }
 
-    return <DesktopView />;
+    return <AuthGuard>
+             <DesktopView />
+           </AuthGuard>
 }
 
 function DesktopView() {
@@ -185,133 +212,92 @@ function DesktopView() {
 }
 
 function MobileView() {
-    const [chatOpen, setChatOpen] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveIndex((prevIndex) => (prevIndex + 1) % 2); // Alterna entre 0 e 1 (número de itens do carrossel)
+        }, 3000); // 1 segundo
+
+        return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
+    }, []);
 
     return (
-        <div className="min-h-screen bg-background text-foreground" >
-            <div className="min-h-fit-content">
+        <div className="min-h-fit-content bg-background text-foreground">
+            <div>
                 {/* Carrossel */}
                 <section className="p-3">
                     <Carousel className="w-full">
-                        <CarouselContent>
-                            <CarouselItem>
-                                <Card className=" bg-card shadow-md min-h-44 text-slate-800" style={{ backgroundImage: 'url(./carroussel-neutro.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                                    <CardHeader>
-                                        <CardTitle>Como entrar com um processo?</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p>Saiba os passos para abrir um processo com rapidez e segurança.</p>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                            <CarouselItem>
-                                <Card className=" bg-card shadow-md min-h-44 text-slate-800" style={{ backgroundImage: 'url(./carroussel-neutro-2.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                                    <CardHeader>
-                                        <CardTitle>Encontre um advogado</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p>Busque profissionais por especialidade e localização.</p>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
+                        <CarouselContent className="min-h-48 max-h-48">
+                            <motion.div
+                                key={activeIndex}
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -50 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                {activeIndex === 0 && (
+                                    <CarouselItem>
+                                        <Card className=" bg-card shadow-md text-slate-800" style={{ backgroundImage: 'url(./carroussel-neutro.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                                            <CardHeader>
+                                                <CardTitle>Como entrar com um processo?</CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p>Saiba os passos para abrir um processo com rapidez e segurança.</p>
+                                            </CardContent>
+                                        </Card>
+                                    </CarouselItem>
+                                )}
+                                {activeIndex === 1 && (
+                                    <CarouselItem>
+                                        <Card className=" bg-card shadow-md text-slate-800" style={{ backgroundImage: 'url(./carroussel-neutro-2.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                                            <CardHeader>
+                                                <CardTitle>Encontre um advogado</CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p>Busque profissionais por especialidade e localização.</p>
+                                            </CardContent>
+                                        </Card>
+                                    </CarouselItem>
+                                )}
+                            </motion.div>
                         </CarouselContent>
                     </Carousel>
                 </section>
 
-                {/* Pesquisa rápida */}
-                <section className="p-3">
-                    <Card className="bg-card shadow-md">
-                        <CardContent className="p-4">
-                            <div className="space-y-3">
-                                <h3 className="font-semibold">Buscar advogado</h3>
-                                <div className="flex flex-col gap-2">
-                                    <Input placeholder="Especialidade" />
-                                    <Input placeholder="Localização" />
-                                    <Button variant="default" className="w-full">Buscar</Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </section>
-
                 {/* Menu de serviços */}
                 <section className="p-3 mb-4">
-                    <h2 className="text-lg font-bold mb-2">Nossos Serviços</h2>
+                    <h2 className="text-lg font-bold mb-2">Serviços</h2>
                     <div className="grid grid-cols-2 gap-3">
                         <Card className="bg-card shadow-md">
                             <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Briefcase className="w-6 h-6 mb-2 text-primary" />
+                                <Briefcase className="w-6 h-6 mb-2 text-secondary" />
                                 <div className="text-sm font-medium text-center">Consultoria Jurídica</div>
                             </CardContent>
                         </Card>
                         <Card className="bg-card shadow-md">
                             <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Book className="w-6 h-6 mb-2 text-primary" />
-                                <div className="text-sm font-medium text-center">Documentos Legais</div>
+                                <Book className="w-6 h-6 mb-2 text-secondary" />
+                                <div className="text-sm font-medium text-center">Biblioteca</div>
                             </CardContent>
                         </Card>
                         <Card className="bg-card shadow-md">
                             <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Calendar className="w-6 h-6 mb-2 text-primary" />
+                                <Calendar className="w-6 h-6 mb-2 text-secondary" />
                                 <div className="text-sm font-medium text-center">Acompanhamento</div>
                             </CardContent>
                         </Card>
                         <Card className="bg-card shadow-md">
                             <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Video className="w-6 h-6 mb-2 text-primary" />
-                                <div className="text-sm font-medium text-center">Videochamada</div>
+                                <Video className="w-6 h-6 mb-2 text-secondary" />
+                                <div className="text-sm font-medium text-center">Videoteca</div>
                             </CardContent>
                         </Card>
                     </div>
                 </section>
 
-                {/* Depoimentos */}
-                <section className="p-3 mb-16">
-                    <h2 className="text-lg font-bold mb-2">Depoimentos</h2>
-                    <Carousel className="w-full">
-                        <CarouselContent>
-                            <CarouselItem>
-                                <Card className="bg-card shadow-md p-2">
-                                    <CardContent className="pt-2">
-                                        <div className="flex items-center mb-2">
-                                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                                                <span className="text-primary font-bold text-sm">MS</span>
-                                            </div>
-                                            <div>
-                                                <h3 className="font-semibold text-sm">Maria Silva</h3>
-                                                <p className="text-xs text-muted-foreground">Cliente desde 2021</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                            &apos;Encontrei o advogado perfeito para meu caso. O processo foi rápido e eficiente!&apos;
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                            <CarouselItem>
-                                <Card className="bg-card shadow-md p-2">
-                                    <CardContent className="pt-2">
-                                        <div className="flex items-center mb-2">
-                                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                                                <span className="text-primary font-bold text-sm">JP</span>
-                                            </div>
-                                            <div>
-                                                <h3 className="font-semibold text-sm">João Paulo</h3>
-                                                <p className="text-xs text-muted-foreground">Cliente desde 2022</p>
-                                            </div>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                            &apos;A consultoria jurídica resolveu questões que pareciam impossíveis. Recomendo!&apos;
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                        </CarouselContent>
-                    </Carousel>
-                </section>
-
                 {/* Chat flutuante */}
-                {chatOpen ? (
+                {/* {chatOpen ? (
                     <Dialog open={chatOpen} onOpenChange={setChatOpen}>
                         <ChatAvocuss open={chatOpen} onOpenChange={setChatOpen} />
                     </Dialog>
@@ -322,8 +308,9 @@ function MobileView() {
                     >
                         💬
                     </Button>
-                )}
+                )} */}
+
             </div>
         </div>
     );
-} 
+}

@@ -10,7 +10,7 @@ export default function CasosPage() {
     useEffect(() => {
         updateConfig({
             showNavbar: true,
-            showSidebar: isAdvogado,
+            showSidebar: true,
             showFooter: true
         });
     }, [updateConfig, isAdvogado]);

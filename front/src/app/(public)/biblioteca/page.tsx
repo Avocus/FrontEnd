@@ -1,132 +1,140 @@
 "use client";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useLayout } from "@/contexts/LayoutContext";
-import { useEffect } from "react";
-
-// Componente para versão mobile
-const BibliotecaMobile = () => (
-  <div className="p-4">
-    <h1 className="text-2xl font-bold mb-4">Biblioteca</h1>
-    <div className="space-y-4">
-      <div className="bg-card rounded-lg p-4 shadow">
-        <h2 className="text-xl font-semibold mb-2">Documentos Recentes</h2>
-        <ul className="space-y-2">
-          <li className="border-b pb-2">Contrato de Prestação de Serviços</li>
-          <li className="border-b pb-2">Petição Inicial - Modelo</li>
-          <li className="border-b pb-2">Recurso de Apelação</li>
-        </ul>
-      </div>
-      
-      <div className="bg-card rounded-lg p-4 shadow">
-        <h2 className="text-xl font-semibold mb-2">Categorias</h2>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-background p-3 rounded text-center">Civil</div>
-          <div className="bg-background p-3 rounded text-center">Penal</div>
-          <div className="bg-background p-3 rounded text-center">Trabalhista</div>
-          <div className="bg-background p-3 rounded text-center">Administrativo</div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// Componente para versão web
-const BibliotecaWeb = () => (
-  <div className="container p-6">
-    <h1 className="text-3xl font-bold mb-6">Biblioteca Jurídica</h1>
-    
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-        <div className="bg-card rounded-lg p-6 shadow mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Documentos Recentes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border p-4 rounded-lg">
-              <h3 className="font-medium">Contrato de Prestação de Serviços</h3>
-              <p className="text-sm text-muted-foreground">Atualizado em 10/06/2023</p>
-              <div className="mt-2 flex justify-end">
-                <button className="text-primary text-sm">Visualizar</button>
-              </div>
-            </div>
-            <div className="border p-4 rounded-lg">
-              <h3 className="font-medium">Petição Inicial - Modelo</h3>
-              <p className="text-sm text-muted-foreground">Atualizado em 15/08/2023</p>
-              <div className="mt-2 flex justify-end">
-                <button className="text-primary text-sm">Visualizar</button>
-              </div>
-            </div>
-            <div className="border p-4 rounded-lg">
-              <h3 className="font-medium">Recurso de Apelação</h3>
-              <p className="text-sm text-muted-foreground">Atualizado em 22/09/2023</p>
-              <div className="mt-2 flex justify-end">
-                <button className="text-primary text-sm">Visualizar</button>
-              </div>
-            </div>
-            <div className="border p-4 rounded-lg">
-              <h3 className="font-medium">Contestação - Direito do Consumidor</h3>
-              <p className="text-sm text-muted-foreground">Atualizado em 05/10/2023</p>
-              <div className="mt-2 flex justify-end">
-                <button className="text-primary text-sm">Visualizar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="lg:col-span-1">
-        <div className="bg-card rounded-lg p-6 shadow mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Categorias</h2>
-          <ul className="space-y-2">
-            <li className="p-3 bg-background rounded-lg hover:bg-primary/10 cursor-pointer">Direito Civil</li>
-            <li className="p-3 bg-background rounded-lg hover:bg-primary/10 cursor-pointer">Direito Penal</li>
-            <li className="p-3 bg-background rounded-lg hover:bg-primary/10 cursor-pointer">Direito Trabalhista</li>
-            <li className="p-3 bg-background rounded-lg hover:bg-primary/10 cursor-pointer">Direito Administrativo</li>
-            <li className="p-3 bg-background rounded-lg hover:bg-primary/10 cursor-pointer">Direito Tributário</li>
-            <li className="p-3 bg-background rounded-lg hover:bg-primary/10 cursor-pointer">Direito do Consumidor</li>
-          </ul>
-        </div>
-        
-        <div className="bg-card rounded-lg p-6 shadow">
-          <h2 className="text-2xl font-semibold mb-4">Filtros</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Tipo de Documento</label>
-              <select className="w-full p-2 border rounded-md">
-                <option>Todos</option>
-                <option>Contratos</option>
-                <option>Petições</option>
-                <option>Recursos</option>
-                <option>Pareceres</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Data</label>
-              <select className="w-full p-2 border rounded-md">
-                <option>Qualquer data</option>
-                <option>Última semana</option>
-                <option>Último mês</option>
-                <option>Último ano</option>
-              </select>
-            </div>
-            <button className="w-full bg-primary text-primary-foreground py-2 rounded-md">
-              Aplicar Filtros
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+import { Input } from "@/components/ui/input"; // Adjust the path to match your project structure
+import { useEffect, useState } from "react";
+import { Button } from "react-day-picker";
+import { Content } from "@/types";
 
 export default function BibliotecaPage() {
   const { updateConfig, isMobile, isAdvogado } = useLayout();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedContent, setSelectedContent] = useState<Content | null>(null);
+
+  const filteredContents = conteudos.filter(
+      (content) =>
+          content.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          content.categoria.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
   useEffect(() => {
     // Configuração específica para a página Biblioteca
     updateConfig({
       showNavbar: true,
-      showSidebar: isAdvogado, // Mostrar sidebar apenas para advogados
+      showSidebar: true, // Mostrar sidebar apenas para advogados
       showFooter: true
     });
   }, [updateConfig, isAdvogado]);
+
+
+  // Componente para versão mobile
+const BibliotecaMobile = () => (
+  <div className="p-4 bg-background text-foreground">
+              {/* <h1 className="text-2xl font-bold mb-4">Biblioteca Jurídica</h1> */}
+  
+              {/* Barra de Busca */}
+              <div className="mb-4">
+                  <Input
+                      placeholder="Buscar por título ou categoria..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full"
+                  />
+              </div>
+  
+              {/* Lista de Conteúdos */}
+              <div className="space-y-4">
+                  {filteredContents.map((content) => (
+                      <Card
+                          key={content.id}
+                          className="cursor-pointer hover:shadow-lg transition-shadow"
+                          onClick={() => setSelectedContent(content)}
+                      >
+                          <CardHeader>
+                              <CardTitle>{content.titulo}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                              <p className="text-sm text-secondary-foreground">{content.categoria}</p>
+                          </CardContent>
+                      </Card>
+                  ))}
+              </div>
+  
+              {/* Detalhes do Conteúdo */}
+              {selectedContent && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                      <Card className="w-full">
+                          <CardHeader>
+                              <CardTitle>{selectedContent.titulo}</CardTitle>
+                              <p className="text-sm text-secondary-foreground">{selectedContent.subTitulo}</p>
+                          </CardHeader>
+                          <CardContent>
+                              <img src={selectedContent.imagem} alt={selectedContent.titulo} className="w-full h-32 object-cover mb-4" />
+                              <p>{selectedContent.conteudo}</p>
+                              <Button onClick={() => setSelectedContent(null)} className="mt-4">
+                                  Fechar
+                              </Button>
+                          </CardContent>
+                      </Card>
+                  </div>
+              )}
+          </div>
+  );
+  
+  // Componente para versão web
+  const BibliotecaWeb = () => (
+    <div className="p-8 bg-background text-foreground">
+    <h1 className="text-3xl font-bold mb-6">Biblioteca Jurídica</h1>
+  
+    {/* Barra de Busca */}
+    <div className="mb-8">
+        <Input
+            placeholder="Buscar por título ou categoria..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full max-w-md"
+        />
+    </div>
+  
+    {/* Lista de Conteúdos */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredContents.map((content) => (
+            <Card
+                key={content.id}
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => setSelectedContent(content)}
+            >
+                <CardHeader>
+                    <CardTitle>{content.titulo}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-secondary-foreground">{content.categoria}</p>
+                </CardContent>
+            </Card>
+        ))}
+    </div>
+  
+    {/* Detalhes do Conteúdo */}
+    {selectedContent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8">
+            <Card className="w-full max-w-2xl">
+                <CardHeader>
+                    <CardTitle>{selectedContent.titulo}</CardTitle>
+                    <p className="text-sm text-secondary-foreground">{selectedContent.subTitulo}</p>
+                </CardHeader>
+                <CardContent>
+                    <img src={selectedContent.imagem} alt={selectedContent.titulo} className="w-full h-48 object-cover mb-4" />
+                    <p>{selectedContent.conteudo}</p>
+                    <Button onClick={() => setSelectedContent(null)} className="mt-4">
+                        Fechar
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+    )}
+  </div>
+  );
   
   return (
     <>
@@ -134,3 +142,46 @@ export default function BibliotecaPage() {
     </>
   );
 }
+
+const conteudos = [
+  {
+      "id": 1,
+      "titulo": "Como funciona a multa por excesso de velocidade?",
+      "categoria": "Trânsito",
+      "imagem": "/transito1.jpg",
+      "subTitulo": "Entenda as regras e como recorrer",
+      "conteudo": "A multa por excesso de velocidade é aplicada quando o condutor ultrapassa os limites estabelecidos... (texto completo)"
+  },
+  {
+      "id": 2,
+      "titulo": "Direitos do trabalhador em caso de demissão",
+      "categoria": "Trabalho",
+      "imagem": "/trabalho1.jpg",
+      "subTitulo": "Saiba o que fazer se for demitido",
+      "conteudo": "Em caso de demissão, o trabalhador tem direito a uma série de benefícios, como seguro-desemprego... (texto completo)"
+  },
+  {
+      "id": 3,
+      "titulo": "Guarda compartilhada: o que é e como funciona?",
+      "categoria": "Família",
+      "imagem": "/familia1.jpg",
+      "subTitulo": "Entenda os direitos dos pais e filhos",
+      "conteudo": "A guarda compartilhada é um modelo em que ambos os pais dividem as responsabilidades sobre os filhos... (texto completo)"
+  },
+  {
+      "id": 4,
+      "titulo": "Como recorrer de uma multa de trânsito?",
+      "categoria": "Trânsito",
+      "imagem": "/transito2.jpg",
+      "subTitulo": "Passo a passo para contestar",
+      "conteudo": "Para recorrer de uma multa de trânsito, é necessário seguir alguns passos, como apresentar defesa... (texto completo)"
+  },
+  {
+      "id": 5,
+      "titulo": "Pensão alimentícia: como calcular?",
+      "categoria": "Família",
+      "imagem": "/familia2.jpg",
+      "subTitulo": "Entenda os critérios e valores",
+      "conteudo": "A pensão alimentícia é calculada com base nas necessidades do filho e na capacidade financeira dos pais... (texto completo)"
+  }
+];
