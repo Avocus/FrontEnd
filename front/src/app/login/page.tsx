@@ -1,6 +1,5 @@
 "use client"
 
-import { LoginForm } from "@/components/login/login-form"
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -8,6 +7,7 @@ import { AlertCircle } from "lucide-react"
 import AuthGuard from "@/components/auth/AuthGuard"
 import { useAuth } from "@/contexts/AuthContext"
 import { useLayout } from "@/contexts/LayoutContext"
+import { LoginForm } from '@/components/login/LoginForm'
 
 function LoginContent() {
   const searchParams = useSearchParams()
@@ -59,7 +59,7 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(./bg-login.jpg)' }}></div>
-      <Suspense fallback={<div>Carregando...</div>}>
+      <Suspense fallback={<div className="flex items-center justify-center">Carregando...</div>}>
           <LoginContent />
       </Suspense>
     </div>

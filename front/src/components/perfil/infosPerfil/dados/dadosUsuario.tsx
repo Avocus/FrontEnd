@@ -4,37 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User } from "lucide-react";
+import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User, Save, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PerfilCliente } from "@/types/entities/Cliente";
 import { getToken } from "@/utils/authUtils";
+import { useProfileStore } from "@/store";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import toast from "react-hot-toast";
 
 export function DadosUsuario() {
-    const [profile, setProfile] = useState<PerfilCliente>({
-        nome: "",
-        email: "",
-        telefone: "",
-        cpf: "",
-        endereco: "",
-        cidade: "",
-        estado: "",
-        dataNascimento: "",
-        fotoPerfil: "",
-        processosAtivos: 0,
-        processosFinalizados: 0,
-    });
-    
-    const [isLoading, setIsLoading] = useState(true);
+    const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
+    const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState("");
     const [activeTab, setActiveTab] = useState("informacoes");
+
+    const form = useForm<ProfileFormData>({
+        resolver: zodResolver(profileSchema),
+        defaultValues: profile as unknown as PerfilCliente
+    });
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                setIsLoading(true);
-                
                 const token = getToken();
                 
                 if (!token) {
@@ -55,19 +52,45 @@ export function DadosUsuario() {
                 }
                 
                 const responseData = await response.json();
-                setProfile(responseData.data as PerfilCliente);
+                updateProfileStore(responseData.data as PerfilCliente);
+                form.reset(responseData.data);
             } catch (err) {
                 setError("Não foi possível carregar os dados do perfil");
                 console.error(err);
-            } finally {
-                setIsLoading(false);
             }
         };
 
         fetchProfile();
-    }, []);
+    }, [updateProfileStore, form]);
 
-    if (isLoading) {
+    const onSubmit = async (data: ProfileFormData) => {
+        try {
+            const token = getToken();
+            if (!token) throw new Error('Usuário não autenticado');
+
+            const response = await fetch('/api/profile/dados-gerais', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao atualizar perfil');
+            }
+
+            updateProfileStore(data as PerfilCliente);
+            setIsEditing(false);
+            toast.success('Perfil atualizado com sucesso!');
+        } catch (error) {
+            toast.error('Erro ao atualizar perfil');
+            console.error(error);
+        }
+    };
+
+    if (profileLoading) {
         return (
             <div className="flex items-center justify-center min-h-[70vh]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -82,63 +105,181 @@ export function DadosUsuario() {
                 <CardDescription>Todos os seus dados cadastrais</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-start gap-3">
-                        <MailIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-medium">Email</p>
-                            <p className="text-muted-foreground">{profile.email}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <PhoneIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-medium">Telefone</p>
-                            <p className="text-muted-foreground">{profile.telefone || "Não informado"}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <CalendarIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-medium">Data de Nascimento</p>
-                            <p className="text-muted-foreground">
-                                {profile.dataNascimento 
-                                    ? new Date(profile?.dataNascimento ?? Date.now()).toLocaleDateString('pt-BR') 
-                                    : "Não informada"}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-medium">CPF</p>
-                            <p className="text-muted-foreground">{profile.cpf || "Não informado"}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="pt-4 border-t">
-                    <h3 className="text-lg font-medium mb-4">Endereço</h3>
-                    <div className="flex items-start gap-3">
-                        <MapPinIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-medium">Localização</p>
-                            <p className="text-muted-foreground">
-                                {profile.endereco ? (
-                                    `${profile.endereco}, ${profile.cidade} - ${profile.estado}`
-                                ) : (
-                                    "Endereço não informado"
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            {isEditing ? (
+                                                <Input {...field} />
+                                            ) : (
+                                                <div className="flex items-start gap-3">
+                                                    <MailIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                                    <p className="text-muted-foreground">{field.value}</p>
+                                                </div>
+                                            )}
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
-                            </p>
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="telefone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Telefone</FormLabel>
+                                        <FormControl>
+                                            {isEditing ? (
+                                                <Input {...field} />
+                                            ) : (
+                                                <div className="flex items-start gap-3">
+                                                    <PhoneIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                </div>
+                                            )}
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="dataNascimento"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Data de Nascimento</FormLabel>
+                                        <FormControl>
+                                            {isEditing ? (
+                                                <Input type="date" {...field} />
+                                            ) : (
+                                                <div className="flex items-start gap-3">
+                                                    <CalendarIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                                    <p className="text-muted-foreground">
+                                                        {field.value 
+                                                            ? new Date(field.value).toLocaleDateString('pt-BR') 
+                                                            : "Não informada"}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="cpf"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>CPF</FormLabel>
+                                        <FormControl>
+                                            {isEditing ? (
+                                                <Input {...field} />
+                                            ) : (
+                                                <div className="flex items-start gap-3">
+                                                    <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                </div>
+                                            )}
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
-                    </div>
-                </div>
+
+                        <div className="pt-4 border-t">
+                            <h3 className="text-lg font-medium mb-4">Endereço</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="endereco"
+                                    render={({ field }) => (
+                                        <FormItem className="md:col-span-2">
+                                            <FormLabel>Endereço</FormLabel>
+                                            <FormControl>
+                                                {isEditing ? (
+                                                    <Input {...field} />
+                                                ) : (
+                                                    <div className="flex items-start gap-3">
+                                                        <MapPinIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                                        <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                    </div>
+                                                )}
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="cidade"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Cidade</FormLabel>
+                                            <FormControl>
+                                                {isEditing ? (
+                                                    <Input {...field} />
+                                                ) : (
+                                                    <p className="text-muted-foreground">{field.value || "Não informada"}</p>
+                                                )}
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="estado"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Estado</FormLabel>
+                                            <FormControl>
+                                                {isEditing ? (
+                                                    <Input {...field} />
+                                                ) : (
+                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                )}
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <CardFooter className="flex justify-end gap-2 p-0">
+                            {isEditing ? (
+                                <>
+                                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                                        <X className="h-4 w-4 mr-2" />
+                                        Cancelar
+                                    </Button>
+                                    <Button type="submit">
+                                        <Save className="h-4 w-4 mr-2" />
+                                        Salvar
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
+                                    Editar informações
+                                </Button>
+                            )}
+                        </CardFooter>
+                    </form>
+                </Form>
             </CardContent>
-            <CardFooter>
-                <Button variant="outline" className="w-full" asChild>
-                    <Link href="/perfil/editar">Editar informações</Link>
-                </Button>
-            </CardFooter>
         </Card>
     );
 
@@ -151,7 +292,7 @@ export function DadosUsuario() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-5">
-                    {cliente.processos.map((processo) => (
+                    {profile.processos.map((processo) => (
                         <div key={processo.id} className="flex items-center justify-between p-4 rounded-lg border">
                             <div>
                                 <h3 className="font-medium">{processo.titulo}</h3>
@@ -182,7 +323,7 @@ export function DadosUsuario() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {cliente.documentos.map((documento) => (
+                    {profile.documentos.map((documento) => (
                         <div key={documento.id} className="flex items-center justify-between p-4 rounded-lg border">
                             <div className="flex items-center gap-3">
                                 <FileIcon className="h-8 w-8 text-secondary" />
@@ -225,23 +366,23 @@ export function DadosUsuario() {
                 <div className="flex flex-col items-center">
                     <Avatar className="h-32 w-32 border-4 border-background">
                         <div className="h-full w-full flex items-center justify-center">
-                            {profile.fotoPerfil ? (
+                            {profile?.fotoPerfil ? (
                                 <div className="relative h-full w-full">
                                     <Image
                                         src={profile.fotoPerfil} 
-                                        alt={profile.nome} 
+                                        alt={profile?.nome || 'Usuário'} 
                                         fill
                                         className="object-cover"
                                     />
                                 </div>
                             ) : (
                                 <div className="text-4xl bg-primary/10 h-full w-full flex items-center justify-center">
-                                    {profile?.nome?.charAt(0) ?? ''}
+                                    {profile?.nome?.charAt(0) ?? '?'}
                                 </div>
                             )}
                         </div>
                     </Avatar>
-                    <h2 className="mt-3 text-2xl font-bold">{profile.nome}</h2>
+                    <h2 className="mt-3 text-2xl font-bold">{profile?.nome || 'Usuário'}</h2>
                     <p className="text-muted-foreground">Cliente</p>
 
                     <div className="flex gap-3 mt-4">
@@ -265,11 +406,11 @@ export function DadosUsuario() {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-lg bg-primary/10">
                         <h3 className="font-medium text-muted-foreground">Processos Ativos</h3>
-                        <p className="text-3xl font-bold">{profile.processosAtivos}</p>
+                        <p className="text-3xl font-bold">{profile?.processosAtivos || 0}</p>
                     </div>
                     <div className="p-4 rounded-lg bg-primary/10">
                         <h3 className="font-medium text-muted-foreground">Finalizados</h3>
-                        <p className="text-3xl font-bold">{profile.processosFinalizados}</p>
+                        <p className="text-3xl font-bold">{profile?.processosFinalizados || 0}</p>
                     </div>
                 </div>
             </CardContent>

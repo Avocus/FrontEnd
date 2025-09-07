@@ -13,41 +13,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCallback, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { auth, sendPasswordResetEmail } from "../../../firebaseConfig";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ServiceTerms } from "./serviceTerms";
-import { PrivacyPolicy } from "./privacyPolicy";
+import { ServiceTerms } from "./ServiceTerms";
+import { PrivacyPolicy } from "./PrivacyPolicy";
 import { useRouter } from "next/navigation";
 import { useAuthStore, useProfileStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-interface ResetPasswordData {
-  resetEmail: string;
-}
+import { loginSchema, resetPasswordSchema, type LoginFormData, type ResetPasswordData } from "../../schemas/loginSchema";
+import { getFieldValidationClass } from "../../utils/formValidation";
+import { useToast } from "@/hooks/useToast";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const { register, handleSubmit, formState: { errors, isValid } } = useForm<LoginData>({
+  const { register, handleSubmit, formState: { errors, isValid, touchedFields, dirtyFields } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     mode: "onChange"
   });
-  const { register: registerReset, handleSubmit: handleSubmitReset, formState: { errors: errorsReset, isValid: isValidReset } } = useForm<ResetPasswordData>({
+  const { register: registerReset, handleSubmit: handleSubmitReset, formState: { errors: errorsReset, isValid: isValidReset, touchedFields: touchedFieldsReset, dirtyFields: dirtyFieldsReset } } = useForm<ResetPasswordData>({
+    resolver: zodResolver(resetPasswordSchema),
     mode: "onChange"
   });
   const [resetEmailSent, setResetEmailSent] = useState<boolean>(false);
+  const [lastErrorShown, setLastErrorShown] = useState<string | null>(null);
   const router = useRouter();
+  const { error: showErrorToast } = useToast();
   
   // Usar o useAuthStore para autenticação
   const { login, error: loginError, isAuthenticated, isLoading, setError } = useAuthStore();
   // Usar o useProfileStore para verificar o status do perfil
   const { checkProfileCompletion } = useProfileStore();
+
+  const getFieldValidationClassLocal = (fieldName: string, isReset = false) => {
+    const isTouched = isReset ? !!touchedFieldsReset[fieldName as keyof ResetPasswordData] : !!touchedFields[fieldName as keyof LoginFormData];
+    const hasError = isReset ? !!errorsReset[fieldName as keyof ResetPasswordData] : !!errors[fieldName as keyof LoginFormData];
+    const isDirty = isReset ? !!dirtyFieldsReset[fieldName as keyof ResetPasswordData] : !!dirtyFields[fieldName as keyof LoginFormData];
+    
+    return getFieldValidationClass(isTouched, hasError, isDirty);
+  };
 
   // Redirecionar para a página principal se já estiver autenticado
   useEffect(() => {
@@ -57,7 +64,15 @@ export function LoginForm({
     }
   }, [isAuthenticated, router, checkProfileCompletion]);
 
-  const handleLoginEmail = useCallback(async (data: LoginData) => {
+  // Mostrar toast de erro quando houver erro de login
+  useEffect(() => {
+    if (loginError && loginError !== lastErrorShown) {
+      showErrorToast(loginError);
+      setLastErrorShown(loginError);
+    }
+  }, [loginError, lastErrorShown, showErrorToast]);
+
+  const handleLoginEmail = useCallback(async (data: LoginFormData) => {
     try {
       // Usar a função login do useAuthStore
       await login({
@@ -101,14 +116,10 @@ export function LoginForm({
         </Button>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">AVOCUSS</CardTitle>
-          <CardDescription>
-            Faça login com sua conta Google
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(handleLoginEmail)}>
             <div className="grid gap-6">
-              {loginError && <span className="text-red-500 text-sm">{loginError}</span>}
               <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
@@ -116,9 +127,10 @@ export function LoginForm({
                     id="email"
                     type="email"
                     placeholder="m@example.com"
-                    {...register("email", { required: "Email é obrigatório", pattern: { value: /^\S+@\S+$/i, message: "Email inválido" } })}
+                    className={getFieldValidationClassLocal("email")}
+                    {...register("email")}
                   />
-                  {errors.email && <span className="text-red-500 text-sm">{String(errors.email.message)}</span>}
+                  {errors.email && touchedFields.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
@@ -131,8 +143,8 @@ export function LoginForm({
                       Esqueci minha senha
                     </Link>
                   </div>
-                  <Input id="password" type="password" {...register("password", { required: "Senha é obrigatória" })} />
-                  {errors.password && <span className="text-red-500 text-sm">{String(errors.password.message)}</span>}
+                  <Input id="password" type="password" className={getFieldValidationClassLocal("password")} {...register("password")} />
+                  {errors.password && touchedFields.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
                 </div>
                 <div className="grid gap-2">
                   <Button 
@@ -184,9 +196,10 @@ export function LoginForm({
                   id="reset-email"
                   type="email"
                   placeholder="m@example.com"
-                  {...registerReset("resetEmail", { required: "Email é obrigatório", pattern: { value: /^\S+@\S+$/i, message: "Email inválido" } })}
+                  className={getFieldValidationClassLocal("resetEmail", true)}
+                  {...registerReset("resetEmail")}
                 />
-                {errorsReset.resetEmail && <span className="text-red-500 text-sm">{String(errorsReset.resetEmail.message)}</span>}
+                {errorsReset.resetEmail && touchedFieldsReset.resetEmail && <span className="text-red-500 text-sm">{errorsReset.resetEmail.message}</span>}
               </div>
               <Button type="submit" size="sm" className="px-3 bg-secondary text-secondary-foreground" disabled={!isValidReset}>
                 Enviar

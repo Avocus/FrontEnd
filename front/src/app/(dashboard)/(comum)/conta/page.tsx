@@ -10,7 +10,7 @@ export default function Dados() {
     useEffect(() => {
         updateConfig({
             showNavbar: true,
-            showSidebar: true,
+            showSidebar: isAdvogado,
             showFooter: true
         });
     }, [updateConfig, isAdvogado]);

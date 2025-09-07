@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { useLayout } from "@/contexts/LayoutContext";
 import Link from "next/link";
-import { NovoCaso } from "./NovoCaso";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Dados mockados - em um ambiente real isso viria de uma API
 const casosCliente = [
@@ -66,17 +67,13 @@ function CasosClienteWeb() {
       <h1 className="text-3xl font-bold mb-6">Meus Casos</h1>
 
       {/* Filtro de busca */}
-      <div className="mb-6 flex gap-5">
+      <div className="mb-6">
         <Input
           placeholder="Buscar por título do caso ou status..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full max-w-md"
         />
-
-        <div>
-          <NovoCaso></NovoCaso>
-        </div>
       </div>
 
       {/* Listagem de casos */}
@@ -132,10 +129,6 @@ function CasosClienteMobile() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full"
         />
-      </div>
-
-      <div>
-        <NovoCaso></NovoCaso>
       </div>
 
       {/* Listagem de casos */}
@@ -205,51 +198,120 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
 
   return (
     <div className={`bg-background text-foreground ${isMobile ? 'p-4' : 'p-8'}`}>
-      <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold mb-4`}>{caso.titulo}</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="border rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-2">Informações do Caso</h2>
-          <div className="space-y-2">
-            <p><span className="font-medium">Status:</span> {caso.status}</p>
-            <p><span className="font-medium">Data de Abertura:</span> {caso.dataAbertura}</p>
-            <p><span className="font-medium">Descrição:</span> {caso.descricao}</p>
-          </div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>{caso.titulo}</h1>
+          <p className="text-muted-foreground">Advogado: {caso.advogado.nome}</p>
         </div>
-
-        <div className="border rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-2">Seu Advogado</h2>
-          <div className="space-y-2">
-            <p><span className="font-medium">Nome:</span> {caso.advogado.nome}</p>
-            <p><span className="font-medium">Email:</span> {caso.advogado.email}</p>
-            <p><span className="font-medium">Telefone:</span> {caso.advogado.telefone}</p>
-          </div>
-        </div>
+        <Badge variant={caso.status === "Em andamento" ? "default" : "secondary"}>
+          {caso.status}
+        </Badge>
       </div>
 
-      <div className="border rounded-lg p-4 mb-6">
-        <h2 className="text-xl font-semibold mb-2">Documentos</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {caso.documentos.map((doc) => (
-            <div key={doc.id} className="border rounded p-3 flex items-center justify-between">
-              <span>{doc.nome}</span>
-              <Button size="sm" variant="outline">Visualizar</Button>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="documents">Documentos</TabsTrigger>
+          <TabsTrigger value="timeline">Andamentos</TabsTrigger>
+          <TabsTrigger value="lawyer">Advogado</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border rounded-lg p-4">
+              <h2 className="text-xl font-semibold mb-2">Informações do Caso</h2>
+              <div className="space-y-2">
+                <p><span className="font-medium">Status:</span> {caso.status}</p>
+                <p><span className="font-medium">Data de Abertura:</span> {caso.dataAbertura}</p>
+                <p><span className="font-medium">Descrição:</span> {caso.descricao}</p>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="border rounded-lg p-4">
-        <h2 className="text-xl font-semibold mb-2">Andamento do Processo</h2>
-        <div className="space-y-2">
-          {caso.movimentacoes.map((mov) => (
-            <div key={mov.id} className="border-b pb-2 last:border-0">
-              <p className="text-sm text-muted-foreground">{mov.data}</p>
-              <p>{mov.descricao}</p>
+            <div className="border rounded-lg p-4">
+              <h2 className="text-xl font-semibold mb-2">Próximas Etapas</h2>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium">Análise Inicial</p>
+                    <p className="text-sm text-muted-foreground">Revisar documentos e entender o caso</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-muted-foreground">Petição Inicial</p>
+                    <p className="text-sm text-muted-foreground">Elaborar e protocolar petição inicial</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-muted-foreground">Audiência</p>
+                    <p className="text-sm text-muted-foreground">Participar da audiência inicial</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="documents" className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <h2 className="text-xl font-semibold mb-4">Documentos do Processo</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {caso.documentos.map((doc) => (
+                <div key={doc.id} className="border rounded p-3 flex items-center justify-between">
+                  <span>{doc.nome}</span>
+                  <Button size="sm" variant="outline">Visualizar</Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="timeline" className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <h2 className="text-xl font-semibold mb-4">Andamentos do Processo</h2>
+            <div className="space-y-4">
+              {caso.movimentacoes.map((mov, index) => (
+                <div key={mov.id} className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <div className="w-3 h-3 bg-primary rounded-full"></div>
+                    {index < caso.movimentacoes.length - 1 && (
+                      <div className="w-0.5 h-16 bg-muted mt-2"></div>
+                    )}
+                  </div>
+                  <div className="pb-8">
+                    <p className="text-sm text-muted-foreground">{mov.data}</p>
+                    <p className="font-medium">{mov.descricao}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="lawyer" className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <h2 className="text-xl font-semibold mb-4">Informações do Advogado</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="font-medium">Nome</p>
+                <p className="text-muted-foreground">{caso.advogado.nome}</p>
+              </div>
+              <div>
+                <p className="font-medium">Email</p>
+                <p className="text-muted-foreground">{caso.advogado.email}</p>
+              </div>
+              <div>
+                <p className="font-medium">Telefone</p>
+                <p className="text-muted-foreground">{caso.advogado.telefone}</p>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

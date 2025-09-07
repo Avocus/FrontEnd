@@ -21,7 +21,10 @@ async function serverLogin(email: string, password: string): Promise<UserRespons
       body: JSON.stringify(credentials),
     });
     
-    const responseData = await response.json() as UserApiResponse | ApiErrorResponse;
+    const responseData: UserApiResponse | ApiErrorResponse = await response.json() as UserApiResponse | ApiErrorResponse;
+
+    if(response.status == 401)
+      throw new Error('Credenciais inválidas');
 
     if ('error' in responseData) {
       throw new Error(responseData.error);
@@ -43,15 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { method, email, password } = req.body;
 
   try {
-    let result;
 
-    switch (method) {
-      case 'server':
-        result = await serverLogin(email, password);
-        break;
-      default:
-        throw new Error('Método de login inválido');
-    }
+    let result = await serverLogin(email, password);
 
     res.status(200).json(result);
   } catch (error: unknown) {

@@ -13,7 +13,7 @@ export default function CasosPage() {
             showSidebar: true,
             showFooter: true
         });
-    }, [updateConfig, isAdvogado]);
+    }, [updateConfig]);
 
     return (
         <Casos />

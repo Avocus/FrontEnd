@@ -30,19 +30,3 @@ export const loginWithEmailServer = async (email: string, password: string) => {
 
   return response.json();
 };
-
-export const loginWithGoogle = async (idToken: string, accessToken: string) => {
-  const response = await fetch('/api/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ method: 'google', idToken, accessToken }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Erro ao logar com Google');
-  }
-
-  return response.json();
-};

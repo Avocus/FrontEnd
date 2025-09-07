@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store";
 import { memo } from "react";
 
-// Usar memo para evitar re-renderizações desnecessárias
 export const ProfileAlertBanner = memo(function ProfileAlertBanner() {
   const { pendente } = useProfileStore();
   const { user } = useAuthStore();
@@ -22,7 +21,6 @@ export const ProfileAlertBanner = memo(function ProfileAlertBanner() {
     router.push('/conta');
   };
 
-  // Adicionando key fixa para manter a identidade do componente entre navegações
   return (
     <div className="px-4">
       <Alert key="profile-alert" variant="destructive" className="mb-4 mt-4">

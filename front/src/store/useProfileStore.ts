@@ -13,14 +13,11 @@ export const useProfileStore = create<ProfileState>()(
       error: null,
       pendente: false,
 
-      // Carregar perfil do usuário
       loadProfile: async () => {
         set({ isLoading: true });
         try {
-          // Simulação de chamada API
           await new Promise(resolve => setTimeout(resolve, 1000));
 
-          // Simulando dados de perfil
           const profileType = Math.random() > 0.5 ? 'advogado' : 'cliente';
           
           if (profileType === 'advogado') {

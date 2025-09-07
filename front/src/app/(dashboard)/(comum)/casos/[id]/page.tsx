@@ -15,10 +15,10 @@ export default function DetalheCasoPage() {
     useEffect(() => {
         updateConfig({
             showNavbar: true,
-            showSidebar: isAdvogado,
+            showSidebar: true,
             showFooter: true
         });
-    }, [updateConfig, isAdvogado]);
+    }, [updateConfig]);
 
     return (
         <>

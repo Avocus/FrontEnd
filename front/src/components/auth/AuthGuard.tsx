@@ -25,42 +25,51 @@ export default function AuthGuard({
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
-    // Sincronizar o estado de autenticação com o sessionStorage
-    syncAuth();
-    
-    // Verificação de autenticação após sincronização
-    const token = sessionStorage.getItem('token');
-    const isLoggedIn = !!token && isAuthenticated;
+    const checkAuth = async () => {
+      // Sincronizar o estado de autenticação com o sessionStorage
+      await syncAuth();
+      
+      // Verificação de autenticação após sincronização
+      const token = sessionStorage.getItem('token');
+      const isLoggedIn = !!token && isAuthenticated;
 
-    // Evitar múltiplos redirecionamentos
-    if (isRedirecting) {
-      return;
-    }
-
-    // Se precisamos de autenticação e não está autenticado
-    if (config.requireAuth && !isLoggedIn) {
-      // Armazenar a URL atual para redirecionamento após login
-      const currentPath = window.location.pathname;
-      if (currentPath !== config.redirectTo) {
-        sessionStorage.setItem('redirectAfterLogin', currentPath);
-        setIsRedirecting(true);
-        router.push(config.redirectTo || '/login');
+      // Evitar múltiplos redirecionamentos
+      if (isRedirecting) {
+        return;
       }
-    } 
-    // Se está na página de login ou cadastro mas já está autenticado
-    else if (!config.requireAuth && isLoggedIn) {
-      const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/home';
-      sessionStorage.removeItem('redirectAfterLogin');
-      setIsRedirecting(true);
-      router.push(redirectPath);
-    }
-    
-    setIsChecking(false);
+
+      // Se precisamos de autenticação e não está autenticado
+      if (config.requireAuth && !isLoggedIn) {
+        // Armazenar a URL atual para redirecionamento após login
+        const currentPath = window.location.pathname;
+        if (currentPath !== config.redirectTo) {
+          sessionStorage.setItem('redirectAfterLogin', currentPath);
+          setIsRedirecting(true);
+          router.push(config.redirectTo || '/login');
+        }
+      } 
+      // Se está na página de login ou cadastro mas já está autenticado
+      else if (!config.requireAuth && isLoggedIn) {
+        const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/home';
+        sessionStorage.removeItem('redirectAfterLogin');
+        setIsRedirecting(true);
+        router.push(redirectPath);
+      }
+      
+      setIsChecking(false);
+    };
+
+    checkAuth();
   }, [isAuthenticated, config, router, logout, isRedirecting, syncAuth]);
 
   // Mostra tela de carregamento enquanto verifica autenticação
-  if (isChecking) {
+  if (isChecking || isRedirecting) {
     return <LoadingScreen />;
+  }
+
+  // Se precisamos de autenticação e não está autenticado, não renderiza nada
+  if (config.requireAuth && !isAuthenticated) {
+    return null;
   }
 
   // Se tudo estiver ok, renderiza os filhos
