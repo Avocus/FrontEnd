@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  Home, 
   Calendar, 
   BookOpen, 
   Video, 
@@ -19,7 +18,6 @@ import {
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-// import { NovoCaso } from "@/components/casos/NovoCaso";
 
 type SidebarItemProps = {
   label: string;
@@ -93,7 +91,6 @@ export function Sidebar({
   };
 
   const mainItems: SidebarItemProps[] = [
-    { label: "Home", href: "/home", icon: <Home className="h-5 w-5" /> },
     { label: "Agenda", href: "/agenda", icon: <Calendar className="h-5 w-5" /> },
     { label: "Chat", icon: <MessageCircle className="h-5 w-5" />, onClick: () => setChatOpen && setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca", icon: <BookOpen className="h-5 w-5" /> },
@@ -102,9 +99,9 @@ export function Sidebar({
 
   const casosItems: SidebarItemProps[] = [
     { label: "Meus Casos", href: "/casos", icon: <Briefcase className="h-5 w-5" /> },
-    { label: "Novo Caso", icon: <FilePlus className="h-5 w-5" />, disabled: true }, // Atualizado
+    { label: "Novo Caso", href: "/casos/novo", icon: <FilePlus className="h-5 w-5" /> },
     { label: "Documentos", href: "/documentos", icon: <FileText className="h-5 w-5" /> , disabled: true },
-    { label: "Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />, disabled: true },
+    { label: "Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />},
   ];
 
   const gerencialItems: SidebarItemProps[] = [

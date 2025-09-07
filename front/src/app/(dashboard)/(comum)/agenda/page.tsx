@@ -6,7 +6,7 @@ import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
 
 export default function AgendaPage() {
-  const { updateConfig } = useLayout();
+  const { updateConfig, isAdvogado } = useLayout();
 
   const { updateAuth } = useAuth();
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function AgendaPage() {
   useEffect(() => {
     updateConfig({
       showNavbar: true,
-      showSidebar: true,
+      showSidebar: isAdvogado,
       showFooter: true
     });
   }, [updateConfig]);

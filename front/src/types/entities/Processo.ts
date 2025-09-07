@@ -16,6 +16,20 @@ export interface Processo {
   concluido?: boolean;
   mensagensNaoLidas?: number;
   prazosVencidos?: number;
+  steps?: ProcessoStep[];
+  isDraft?: boolean;
+}
+
+/**
+ * Interface que representa uma etapa do processo
+ */
+export interface ProcessoStep {
+  id: string;
+  titulo: string;
+  descricao: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  dataPrevista?: string;
+  dataConclusao?: string;
 }
 
 /**
