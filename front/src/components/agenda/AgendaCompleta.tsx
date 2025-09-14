@@ -44,9 +44,21 @@ import { format, isToday, isTomorrow, isPast } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useNotificacoes } from "@/hooks/useNotificacoes"
 import '@/styles/agenda.css'
+import { useLayout } from "@/contexts/LayoutContext"
 
 // Componente seletor de cores
 function ColorPicker({ value, onChange }: { value: EventoCor, onChange: (cor: EventoCor) => void }) {
+    const { updateConfig, isAdvogado } = useLayout();
+    
+    useEffect(() => {
+      updateConfig({
+        showNavbar: true,
+        showSidebar: true,
+        showFooter: true
+      });
+    }, [updateConfig, isAdvogado]);
+  
+  
   const cores = Object.values(EventoCor)
   
   return (
