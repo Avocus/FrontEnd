@@ -1,11 +1,10 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { motion } from "framer-motion";
-import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
-import { Calendar, Book, Briefcase, Video } from "lucide-react";
+import { Progress } from "@radix-ui/react-progress";
+import { useEffect } from "react";
+import { Calendar, Book, Briefcase, FileText, CheckCircle } from "lucide-react";
 import { useResponsive } from "@/hooks/useResponsive";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,7 +30,6 @@ export function HomeCliente() {
         });
     }, [updateConfig]);
 
-
     const { isMobile } = useResponsive();
 
     if (isMobile) {
@@ -47,248 +45,287 @@ export function HomeCliente() {
 
 function DesktopView() {
     return (
-        <div className="min-h-screen bg-background text-foreground flex flex-col items-center">
-
-            {/* Hero Section */}
-            <section className="w-full h-[90vh] flex items-center justify-center bg-cover bg-center relative overflow-hidden">
-                <div
-                    className="absolute inset-0 bg-black bg-opacity-50"
-                    style={{ backgroundImage: 'url(./fachada.jpg)', backgroundSize: 'cover', backgroundRepeat: 'no-repeat' }}
-                />
-                <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="relative z-10 text-center text-white max-w-3xl px-4"
-                >
-                    <h1 className="text-6xl font-bold mb-6">Encontre a Melhor Assessoria Jurídica</h1>
-                    <p className="text-xl mb-8">
-                        Conecte-se com especialistas e tenha suporte personalizado para seus processos.
-                    </p>
-                    <Button variant="default">
-                        Saiba Mais
-                    </Button>
-                </motion.div>
-            </section>
-
-            {/* Serviços */}
-            <section className="py-20 px-4 w-full max-w-7xl">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold mb-4">Nossos Serviços</h2>
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                        Oferecemos uma ampla gama de serviços jurídicos personalizados para suas necessidades.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <Card className="bg-card shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+        <div className="min-h-screen bg-background text-foreground flex flex-col">
+            {/* Dashboard */}
+            <div className="flex-1 p-8">
+                {/* Resumo dos Casos */}
+                <section className="grid grid-cols-4 gap-6 mb-8">
+                    <Card>
                         <CardHeader>
-                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                                <Briefcase className="w-8 h-8 text-primary" />
-                            </div>
-                            <CardTitle>Consultoria Jurídica</CardTitle>
+                            <CardTitle>Processos Ativos</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">
-                                Acesso a advogados especializados para orientação em questões jurídicas diversas.
-                            </p>
+                            <p className="text-2xl font-bold">5</p>
                         </CardContent>
                     </Card>
-
-                    <Card className="bg-card shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+                    <Card>
                         <CardHeader>
-                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                                <Book className="w-8 h-8 text-primary" />
-                            </div>
-                            <CardTitle>Documentação Legal</CardTitle>
+                            <CardTitle>Próximos Compromissos</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">
-                                Preparação e revisão de documentos, contratos e acordos legais.
-                            </p>
+                            <p className="text-2xl font-bold">2</p>
                         </CardContent>
                     </Card>
-
-                    <Card className="bg-card shadow-lg transition-all hover:shadow-xl hover:-translate-y-1">
+                    <Card>
                         <CardHeader>
-                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                                <Calendar className="w-8 h-8 text-primary" />
-                            </div>
-                            <CardTitle>Acompanhamento Processual</CardTitle>
+                            <CardTitle>Documentos Pendentes</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground">
-                                Monitoramento e gestão de processos judiciais em andamento.
-                            </p>
+                            <p className="text-2xl font-bold">3</p>
                         </CardContent>
                     </Card>
-                </div>
-            </section>
-
-            {/* Pesquisa de Advogados */}
-            <section className="py-20 px-4 w-full bg-muted/30">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold mb-4">Encontre um Advogado</h2>
-                        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                            Busque por especialidade, localização ou nome para encontrar o profissional ideal para seu caso.
-                        </p>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
-                        <Input placeholder="Especialidade ou área de atuação" className="flex-1" />
-                        <Input placeholder="Localização" className="flex-1" />
-                        <Button variant="default" className="w-full md:w-auto">Buscar</Button>
-                    </div>
-                </div>
-            </section>
-
-            {/* Depoimentos */}
-            <section className="py-20 px-4 w-full max-w-7xl">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold mb-4">O Que Nossos Clientes Dizem</h2>
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                        Veja a experiência de quem já utilizou nossos serviços e encontrou a solução jurídica ideal.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <Card className="bg-card shadow-md">
-                        <CardContent className="pt-6">
-                            <div className="flex items-center mb-4">
-                                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mr-4">
-                                    <span className="text-primary font-bold">MS</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Maria Silva</h3>
-                                    <p className="text-sm text-muted-foreground">Cliente desde 2021</p>
-                                </div>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Status Geral</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center">
+                                <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+                                <p className="text-lg font-bold">Em dia</p>
                             </div>
-                            <p className="text-muted-foreground">
-                                &apos;Encontrei o advogado perfeito para meu caso através da plataforma. O processo foi rápido e o atendimento excelente!&apos;
-                            </p>
+                        </CardContent>
+                    </Card>
+                </section>
+
+                {/* Histórico de Processos e Próximos Compromissos */}
+                <div className="grid grid-cols-2 gap-6 mb-8">
+                    {/* Histórico de Processos */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Meus Processos</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Processo</TableHead>
+                                        <TableHead>Advogado</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell>Trabalhista #12345</TableCell>
+                                        <TableCell>Dr. Carlos Silva</TableCell>
+                                        <TableCell>
+                                            <span className="text-green-600 font-medium">Em andamento</span>
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Previdenciário #54321</TableCell>
+                                        <TableCell>Dra. Maria Santos</TableCell>
+                                        <TableCell>
+                                            <span className="text-blue-600 font-medium">Aguardando</span>
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Civil #98765</TableCell>
+                                        <TableCell>Dr. João Almeida</TableCell>
+                                        <TableCell>
+                                            <span className="text-yellow-600 font-medium">Análise</span>
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-card shadow-md">
-                        <CardContent className="pt-6">
-                            <div className="flex items-center mb-4">
-                                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mr-4">
-                                    <span className="text-primary font-bold">JP</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">João Paulo</h3>
-                                    <p className="text-sm text-muted-foreground">Cliente desde 2022</p>
-                                </div>
-                            </div>
-                            <p className="text-muted-foreground">
-                                &apos;A consultoria jurídica me ajudou a resolver questões que pareciam impossíveis. Recomendo fortemente.&apos;
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card shadow-md">
-                        <CardContent className="pt-6">
-                            <div className="flex items-center mb-4">
-                                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mr-4">
-                                    <span className="text-primary font-bold">CA</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">Carolina Almeida</h3>
-                                    <p className="text-sm text-muted-foreground">Cliente desde 2020</p>
-                                </div>
-                            </div>
-                            <p className="text-muted-foreground">
-                                &apos;O acompanhamento processual foi essencial para o sucesso do meu caso. Sempre me mantiveram informada sobre cada etapa.&apos;
-                            </p>
+                    {/* Próximos Compromissos */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Próximos Compromissos</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Evento</TableHead>
+                                        <TableHead>Data</TableHead>
+                                        <TableHead>Horário</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    <TableRow className="bg-yellow-50">
+                                        <TableCell>Audiência Trabalhista</TableCell>
+                                        <TableCell>Amanhã</TableCell>
+                                        <TableCell>14:30</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Reunião com Advogado</TableCell>
+                                        <TableCell>Em 3 dias</TableCell>
+                                        <TableCell>10:00</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Entrega de Documentos</TableCell>
+                                        <TableCell>Em 5 dias</TableCell>
+                                        <TableCell>09:00</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
                         </CardContent>
                     </Card>
                 </div>
-            </section>
+
+                {/* Ações Rápidas */}
+                <section className="grid grid-cols-4 gap-6">
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6 flex flex-col items-center text-center">
+                            <FileText className="w-8 h-8 text-primary mb-3" />
+                            <h3 className="font-semibold mb-2">Novo Processo</h3>
+                            <p className="text-sm text-muted-foreground">Iniciar um novo processo jurídico</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6 flex flex-col items-center text-center">
+                            <Calendar className="w-8 h-8 text-primary mb-3" />
+                            <h3 className="font-semibold mb-2">Agendar Consulta</h3>
+                            <p className="text-sm text-muted-foreground">Marcar reunião com advogado</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6 flex flex-col items-center text-center">
+                            <Book className="w-8 h-8 text-primary mb-3" />
+                            <h3 className="font-semibold mb-2">Biblioteca Jurídica</h3>
+                            <p className="text-sm text-muted-foreground">Acesso a documentos e leis</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6 flex flex-col items-center text-center">
+                            <Briefcase className="w-8 h-8 text-primary mb-3" />
+                            <h3 className="font-semibold mb-2">Meus Documentos</h3>
+                            <p className="text-sm text-muted-foreground">Gerenciar documentos pessoais</p>
+                        </CardContent>
+                    </Card>
+                </section>
+            </div>
         </div>
     );
 }
 
 function MobileView() {
-    const [activeIndex, setActiveIndex] = useState(0);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setActiveIndex((prevIndex) => (prevIndex + 1) % 2); // Alterna entre 0 e 1 (número de itens do carrossel)
-        }, 3000); // 1 segundo
-
-        return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
-    }, []);
-
     return (
-        <div className="min-h-fit-content bg-background text-foreground">
-            <div>
-                {/* Carrossel */}
+        <div className="min-h-screen bg-background text-foreground">
+            <div className="min-h-fit-content">
+                {/* Carrossel com Resumo */}
                 <section className="p-3">
                     <Carousel className="w-full">
-                        <CarouselContent className="min-h-48 max-h-48">
-                            <motion.div
-                                key={activeIndex}
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -50 }}
-                                transition={{ duration: 0.5 }}
-                            >
-                                {activeIndex === 0 && (
-                                    <CarouselItem>
-                                        <Card className=" bg-card shadow-md text-slate-800" style={{ backgroundImage: 'url(./carroussel-neutro.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                                            <CardHeader>
-                                                <CardTitle>Como entrar com um processo?</CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p>Saiba os passos para abrir um processo com rapidez e segurança.</p>
-                                            </CardContent>
-                                        </Card>
-                                    </CarouselItem>
-                                )}
-                                {activeIndex === 1 && (
-                                    <CarouselItem>
-                                        <Card className=" bg-card shadow-md text-slate-800" style={{ backgroundImage: 'url(./carroussel-neutro-2.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                                            <CardHeader>
-                                                <CardTitle>Encontre um advogado</CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p>Busque profissionais por especialidade e localização.</p>
-                                            </CardContent>
-                                        </Card>
-                                    </CarouselItem>
-                                )}
-                            </motion.div>
+                        <CarouselContent>
+                            <CarouselItem>
+                                <Card className="bg-card shadow-md min-h-36">
+                                    <CardHeader>
+                                        <CardTitle>Processos Ativos</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex items-center">
+                                            <div className="text-3xl font-bold mr-4">5</div>
+                                            <div className="text-sm">
+                                                <div>+1 novo esta semana</div>
+                                                <Progress className="h-2 w-full bg-gray-200" value={75} />
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </CarouselItem>
+                            <CarouselItem>
+                                <Card className="bg-card shadow-md min-h-36">
+                                    <CardHeader>
+                                        <CardTitle>Próximos Compromissos</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex items-center">
+                                            <div className="text-3xl font-bold mr-4 text-orange-500">2</div>
+                                            <div className="text-sm">
+                                                <div>Esta semana</div>
+                                                <Progress className="h-2 w-full bg-gray-200" value={40} />
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </CarouselItem>
                         </CarouselContent>
                     </Carousel>
                 </section>
 
-                {/* Menu de serviços */}
-                <section className="p-3 mb-4">
-                    <h2 className="text-lg font-bold mb-2">Serviços</h2>
+                {/* Próximos Compromissos */}
+                <section className="p-3">
+                    <h2 className="text-lg font-bold mb-2">Próximos Compromissos</h2>
+                    <Card className="mb-3 bg-yellow-50">
+                        <CardContent className="p-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="font-bold">Audiência Trabalhista</h3>
+                                    <p className="text-sm text-muted-foreground">Dr. Carlos Silva - 14:30</p>
+                                </div>
+                                <div className="text-orange-500 text-sm font-bold">Amanhã</div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="mb-3">
+                        <CardContent className="p-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="font-bold">Reunião com Advogado</h3>
+                                    <p className="text-sm text-muted-foreground">Dra. Maria Santos - 10:00</p>
+                                </div>
+                                <div className="text-sm">Em 3 dias</div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </section>
+
+                {/* Meus Processos */}
+                <section className="p-3">
+                    <h2 className="text-lg font-bold mb-2">Meus Processos</h2>
+                    <Card className="mb-3">
+                        <CardContent className="p-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="font-bold">Trabalhista #12345</h3>
+                                    <p className="text-sm text-muted-foreground">Dr. Carlos Silva</p>
+                                </div>
+                                <span className="text-green-600 text-sm font-medium">Em andamento</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card className="mb-3">
+                        <CardContent className="p-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="font-bold">Previdenciário #54321</h3>
+                                    <p className="text-sm text-muted-foreground">Dra. Maria Santos</p>
+                                </div>
+                                <span className="text-blue-600 text-sm font-medium">Aguardando</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </section>
+
+                {/* Ações Rápidas */}
+                <section className="p-3 mb-16">
+                    <h2 className="text-lg font-bold mb-2">Ações Rápidas</h2>
                     <div className="grid grid-cols-2 gap-3">
-                        <Card className="bg-card shadow-md">
-                            <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Briefcase className="w-6 h-6 mb-2 text-secondary" />
-                                <div className="text-sm font-medium text-center">Consultoria Jurídica</div>
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow">
+                            <CardContent className="p-4 flex flex-col items-center justify-center">
+                                <FileText className="w-6 h-6 mb-2 text-primary" />
+                                <div className="text-sm font-medium text-center">Novo Processo</div>
                             </CardContent>
                         </Card>
-                        <Card className="bg-card shadow-md">
-                            <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Book className="w-6 h-6 mb-2 text-secondary" />
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow">
+                            <CardContent className="p-4 flex flex-col items-center justify-center">
+                                <Calendar className="w-6 h-6 mb-2 text-primary" />
+                                <div className="text-sm font-medium text-center">Agendar</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow">
+                            <CardContent className="p-4 flex flex-col items-center justify-center">
+                                <Book className="w-6 h-6 mb-2 text-primary" />
                                 <div className="text-sm font-medium text-center">Biblioteca</div>
                             </CardContent>
                         </Card>
-                        <Card className="bg-card shadow-md">
-                            <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Calendar className="w-6 h-6 mb-2 text-secondary" />
-                                <div className="text-sm font-medium text-center">Acompanhamento</div>
-                            </CardContent>
-                        </Card>
-                        <Card className="bg-card shadow-md">
-                            <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-                                <Video className="w-6 h-6 mb-2 text-secondary" />
-                                <div className="text-sm font-medium text-center">Videoteca</div>
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow">
+                            <CardContent className="p-4 flex flex-col items-center justify-center">
+                                <Briefcase className="w-6 h-6 mb-2 text-primary" />
+                                <div className="text-sm font-medium text-center">Documentos</div>
                             </CardContent>
                         </Card>
                     </div>

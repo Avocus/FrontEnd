@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,8 +15,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { auth, sendPasswordResetEmail } from "../../../firebaseConfig";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ServiceTerms } from "./ServiceTerms";
-import { PrivacyPolicy } from "./PrivacyPolicy";
 import { useRouter } from "next/navigation";
 import { useAuthStore, useProfileStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
@@ -25,6 +22,8 @@ import Link from "next/link";
 import { loginSchema, resetPasswordSchema, type LoginFormData, type ResetPasswordData } from "../../schemas/loginSchema";
 import { getFieldValidationClass } from "../../utils/formValidation";
 import { useToast } from "@/hooks/useToast";
+import { PrivacyPolicy } from "./PrivacyPolicy";
+import { ServiceTerms } from "./ServiceTerms";
 
 export function LoginForm({
   className,
