@@ -1,0 +1,130 @@
+/* Estilos para a agenda */
+
+/* Calendário com eventos */
+.rdp-day_button.has-event {
+  position: relative;
+  font-weight: 600;
+}
+
+.rdp-day_button.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+}
+
+/* Hoje */
+.rdp-day_button[aria-selected="true"].has-event::after {
+  background-color: white;
+}
+
+/* Hover states */
+.rdp-day_button.has-event:hover {
+  background-color: #dbeafe;
+}
+
+/* Card de evento com animações */
+.evento-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.evento-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Indicadores de status */
+.evento-hoje {
+  border-left: 4px solid #3b82f6;
+  background: linear-gradient(90deg, #dbeafe 0%, transparent 100%);
+}
+
+.evento-amanha {
+  border-left: 4px solid #f59e0b;
+  background: linear-gradient(90deg, #fef3c7 0%, transparent 100%);
+}
+
+.evento-passado {
+  opacity: 0.7;
+  border-left: 4px solid #9ca3af;
+}
+
+/* Cores dos tipos de evento */
+.evento-audiencia {
+  border-left-color: #dc2626;
+}
+
+.evento-reuniao {
+  border-left-color: #16a34a;
+}
+
+.evento-prazo {
+  border-left-color: #ea580c;
+}
+
+.evento-outro {
+  border-left-color: #6366f1;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Seletor de cores */
+.color-picker-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.color-picker-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.color-picker-button.selected {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .evento-card {
+    padding: 12px;
+  }
+  
+  .rdp-day_button.has-event::after {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .rdp-day_button.has-event:hover {
+    background-color: #1e40af;
+  }
+  
+  .evento-hoje {
+    background: linear-gradient(90deg, #1e40af 0%, transparent 100%);
+  }
+  
+  .evento-amanha {
+    background: linear-gradient(90deg, #92400e 0%, transparent 100%);
+  }
+}

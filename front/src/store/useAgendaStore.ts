@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { Evento, AgendaState, EventoTipo, EventoStatus } from '@/types';
+import { Evento, AgendaState, EventoTipo, EventoStatus, EventoCor, EventoFiltro } from '@/types';
 
 export const useAgendaStore = create<AgendaState>()(
   devtools(
@@ -10,6 +10,7 @@ export const useAgendaStore = create<AgendaState>()(
         eventoSelecionado: null,
         isLoading: false,
         error: null,
+        filtros: {},
 
         // Carregar eventos
         loadEventos: async () => {
@@ -33,7 +34,10 @@ export const useAgendaStore = create<AgendaState>()(
                 tipo: EventoTipo.AUDIENCIA,
                 processoId: '123',
                 status: EventoStatus.PENDENTE,
-                localizacao: 'Fórum Central'
+                localizacao: 'Fórum Central',
+                cor: EventoCor.AZUL,
+                notificarPorEmail: true,
+                lembrarAntes: 1440 // 24 horas antes
               },
               {
                 id: '2',
@@ -42,7 +46,10 @@ export const useAgendaStore = create<AgendaState>()(
                 dataInicio: amanha.toISOString(),
                 tipo: EventoTipo.PRAZO,
                 processoId: '456',
-                status: EventoStatus.PENDENTE
+                status: EventoStatus.PENDENTE,
+                cor: EventoCor.VERMELHO,
+                notificarPorEmail: true,
+                lembrarAntes: 1440
               }
             ];
             
@@ -70,7 +77,10 @@ export const useAgendaStore = create<AgendaState>()(
             
             const novoEvento: Evento = {
               ...evento,
-              id: crypto.randomUUID()
+              id: crypto.randomUUID(),
+              cor: evento.cor || EventoCor.AZUL,
+              notificarPorEmail: evento.notificarPorEmail ?? true,
+              lembrarAntes: evento.lembrarAntes ?? 1440
             };
             
             set(state => ({ 
@@ -155,12 +165,86 @@ export const useAgendaStore = create<AgendaState>()(
               eventoDate.getFullYear() === date.getFullYear()
             );
           });
+        },
+
+        // Obter eventos próximos
+        getEventosProximos: (dias = 7) => {
+          const { eventos } = get();
+          const agora = new Date();
+          const limite = new Date();
+          limite.setDate(agora.getDate() + dias);
+          
+          return eventos
+            .filter(evento => {
+              const dataEvento = new Date(evento.dataInicio);
+              return dataEvento >= agora && dataEvento <= limite;
+            })
+            .sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
+        },
+
+        // Obter eventos passados
+        getEventosPassados: (dias = 7) => {
+          const { eventos } = get();
+          const agora = new Date();
+          const limite = new Date();
+          limite.setDate(agora.getDate() - dias);
+          
+          return eventos
+            .filter(evento => {
+              const dataEvento = new Date(evento.dataInicio);
+              return dataEvento < agora && dataEvento >= limite;
+            })
+            .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime());
+        },
+
+        // Definir filtros
+        setFiltros: (filtros: Partial<EventoFiltro>) => {
+          set(state => ({
+            filtros: { ...state.filtros, ...filtros }
+          }));
+        },
+
+        // Limpar filtros
+        clearFiltros: () => {
+          set({ filtros: {} });
+        },
+
+        // Marcar email como notificado
+        marcarEmailNotificado: (eventoId: string) => {
+          set(state => ({
+            eventos: state.eventos.map(evento =>
+              evento.id === eventoId
+                ? { ...evento, emailNotificado: true }
+                : evento
+            )
+          }));
+        },
+
+        // Obter eventos para notificar
+        getEventosParaNotificar: () => {
+          const { eventos } = get();
+          const agora = new Date();
+          const amanha = new Date();
+          amanha.setDate(agora.getDate() + 1);
+          
+          return eventos.filter(evento => {
+            if (!evento.notificarPorEmail || evento.emailNotificado) {
+              return false;
+            }
+            
+            const dataEvento = new Date(evento.dataInicio);
+            const dataNotificacao = new Date(dataEvento);
+            dataNotificacao.setMinutes(dataNotificacao.getMinutes() - (evento.lembrarAntes || 1440));
+            
+            return dataNotificacao <= agora && dataEvento > agora;
+          });
         }
       }),
       {
         name: 'agenda-storage',
         partialize: (state) => ({
           eventos: state.eventos,
+          filtros: state.filtros
         }),
       }
     )
