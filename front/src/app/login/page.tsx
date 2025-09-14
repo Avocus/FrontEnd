@@ -38,12 +38,13 @@ function LoginContent() {
   }, [updateConfig]); 
 
   return (
-    <div className="relative flex w-full max-w-sm flex-col gap-6">
+    <div
+      className="relative flex w-full max-w-sm flex-col gap-6 ">
       {showExpiredMessage && (
-        <Alert variant="destructive" className="animate-fadeIn">
+      <Alert variant="destructive" className="animate-fadeIn bg-background p-4">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Sua sessão expirou. Por favor, faça login novamente.
+        Sua sessão expirou. Por favor, faça login novamente.
         </AlertDescription>
       </Alert>
       )}

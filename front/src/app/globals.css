@@ -63,7 +63,32 @@ body {
     --chart-4: 50, 65%, 60%; /* Dourado-claro */
     --chart-5: 40, 90%, 55%; /* Laranja caloroso */
     --radius: 0.5rem; /* Consistência */
-    --filter-bg: #ffffffbd
+    --filter-bg: #ffffffbd;
+    
+    /* Cores customizadas para dashboard - Tema Claro */
+    --dashboard-blue: 220, 89%, 60%; /* Azul vibrante */
+    --dashboard-blue-light: 220, 100%, 97%; /* Azul muito claro */
+    --dashboard-blue-muted: 220, 60%, 95%; /* Azul suave para tema claro */
+    --dashboard-orange: 25, 95%, 53%; /* Laranja vibrante */
+    --dashboard-orange-light: 25, 100%, 97%; /* Laranja muito claro */
+    --dashboard-orange-muted: 25, 70%, 95%; /* Laranja suave para tema claro */
+    --dashboard-red: 0, 84%, 60%; /* Vermelho vibrante */
+    --dashboard-red-light: 0, 100%, 97%; /* Vermelho muito claro */
+    --dashboard-red-muted: 0, 60%, 95%; /* Vermelho suave para tema claro */
+    --dashboard-yellow: 45, 93%, 58%; /* Amarelo vibrante */
+    --dashboard-yellow-light: 45, 100%, 97%; /* Amarelo muito claro */
+    --dashboard-yellow-muted: 45, 70%, 95%; /* Amarelo suave para tema claro */
+    --dashboard-green: 142, 76%, 36%; /* Verde vibrante */
+    --dashboard-green-light: 142, 100%, 97%; /* Verde muito claro */
+    --dashboard-green-muted: 142, 50%, 95%; /* Verde suave para tema claro */
+    --dashboard-emerald: 158, 64%, 52%; /* Esmeralda vibrante */
+    --dashboard-emerald-light: 158, 100%, 97%; /* Esmeralda muito claro */
+    --dashboard-emerald-muted: 158, 40%, 95%; /* Esmeralda suave para tema claro */
+    --dashboard-purple: 262, 83%, 58%; /* Roxo vibrante */
+    --dashboard-purple-light: 262, 100%, 97%; /* Roxo muito claro */
+    --dashboard-purple-muted: 262, 60%, 95%; /* Roxo suave para tema claro */
+    --dashboard-gray: 220, 14%, 96%; /* Cinza claro */
+    --dashboard-gray-dark: 220, 13%, 18%; /* Cinza escuro */
   }
   
   .dark {
@@ -96,7 +121,32 @@ body {
     --chart-3: 220, 40%, 50%;
     --chart-4: 300, 50%, 60%;
     --chart-4: 50, 50%, 45%; /* Dourado médio */
-    --filter-bg: #000000bd
+    --filter-bg: #000000bd;
+    
+    /* Cores customizadas para dashboard - Tema Escuro */
+    --dashboard-blue: 220, 70%, 45%; /* Azul mais escuro */
+    --dashboard-blue-light: 220, 30%, 15%; /* Azul escuro para fundos */
+    --dashboard-blue-muted: 220, 40%, 25%; /* Azul intermediário para cards */
+    --dashboard-orange: 25, 80%, 45%; /* Laranja mais escuro */
+    --dashboard-orange-light: 25, 30%, 15%; /* Laranja escuro para fundos */
+    --dashboard-orange-muted: 25, 50%, 25%; /* Laranja intermediário para cards */
+    --dashboard-red: 0, 70%, 50%; /* Vermelho mais escuro */
+    --dashboard-red-light: 0, 30%, 15%; /* Vermelho escuro para fundos */
+    --dashboard-red-muted: 0, 40%, 25%; /* Vermelho intermediário para cards */
+    --dashboard-yellow: 45, 80%, 50%; /* Amarelo mais escuro */
+    --dashboard-yellow-light: 45, 30%, 15%; /* Amarelo escuro para fundos */
+    --dashboard-yellow-muted: 45, 50%, 25%; /* Amarelo intermediário para cards */
+    --dashboard-green: 142, 60%, 30%; /* Verde mais escuro */
+    --dashboard-green-light: 142, 30%, 15%; /* Verde escuro para fundos */
+    --dashboard-green-muted: 142, 40%, 25%; /* Verde intermediário para cards */
+    --dashboard-emerald: 158, 50%, 40%; /* Esmeralda mais escuro */
+    --dashboard-emerald-light: 158, 30%, 15%; /* Esmeralda escuro para fundos */
+    --dashboard-emerald-muted: 158, 35%, 25%; /* Esmeralda intermediário para cards */
+    --dashboard-purple: 262, 60%, 45%; /* Roxo mais escuro */
+    --dashboard-purple-light: 262, 30%, 15%; /* Roxo escuro para fundos */
+    --dashboard-purple-muted: 262, 40%, 25%; /* Roxo intermediário para cards */
+    --dashboard-gray: 220, 13%, 20%; /* Cinza escuro */
+    --dashboard-gray-dark: 220, 13%, 8%; /* Cinza muito escuro */
   }
 }
 
@@ -215,6 +265,311 @@ body {
   
   .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Classes utilitárias para cores do dashboard */
+  .bg-dashboard-blue {
+    background-color: hsl(var(--dashboard-blue));
+  }
+  
+  .bg-dashboard-blue-light {
+    background-color: hsl(var(--dashboard-blue-light));
+  }
+  
+  .bg-dashboard-blue-muted {
+    background-color: hsl(var(--dashboard-blue-muted));
+  }
+  
+  .text-dashboard-blue {
+    color: hsl(var(--dashboard-blue));
+  }
+  
+  .border-dashboard-blue {
+    border-color: hsl(var(--dashboard-blue));
+  }
+
+  .bg-dashboard-orange {
+    background-color: hsl(var(--dashboard-orange));
+  }
+  
+  .bg-dashboard-orange-light {
+    background-color: hsl(var(--dashboard-orange-light));
+  }
+  
+  .bg-dashboard-orange-muted {
+    background-color: hsl(var(--dashboard-orange-muted));
+  }
+  
+  .text-dashboard-orange {
+    color: hsl(var(--dashboard-orange));
+  }
+  
+  .border-dashboard-orange {
+    border-color: hsl(var(--dashboard-orange));
+  }
+
+  .bg-dashboard-red {
+    background-color: hsl(var(--dashboard-red));
+  }
+  
+  .bg-dashboard-red-light {
+    background-color: hsl(var(--dashboard-red-light));
+  }
+  
+  .bg-dashboard-red-muted {
+    background-color: hsl(var(--dashboard-red-muted));
+  }
+  
+  .text-dashboard-red {
+    color: hsl(var(--dashboard-red));
+  }
+  
+  .border-dashboard-red {
+    border-color: hsl(var(--dashboard-red));
+  }
+
+  .bg-dashboard-yellow {
+    background-color: hsl(var(--dashboard-yellow));
+  }
+  
+  .bg-dashboard-yellow-light {
+    background-color: hsl(var(--dashboard-yellow-light));
+  }
+  
+  .bg-dashboard-yellow-muted {
+    background-color: hsl(var(--dashboard-yellow-muted));
+  }
+  
+  .text-dashboard-yellow {
+    color: hsl(var(--dashboard-yellow));
+  }
+  
+  .border-dashboard-yellow {
+    border-color: hsl(var(--dashboard-yellow));
+  }
+
+  .bg-dashboard-green {
+    background-color: hsl(var(--dashboard-green));
+  }
+  
+  .bg-dashboard-green-light {
+    background-color: hsl(var(--dashboard-green-light));
+  }
+  
+  .bg-dashboard-green-muted {
+    background-color: hsl(var(--dashboard-green-muted));
+  }
+  
+  .text-dashboard-green {
+    color: hsl(var(--dashboard-green));
+  }
+  
+  .border-dashboard-green {
+    border-color: hsl(var(--dashboard-green));
+  }
+
+  .bg-dashboard-emerald {
+    background-color: hsl(var(--dashboard-emerald));
+  }
+  
+  .bg-dashboard-emerald-light {
+    background-color: hsl(var(--dashboard-emerald-light));
+  }
+  
+  .bg-dashboard-emerald-muted {
+    background-color: hsl(var(--dashboard-emerald-muted));
+  }
+  
+  .text-dashboard-emerald {
+    color: hsl(var(--dashboard-emerald));
+  }
+  
+  .border-dashboard-emerald {
+    border-color: hsl(var(--dashboard-emerald));
+  }
+
+  .bg-dashboard-purple {
+    background-color: hsl(var(--dashboard-purple));
+  }
+  
+  .bg-dashboard-purple-light {
+    background-color: hsl(var(--dashboard-purple-light));
+  }
+  
+  .bg-dashboard-purple-muted {
+    background-color: hsl(var(--dashboard-purple-muted));
+  }
+  
+  .text-dashboard-purple {
+    color: hsl(var(--dashboard-purple));
+  }
+  
+  .border-dashboard-purple {
+    border-color: hsl(var(--dashboard-purple));
+  }
+
+  /* Classes adaptativas para tema claro/escuro */
+  .bg-dashboard-card-blue {
+    background-color: hsl(var(--dashboard-blue-light));
+  }
+  
+  .dark .bg-dashboard-card-blue {
+    background-color: hsl(var(--dashboard-blue-muted));
+  }
+
+  .bg-dashboard-card-orange {
+    background-color: hsl(var(--dashboard-orange-light));
+  }
+  
+  .dark .bg-dashboard-card-orange {
+    background-color: hsl(var(--dashboard-orange-muted));
+  }
+
+  .bg-dashboard-card-red {
+    background-color: hsl(var(--dashboard-red-light));
+  }
+  
+  .dark .bg-dashboard-card-red {
+    background-color: hsl(var(--dashboard-red-muted));
+  }
+
+  .bg-dashboard-card-yellow {
+    background-color: hsl(var(--dashboard-yellow-light));
+  }
+  
+  .dark .bg-dashboard-card-yellow {
+    background-color: hsl(var(--dashboard-yellow-muted));
+  }
+
+  .bg-dashboard-card-green {
+    background-color: hsl(var(--dashboard-green-light));
+  }
+  
+  .dark .bg-dashboard-card-green {
+    background-color: hsl(var(--dashboard-green-muted));
+  }
+
+  .bg-dashboard-card-emerald {
+    background-color: hsl(var(--dashboard-emerald-light));
+  }
+  
+  .dark .bg-dashboard-card-emerald {
+    background-color: hsl(var(--dashboard-emerald-muted));
+  }
+
+  .bg-dashboard-card-purple {
+    background-color: hsl(var(--dashboard-purple-light));
+  }
+  
+  .dark .bg-dashboard-card-purple {
+    background-color: hsl(var(--dashboard-purple-muted));
+  }
+
+  /* Classes de texto adaptativas para cards - Tema Claro (cores vibrantes) */
+  .text-dashboard-card-primary {
+    color: white; /* Branco para contraste no tema claro */
+  }
+  
+  .dark .text-dashboard-card-primary {
+    color: white;
+  }
+
+  .text-dashboard-card-secondary {
+    color: rgba(255, 255, 255, 0.9); /* Branco com leve transparência */
+  }
+  
+  .dark .text-dashboard-card-secondary {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .text-dashboard-card-blue-light {
+    color: rgba(255, 255, 255, 0.8); /* Branco com transparência */
+  }
+  
+  .dark .text-dashboard-card-blue-light {
+    color: rgba(173, 216, 230, 1);
+  }
+
+  .text-dashboard-card-orange-light {
+    color: rgba(255, 255, 255, 0.8); /* Branco com transparência */
+  }
+  
+  .dark .text-dashboard-card-orange-light {
+    color: rgba(255, 218, 185, 1);
+  }
+
+  .text-dashboard-card-yellow-light {
+    color: rgba(255, 255, 255, 0.8); /* Branco com transparência */
+  }
+  
+  .dark .text-dashboard-card-yellow-light {
+    color: rgba(255, 255, 224, 1);
+  }
+
+  .text-dashboard-card-green-light {
+    color: rgba(255, 255, 255, 0.8); /* Branco com transparência */
+  }
+  
+  .dark .text-dashboard-card-green-light {
+    color: rgba(144, 238, 144, 1);
+  }
+
+  /* Classes para gradientes do dashboard - Tema Claro (cores vibrantes) */
+  .bg-gradient-dashboard-blue {
+    background: linear-gradient(135deg, hsl(220, 89%, 65%), hsl(220, 89%, 75%));
+  }
+
+  .bg-gradient-dashboard-orange {
+    background: linear-gradient(135deg, hsl(25, 95%, 58%), hsl(25, 95%, 68%));
+  }
+
+  .bg-gradient-dashboard-red {
+    background: linear-gradient(135deg, hsl(0, 84%, 65%), hsl(0, 84%, 75%));
+  }
+
+  .bg-gradient-dashboard-yellow {
+    background: linear-gradient(135deg, hsl(45, 93%, 63%), hsl(45, 93%, 73%));
+  }
+
+  .bg-gradient-dashboard-green {
+    background: linear-gradient(135deg, hsl(142, 76%, 41%), hsl(142, 76%, 51%));
+  }
+
+  .bg-gradient-dashboard-emerald {
+    background: linear-gradient(135deg, hsl(158, 64%, 57%), hsl(158, 64%, 67%));
+  }
+
+  .bg-gradient-dashboard-purple {
+    background: linear-gradient(135deg, hsl(262, 83%, 63%), hsl(262, 83%, 73%));
+  }
+
+  /* Gradientes mais suaves para tema escuro */
+  .dark .bg-gradient-dashboard-blue {
+    background: linear-gradient(135deg, hsl(var(--dashboard-blue-muted)), hsl(var(--dashboard-blue-light)));
+  }
+
+  .dark .bg-gradient-dashboard-orange {
+    background: linear-gradient(135deg, hsl(var(--dashboard-orange-muted)), hsl(var(--dashboard-orange-light)));
+  }
+
+  .dark .bg-gradient-dashboard-red {
+    background: linear-gradient(135deg, hsl(var(--dashboard-red-muted)), hsl(var(--dashboard-red-light)));
+  }
+
+  .dark .bg-gradient-dashboard-yellow {
+    background: linear-gradient(135deg, hsl(var(--dashboard-yellow-muted)), hsl(var(--dashboard-yellow-light)));
+  }
+
+  .dark .bg-gradient-dashboard-green {
+    background: linear-gradient(135deg, hsl(var(--dashboard-green-muted)), hsl(var(--dashboard-green-light)));
+  }
+
+  .dark .bg-gradient-dashboard-emerald {
+    background: linear-gradient(135deg, hsl(var(--dashboard-emerald-muted)), hsl(var(--dashboard-emerald-light)));
+  }
+
+  .dark .bg-gradient-dashboard-purple {
+    background: linear-gradient(135deg, hsl(var(--dashboard-purple-muted)), hsl(var(--dashboard-purple-light)));
   }
 }
 
