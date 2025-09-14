@@ -5,16 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { useAuth } from '@/contexts/AuthContext';
+import { getToken } from '@/utils/authUtils';
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
-/**
- * Componente que protege rotas que necessitam de autenticação
- * 
- * @param props.children - O conteúdo a ser renderizado se autenticado
- */
 export default function AuthGuard({
   children,
 }: AuthGuardProps) {
@@ -30,7 +26,7 @@ export default function AuthGuard({
       await syncAuth();
       
       // Verificação de autenticação após sincronização
-      const token = sessionStorage.getItem('token');
+      const token = getToken();
       const isLoggedIn = !!token && isAuthenticated;
 
       // Evitar múltiplos redirecionamentos
@@ -50,7 +46,7 @@ export default function AuthGuard({
       } 
       // Se está na página de login ou cadastro mas já está autenticado
       else if (!config.requireAuth && isLoggedIn) {
-        const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/home';
+        const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/';
         sessionStorage.removeItem('redirectAfterLogin');
         setIsRedirecting(true);
         router.push(redirectPath);

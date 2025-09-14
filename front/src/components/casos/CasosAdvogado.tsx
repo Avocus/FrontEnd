@@ -1,135 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useLayout } from "@/contexts/LayoutContext";
 import Link from "next/link";
-import { CadastroProcessoAdvogado } from "./CadastroProcessoAdvogado";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Grid, List, Calendar, User } from "lucide-react";
+import { listarProcessos, buscarProcessoPorId } from "@/services/processo/processoService";
+import { ProcessoDTO } from "@/types/entities/Processo";
+import { StatusProcesso } from "@/types/enums";
 
-// Dados mockados - em um ambiente real isso viria de uma API
-const casosAdvogado = [
-  {
-    id: 1,
-    titulo: "Caso XYZ - Direito do Consumidor",
-    status: "Em andamento",
-    dataAbertura: "01/10/2023",
-    descricao: "Processo relacionado a uma compra com defeito.",
-    cliente: {
-      nome: "João Silva",
-      email: "joao.silva@example.com",
-      telefone: "(11) 98765-4321",
-    },
-    documentos: [
-      { id: 1, nome: "Contrato", arquivo: "/documentos/contrato.pdf" },
-      { id: 2, nome: "Nota Fiscal", arquivo: "/documentos/nota_fiscal.pdf" },
-    ],
-    movimentacoes: [
-      { id: 1, data: "05/10/2023", descricao: "Processo aberto" },
-      { id: 2, data: "10/10/2023", descricao: "Documentos enviados pelo cliente" },
-    ],
-  },
-  {
-    id: 2,
-    titulo: "Caso ABC - Divórcio Consensual",
-    status: "Finalizado",
-    dataAbertura: "15/09/2023",
-    descricao: "Processo de divórcio consensual entre as partes.",
-    cliente: {
-      nome: "Maria Oliveira",
-      email: "maria.oliveira@example.com",
-      telefone: "(11) 91234-5678",
-    },
-    documentos: [
-      { id: 1, nome: "Petição Inicial", arquivo: "/documentos/peticao_inicial.pdf" },
-    ],
-    movimentacoes: [
-      { id: 1, data: "20/09/2023", descricao: "Processo aberto" },
-      { id: 2, data: "25/09/2023", descricao: "Acordo assinado" },
-    ],
-  },
-  {
-    id: 3,
-    titulo: "Caso DEF - Ação Trabalhista",
-    status: "Aguardando",
-    dataAbertura: "20/11/2023",
-    descricao: "Processo sobre demissão sem justa causa e verbas rescisórias.",
-    cliente: {
-      nome: "Carlos Santos",
-      email: "carlos.santos@example.com",
-      telefone: "(11) 99876-5432",
-    },
-    documentos: [
-      { id: 1, nome: "Carteira de Trabalho", arquivo: "/documentos/ctps.pdf" },
-      { id: 2, nome: "Recibo de Pagamento", arquivo: "/documentos/recibo.pdf" },
-    ],
-    movimentacoes: [
-      { id: 1, data: "25/11/2023", descricao: "Processo protocolado" },
-      { id: 2, data: "30/11/2023", descricao: "Aguardando despacho do juiz" },
-    ],
-  },
-  {
-    id: 4,
-    titulo: "Caso GHI - Inventário",
-    status: "Cancelado",
-    dataAbertura: "05/08/2023",
-    descricao: "Processo de inventário de bens após falecimento.",
-    cliente: {
-      nome: "Ana Costa",
-      email: "ana.costa@example.com",
-      telefone: "(11) 98765-1234",
-    },
-    documentos: [
-      { id: 1, nome: "Certidão de Óbito", arquivo: "/documentos/certidao_obito.pdf" },
-    ],
-    movimentacoes: [
-      { id: 1, data: "10/08/2023", descricao: "Processo aberto" },
-      { id: 2, data: "15/08/2023", descricao: "Processo cancelado por desistência" },
-    ],
-  },
-  {
-    id: 5,
-    titulo: "Caso JKL - Guarda de Menor",
-    status: "Em andamento",
-    dataAbertura: "12/12/2023",
-    descricao: "Ação de guarda e regulamentação de visitas.",
-    cliente: {
-      nome: "Roberto Lima",
-      email: "roberto.lima@example.com",
-      telefone: "(11) 91234-6789",
-    },
-    documentos: [
-      { id: 1, nome: "Certidão de Nascimento", arquivo: "/documentos/certidao_nascimento.pdf" },
-      { id: 2, nome: "Laudo Social", arquivo: "/documentos/laudo_social.pdf" },
-    ],
-    movimentacoes: [
-      { id: 1, data: "15/12/2023", descricao: "Processo distribuído" },
-      { id: 2, data: "20/12/2023", descricao: "Audiência de conciliação agendada" },
-    ],
-  },
-];
+// Função para obter label legível do status
+const getStatusLabel = (status: StatusProcesso): string => {
+  switch (status) {
+    case StatusProcesso.RASCUNHO: return "Rascunho";
+    case StatusProcesso.EM_ANDAMENTO: return "Em Andamento";
+    case StatusProcesso.AGUARDANDO_DOCUMENTOS: return "Aguardando Documentos";
+    case StatusProcesso.EM_JULGAMENTO: return "Em Julgamento";
+    case StatusProcesso.CONCLUIDO: return "Concluído";
+    case StatusProcesso.ARQUIVADO: return "Arquivado";
+    default: return status;
+  }
+};
+
+// Função para obter variant do Badge baseado no status
+const getStatusBadgeVariant = (status: StatusProcesso) => {
+  switch (status) {
+    case StatusProcesso.RASCUNHO: return "outline";
+    case StatusProcesso.EM_ANDAMENTO: return "default";
+    case StatusProcesso.AGUARDANDO_DOCUMENTOS: return "secondary";
+    case StatusProcesso.EM_JULGAMENTO: return "destructive";
+    case StatusProcesso.CONCLUIDO: return "secondary";
+    case StatusProcesso.ARQUIVADO: return "outline";
+    default: return "outline";
+  }
+};
 
 // Versão Web para Advogados
 function CasosAdvogadoWeb() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [processos, setProcessos] = useState<ProcessoDTO[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCasos = casosAdvogado.filter(
-    (caso) =>
-      caso.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caso.cliente.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const fetchProcessos = async () => {
+      try {
+        const data = await listarProcessos();
+        setProcessos(data);
+      } catch (error) {
+        console.error('Erro ao carregar processos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProcessos();
+  }, []);
+
+  const filteredCasos = processos.filter(
+    (processo) =>
+      processo.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      processo.cliente.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Agrupar casos por status para o Kanban
   const casosPorStatus = {
-    "Em andamento": filteredCasos.filter(caso => caso.status === "Em andamento"),
-    "Finalizado": filteredCasos.filter(caso => caso.status === "Finalizado"),
-    "Aguardando": filteredCasos.filter(caso => caso.status === "Aguardando"),
-    "Cancelado": filteredCasos.filter(caso => caso.status === "Cancelado"),
+    [StatusProcesso.RASCUNHO]: filteredCasos.filter(processo => processo.status === StatusProcesso.RASCUNHO),
+    [StatusProcesso.EM_ANDAMENTO]: filteredCasos.filter(processo => processo.status === StatusProcesso.EM_ANDAMENTO),
+    [StatusProcesso.AGUARDANDO_DOCUMENTOS]: filteredCasos.filter(processo => processo.status === StatusProcesso.AGUARDANDO_DOCUMENTOS),
+    [StatusProcesso.EM_JULGAMENTO]: filteredCasos.filter(processo => processo.status === StatusProcesso.EM_JULGAMENTO),
+    [StatusProcesso.CONCLUIDO]: filteredCasos.filter(processo => processo.status === StatusProcesso.CONCLUIDO),
+    [StatusProcesso.ARQUIVADO]: filteredCasos.filter(processo => processo.status === StatusProcesso.ARQUIVADO),
   };
 
   return (
@@ -194,8 +139,8 @@ function CasosAdvogadoWeb() {
                 <TableCell>{caso.titulo}</TableCell>
                 <TableCell>{caso.cliente.nome}</TableCell>
                 <TableCell>
-                  <Badge variant={caso.status === "Em andamento" ? "default" : caso.status === "Finalizado" ? "secondary" : "outline"}>
-                    {caso.status}
+                  <Badge variant={getStatusBadgeVariant(caso.status)}>
+                    {getStatusLabel(caso.status)}
                   </Badge>
                 </TableCell>
                 <TableCell>{caso.dataAbertura}</TableCell>
@@ -211,10 +156,10 @@ function CasosAdvogadoWeb() {
       ) : (
         /* Visualização Kanban */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.entries(casosPorStatus).map(([status, casos]) => (
-            <div key={status} className="bg-muted/50 rounded-lg p-4">
+          {Object.entries(casosPorStatus).map(([statusKey, casos]) => (
+            <div key={statusKey} className="bg-muted/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-lg">{status}</h3>
+                <h3 className="font-semibold text-lg">{getStatusLabel(statusKey as StatusProcesso)}</h3>
                 <Badge variant="outline" className="text-xs">
                   {casos.length}
                 </Badge>
@@ -258,11 +203,28 @@ function CasosAdvogadoWeb() {
 // Versão Mobile para Advogados
 function CasosAdvogadoMobile() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [processos, setProcessos] = useState<ProcessoDTO[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCasos = casosAdvogado.filter(
-    (caso) =>
-      caso.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caso.cliente.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const fetchProcessos = async () => {
+      try {
+        const data = await listarProcessos();
+        setProcessos(data);
+      } catch (error) {
+        console.error('Erro ao carregar processos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProcessos();
+  }, []);
+
+  const filteredCasos = processos.filter(
+    (processo) =>
+      processo.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      processo.cliente.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -281,22 +243,22 @@ function CasosAdvogadoMobile() {
 
       {/* Listagem de casos */}
       <div className="space-y-4">
-        {filteredCasos.map((caso) => (
-          <div key={caso.id} className="border rounded-lg p-4 shadow-sm">
-            <h3 className="font-semibold">{caso.titulo}</h3>
+        {filteredCasos.map((processo) => (
+          <div key={processo.id} className="border rounded-lg p-4 shadow-sm">
+            <h3 className="font-semibold">{processo.titulo}</h3>
             <div className="grid grid-cols-2 gap-2 my-2 text-sm">
               <div>
-                <span className="text-muted-foreground">Cliente:</span> {caso.cliente.nome}
+                <span className="text-muted-foreground">Cliente:</span> {processo.cliente.nome}
               </div>
               <div>
-                <span className="text-muted-foreground">Status:</span> {caso.status}
+                <span className="text-muted-foreground">Status:</span> {getStatusLabel(processo.status)}
               </div>
               <div>
-                <span className="text-muted-foreground">Data:</span> {caso.dataAbertura}
+                <span className="text-muted-foreground">Data:</span> {processo.dataAbertura}
               </div>
             </div>
             <Button asChild variant="outline" size="sm" className="w-full mt-2">
-              <Link href={`/casos/${caso.id}`}>Ver Detalhes</Link>
+              <Link href={`/casos/${processo.id}`}>Ver Detalhes</Link>
             </Button>
           </div>
         ))}
@@ -315,26 +277,35 @@ export function CasosAdvogado() {
 // Componente para detalhes de um caso específico (pode ser reutilizado em ambas versões)
 export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
   const { isMobile } = useLayout();
-  
-  let casoIdNumerico: number;
-  try {
-    casoIdNumerico = parseInt(casoId);
-    if (isNaN(casoIdNumerico)) {
-      throw new Error("ID inválido");
+  const [processo, setProcesso] = useState<ProcessoDTO | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProcesso = async () => {
+      try {
+        const data = await buscarProcessoPorId(casoId);
+        setProcesso(data);
+      } catch (error) {
+        console.error('Erro ao carregar processo:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (casoId) {
+      fetchProcesso();
     }
-  } catch {
+  }, [casoId]);
+
+  if (loading) {
     return (
       <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Caso não encontrado</h1>
-        <p className="text-muted-foreground mb-4">O identificador do caso é inválido.</p>
-        <Link href="/casos" className="text-primary underline">Voltar para lista de casos</Link>
+        <p>Carregando...</p>
       </div>
     );
   }
-  
-  const caso = casosAdvogado.find((c) => c.id === casoIdNumerico);
 
-  if (!caso) {
+  if (!processo) {
     return (
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Caso não encontrado</h1>
@@ -348,11 +319,11 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     <div className={`bg-background text-foreground ${isMobile ? 'p-4' : 'p-8'}`}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>{caso.titulo}</h1>
-          <p className="text-muted-foreground">Cliente: {caso.cliente.nome}</p>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>{processo.titulo}</h1>
+          <p className="text-muted-foreground">Cliente: {processo.cliente.nome}</p>
         </div>
-        <Badge variant={caso.status === "Em andamento" ? "default" : "secondary"}>
-          {caso.status}
+        <Badge variant={getStatusBadgeVariant(processo.status)}>
+          {getStatusLabel(processo.status)}
         </Badge>
       </div>
 
@@ -369,9 +340,9 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
             <div className="border rounded-lg p-4">
               <h2 className="text-xl font-semibold mb-2">Informações do Caso</h2>
               <div className="space-y-2">
-                <p><span className="font-medium">Status:</span> {caso.status}</p>
-                <p><span className="font-medium">Data de Abertura:</span> {caso.dataAbertura}</p>
-                <p><span className="font-medium">Descrição:</span> {caso.descricao}</p>
+                <p><span className="font-medium">Status:</span> {getStatusLabel(processo.status)}</p>
+                <p><span className="font-medium">Data de Abertura:</span> {processo.dataAbertura}</p>
+                <p><span className="font-medium">Descrição:</span> {processo.descricao}</p>
               </div>
             </div>
 
@@ -407,14 +378,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
         <TabsContent value="documents" className="space-y-4">
           <div className="border rounded-lg p-4">
             <h2 className="text-xl font-semibold mb-4">Documentos do Processo</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {caso.documentos.map((doc) => (
-                <div key={doc.id} className="border rounded p-3 flex items-center justify-between">
-                  <span>{doc.nome}</span>
-                  <Button size="sm" variant="outline">Visualizar</Button>
-                </div>
-              ))}
-            </div>
+            <p className="text-muted-foreground">Documentos ainda não implementados.</p>
           </div>
         </TabsContent>
 
@@ -422,17 +386,17 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
           <div className="border rounded-lg p-4">
             <h2 className="text-xl font-semibold mb-4">Andamentos do Processo</h2>
             <div className="space-y-4">
-              {caso.movimentacoes.map((mov, index) => (
-                <div key={mov.id} className="flex gap-4">
+              {processo.linhaDoTempo.map((update, index) => (
+                <div key={update.id} className="flex gap-4">
                   <div className="flex flex-col items-center">
                     <div className="w-3 h-3 bg-primary rounded-full"></div>
-                    {index < caso.movimentacoes.length - 1 && (
+                    {index < processo.linhaDoTempo.length - 1 && (
                       <div className="w-0.5 h-16 bg-muted mt-2"></div>
                     )}
                   </div>
                   <div className="pb-8">
-                    <p className="text-sm text-muted-foreground">{mov.data}</p>
-                    <p className="font-medium">{mov.descricao}</p>
+                    <p className="text-sm text-muted-foreground">{update.dataAtualizacao}</p>
+                    <p className="font-medium">{update.descricao}</p>
                   </div>
                 </div>
               ))}
@@ -446,15 +410,11 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="font-medium">Nome</p>
-                <p className="text-muted-foreground">{caso.cliente.nome}</p>
+                <p className="text-muted-foreground">{processo.cliente.nome}</p>
               </div>
               <div>
                 <p className="font-medium">Email</p>
-                <p className="text-muted-foreground">{caso.cliente.email}</p>
-              </div>
-              <div>
-                <p className="font-medium">Telefone</p>
-                <p className="text-muted-foreground">{caso.cliente.telefone}</p>
+                <p className="text-muted-foreground">{processo.cliente.email}</p>
               </div>
             </div>
           </div>

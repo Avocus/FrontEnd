@@ -10,8 +10,6 @@ import { useResponsive } from "@/hooks/useResponsive";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLayout } from "@/contexts/LayoutContext";
-// import { ChatAvocuss } from "../../comum/chatAvocuss";
-// import { Dialog } from "@/components/ui/dialog";
 
 export function HomeCliente() {
 
@@ -295,21 +293,6 @@ function MobileView() {
                         </Card>
                     </div>
                 </section>
-
-                {/* Chat flutuante */}
-                {/* {chatOpen ? (
-                    <Dialog open={chatOpen} onOpenChange={setChatOpen}>
-                        <ChatAvocuss open={chatOpen} onOpenChange={setChatOpen} />
-                    </Dialog>
-                ) : (
-                    <Button
-                        onClick={() => setChatOpen(true)}
-                        className="fixed bottom-20 right-4 rounded-full w-14 h-14 bg-primary shadow-lg"
-                    >
-                        💬
-                    </Button>
-                )} */}
-
             </div>
         </div>
     );

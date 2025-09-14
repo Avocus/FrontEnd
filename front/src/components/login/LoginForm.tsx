@@ -60,7 +60,7 @@ export function LoginForm({
   useEffect(() => {
     if (isAuthenticated) {
       checkProfileCompletion();
-      router.push("/home");
+      router.push("/");
     }
   }, [isAuthenticated, router, checkProfileCompletion]);
 

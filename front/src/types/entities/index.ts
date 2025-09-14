@@ -1,5 +1,6 @@
 // Arquivo de barril (barrel) para exportar todas as entidades
 
+export * from './Advogado';
 export * from './Avaliacao';
 // Cliente.ts é importado diretamente para evitar ambiguidade com ClienteProfile
 // export * from './Cliente';

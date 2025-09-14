@@ -1,49 +1,55 @@
 /**
- * Obtém o token de autenticação armazenado no sessionStorage
+ * Obtém o token de autenticação armazenado nos cookies
  * @returns Token de autenticação ou null se não existir
  */
 export const getToken = (): string | null => {
-  // Verificação de servidor usando typeof window e process.browser
-  if (typeof window === "undefined" || typeof window.sessionStorage === "undefined") {
+  if (typeof window === "undefined") {
     return null;
   }
   
   try {
-    return sessionStorage.getItem("token");
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'token') {
+        return decodeURIComponent(value);
+      }
+    }
+    return null;
   } catch (error) {
-    console.error("Erro ao acessar sessionStorage:", error);
+    console.error("Erro ao acessar cookies:", error);
     return null;
   }
 };
 
 /**
- * Define o token de autenticação no sessionStorage
+ * Define o token de autenticação nos cookies
  * @param token Token de autenticação
  */
 export const setToken = (token: string): void => {
-  if (typeof window === "undefined" || typeof window.sessionStorage === "undefined") {
+  if (typeof window === "undefined") {
     return;
   }
   
   try {
-    sessionStorage.setItem("token", token);
+    document.cookie = `token=${encodeURIComponent(token)}; Secure; SameSite=Strict; Path=/; Max-Age=86400`;
   } catch (error) {
-    console.error("Erro ao definir token no sessionStorage:", error);
+    console.error("Erro ao definir token nos cookies:", error);
   }
 };
 
 /**
- * Remove o token de autenticação do sessionStorage
+ * Remove o token de autenticação dos cookies
  */
 export const removeToken = (): void => {
-  if (typeof window === "undefined" || typeof window.sessionStorage === "undefined") {
+  if (typeof window === "undefined") {
     return;
   }
   
   try {
-    sessionStorage.removeItem("token");
+    document.cookie = "token=; Secure; SameSite=Strict; Path=/; Max-Age=0";
   } catch (error) {
-    console.error("Erro ao remover token do sessionStorage:", error);
+    console.error("Erro ao remover token dos cookies:", error);
   }
 };
 

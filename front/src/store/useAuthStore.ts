@@ -1,10 +1,13 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { User, Credentials, AuthState } from '@/types';
+import { getToken, setToken, removeToken } from '@/utils/authUtils';
+
+const authChannel = typeof window !== 'undefined' ? new BroadcastChannel('auth') : null;
 
 const checkInitialAuth = (): boolean => {
   if (typeof window === 'undefined') return false;
-  return !!sessionStorage.getItem('token');
+  return !!getToken();
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -43,9 +46,10 @@ export const useAuthStore = create<AuthState>()(
               token
             }
             
-            sessionStorage.setItem("token", token);
+            setToken(token);
             
             set({ user, isAuthenticated: true, isLoading: false });
+            authChannel?.postMessage({ type: 'login' });
             return user;
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -54,12 +58,13 @@ export const useAuthStore = create<AuthState>()(
           }
         },
         logout: () => {
-          sessionStorage.removeItem("token");
+          removeToken();
           set({ user: null, isAuthenticated: false, error: null });
+          authChannel?.postMessage({ type: 'logout' });
         },
         setError: (error: string | null) => set({ error }),
         syncAuth: () => {
-          const hasToken = checkInitialAuth();
+          const hasToken = !!getToken();
           const { isAuthenticated } = get();
           
           if (hasToken !== isAuthenticated) {

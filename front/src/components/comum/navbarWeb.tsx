@@ -59,7 +59,7 @@ export const NavbarWeb = memo(function NavbarWeb({ showFullNavigation = true, sh
   }, []);
 
   const goToHome = useCallback(() => {
-    router.push("/home");
+    router.push("/");
   }, [router]);
 
   return (

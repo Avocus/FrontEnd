@@ -1,3 +1,5 @@
+import { StatusProcesso, TipoProcesso } from '@/types/enums';
+
 /**
  * Interface que representa um processo jurídico
  */
@@ -21,6 +23,53 @@ export interface Processo {
 }
 
 /**
+ * DTO para resposta da API de processos
+ */
+export interface ProcessoDTO {
+  id: number;
+  titulo: string;
+  descricao: string;
+  status: StatusProcesso;
+  tipoProcesso: TipoProcesso;
+  dataAbertura: string;
+  cliente: ClienteDTO;
+  advogado: AdvogadoDTO;
+  linhaDoTempo: StatusUpdateDTO[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * DTO simplificado para cliente
+ */
+export interface ClienteDTO {
+  id: number;
+  nome: string;
+  email: string;
+}
+
+/**
+ * DTO simplificado para advogado
+ */
+export interface AdvogadoDTO {
+  id: number;
+  nome: string;
+  email: string;
+  oab: string;
+}
+
+/**
+ * DTO para atualização de status
+ */
+export interface StatusUpdateDTO {
+  id: number;
+  statusAnterior: StatusProcesso;
+  novoStatus: StatusProcesso;
+  descricao: string;
+  dataAtualizacao: string;
+}
+
+/**
  * Interface que representa uma etapa do processo
  */
 export interface ProcessoStep {
@@ -36,8 +85,10 @@ export interface ProcessoStep {
  * Enumeração com os possíveis status de um processo
  */
 export enum ProcessoStatus {
+  RASCUNHO = 'RASCUNHO',
   EM_ANDAMENTO = 'EM_ANDAMENTO',
+  AGUARDANDO_DOCUMENTOS = 'AGUARDANDO_DOCUMENTOS',
+  EM_JULGAMENTO = 'EM_JULGAMENTO',
   CONCLUIDO = 'CONCLUIDO',
-  CANCELADO = 'CANCELADO',
-  AGUARDANDO = 'AGUARDANDO'
+  ARQUIVADO = 'ARQUIVADO'
 } 

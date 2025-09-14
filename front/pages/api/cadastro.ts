@@ -7,12 +7,13 @@ interface RegisterCredentials {
     client: boolean;
     username: string;
     password: string;
+    inviteToken: string;
 }
 
 // Função para registro pelo servidor
-async function serverRegister(name: string, client: boolean, username: string, password: string): Promise<UserResponse> {
+async function serverRegister(name: string, client: boolean, username: string, password: string, inviteToken: string): Promise<UserResponse> {
     try {
-        const credentials: RegisterCredentials = { name, client, username, password };
+        const credentials: RegisterCredentials = { name, client, username, password, inviteToken };
 
         const response = await fetch(AUTH_ROUTES.REGISTER, {
             method: 'POST',
@@ -41,10 +42,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return;
     }
 
-    const { name, client, username, password } = req.body;
+    const { name, client, username, password, inviteToken } = req.body;
 
     try {
-        const result = await serverRegister(name, client, username, password);
+        const result = await serverRegister(name, client, username, password, inviteToken);
         res.status(200).json({ user: result });
     } catch (error: unknown) {
         if (error instanceof Error) {

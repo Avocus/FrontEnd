@@ -1,14 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ListaClientes } from "@/components/clientes/ListaClientes";
 import { ModalAdicionarCliente } from "@/components/clientes/ModalAdicionarCliente";
 
 export default function ClientesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { user } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect clients away from this page
+    if (user && user.client) {
+      router.push('/advogados');
+    }
+  }, [user, router]);
+
+  // Don't render if user is a client
+  if (user && user.client) {
+    return null;
+  }
 
   const handleShare = () => {
     const url = window.location.origin + "/cadastro";
@@ -19,15 +36,15 @@ export default function ClientesPage() {
     }) || navigator.clipboard.writeText(url);
   };
 
+  const handleClienteVinculado = () => {
+    setRefreshKey(prev => prev + 1); // Força recarga da lista
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Meus Clientes</h1>
         <div className="flex gap-2">
-          <Button onClick={handleShare} variant="default" className="border border-gray-300">
-            <Share2 className="h-4 w-4 mr-2" />
-            Compartilhar Cadastro
-          </Button>
           <Button onClick={() => setIsModalOpen(true)} className="border border-gray-300">
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Cliente
@@ -40,13 +57,14 @@ export default function ClientesPage() {
           <CardTitle>Lista de Clientes</CardTitle>
         </CardHeader>
         <CardContent>
-          <ListaClientes />
+          <ListaClientes key={refreshKey} />
         </CardContent>
       </Card>
 
       <ModalAdicionarCliente
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onClienteVinculado={handleClienteVinculado}
       />
     </div>
   );

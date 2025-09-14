@@ -37,10 +37,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       syncAuth();
     };
 
+    const authChannel = typeof window !== 'undefined' ? new BroadcastChannel('auth') : null;
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data.type === 'login' || e.data.type === 'logout') {
+        syncAuth();
+      }
+    };
+
     window.addEventListener('focus', handleFocus);
+    authChannel?.addEventListener('message', handleMessage);
     
     return () => {
       window.removeEventListener('focus', handleFocus);
+      authChannel?.removeEventListener('message', handleMessage);
+      authChannel?.close();
     };
   }, [syncAuth]);
 

@@ -16,6 +16,7 @@ interface LayoutContextProps {
   updateConfig: (newConfig: Partial<LayoutConfig>) => void;
   toggleSidebar: () => void;
   isAdvogado: boolean;
+  isCliente: boolean;
   isMobile: boolean;
 }
 
@@ -32,15 +33,16 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
   const { user } = useAuthStore();
   const { isMobile } = useResponsive();
   const isAdvogado = Boolean(user && !user.client);
+  const isCliente = Boolean(user && user.client);
   const [isMounted, setIsMounted] = useState(false);
   
   // Usar useMemo para evitar recálculos desnecessários
   const initialConfig = useMemo(() => ({
     ...defaultConfig,
-    showSidebar: isAdvogado && !isMobile,
+    showSidebar: (isAdvogado || isCliente) && !isMobile,
     // Evitamos acessar window durante SSR
     sidebarCollapsed: isMobile
-  }), [isAdvogado, isMobile]);
+  }), [isAdvogado, isCliente, isMobile]);
   
   // Configuração padrão de layout baseada no usuário
   const [config, setConfig] = useState<LayoutConfig>(initialConfig);
@@ -64,8 +66,8 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
       const newConfig = { ...prevConfig };
       
       // Só atualizar se mudou para evitar re-renders em cascata
-      if (prevConfig.showSidebar !== (isAdvogado && !isMobile)) {
-        newConfig.showSidebar = isAdvogado && !isMobile;
+      if (prevConfig.showSidebar !== ((isAdvogado || isCliente) && !isMobile)) {
+        newConfig.showSidebar = (isAdvogado || isCliente) && !isMobile;
       }
       
       // Atualizar collapse da sidebar baseado no dispositivo
@@ -98,8 +100,9 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
     updateConfig,
     toggleSidebar,
     isAdvogado,
+    isCliente,
     isMobile,
-  }), [config, updateConfig, toggleSidebar, isAdvogado, isMobile]);
+  }), [config, updateConfig, toggleSidebar, isAdvogado, isCliente, isMobile]);
 
   return (
     <LayoutContext.Provider value={contextValue}>

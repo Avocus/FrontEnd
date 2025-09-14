@@ -17,7 +17,7 @@ export function FooterMobile() {
 
     function handleHomeClick(): void {
         if (router) {
-            router.push("/home");
+            router.push("/");
         } else {
             console.error('Router não está disponível.');
         }

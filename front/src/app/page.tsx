@@ -9,18 +9,25 @@ import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carouse
 import { Gavel, Users, FileText, MessageCircle, Calendar, Library, Briefcase, Clock, Shield, UserCheck, Zap } from 'lucide-react';
 import Image from 'next/image';
 import { useLayout } from "@/contexts/LayoutContext";
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store';
 
 export default function Home() {
-  const { updateConfig, isAdvogado } = useLayout();
+  const { updateConfig } = useLayout();
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    // Configuração específica para a página inicial
+    if (isAuthenticated) {
+      router.push('/home');
+      return;
+    }
     updateConfig({
       showNavbar: false,
-      showSidebar: false, // Mostrar sidebar apenas para advogados
+      showSidebar: false,
       showFooter: false
     });
-  }, [updateConfig, isAdvogado]);
+  }, [updateConfig, router]);
 
   return (
     <div className="bg-background text-foreground min-h-screen">
@@ -66,7 +73,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="flex gap-4"
           >
-            <Button className="bg-primary hover:bg-white/10 px-8 py-6 text-lg text-secondary-foreground" onClick={() => window.location.href = "/login"}>
+            <Button className="bg-primary hover:bg-white/10 px-8 py-6 text-lg text-secondary-foreground" onClick={() => router.push("/login")}>
               Comece Agora
             </Button>
             <Button variant="outline" className="text-secondary-foreground  hover:bg-white/10 px-8 py-6 text-lg">
@@ -333,7 +340,7 @@ export default function Home() {
               placeholder="Seu melhor e-mail"
               className="max-w-md bg-white/10 border-white/30 text-secondary-foreground placeholder:text-secondary-foreground/70"
             />
-            <Button variant="secondary" className="px-8 py-6 text-lg hover:bg-white/10" onClick={() => window.location.href = "/cadastro"}>
+            <Button variant="secondary" className="px-8 py-6 text-lg hover:bg-white/10" onClick={() => router.push("/cadastro")}>
               Comece Agora
             </Button>
           </motion.div>
