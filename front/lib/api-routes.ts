@@ -40,5 +40,10 @@ export const USER_ROUTES = {
   PROFILE_GENERAL_DATA: `${API_BASE_URL}/user/dados-gerais`,
 };
 
+// Rotas de advogados
+export const ADVOGADO_ROUTES = {
+  MEUS_CLIENTES: `${API_BASE_URL}/advogado/meus-clientes`,
+};
+
 
 // Adicione outras categorias de rotas conforme necessário 

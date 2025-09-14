@@ -1,14 +1,11 @@
-// pages/api/logar.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { AUTH_ROUTES, UserApiResponse, ApiErrorResponse, UserResponse } from '../../lib/api-routes';
 
-// Interfaces para tipagem
 interface LoginCredentials {
   username: string;
   password: string;
 }
 
-// Função para autenticação pelo servidor
 async function serverLogin(email: string, password: string): Promise<UserResponse> {
   try {
     const credentials: LoginCredentials = { username: email, password };
@@ -21,18 +18,15 @@ async function serverLogin(email: string, password: string): Promise<UserRespons
       body: JSON.stringify(credentials),
     });
     
-    const responseData: UserApiResponse | ApiErrorResponse = await response.json() as UserApiResponse | ApiErrorResponse;
+    const responseData: UserApiResponse = await response.json() as UserApiResponse;
 
     if(response.status == 401)
       throw new Error('Credenciais inválidas');
 
-    if ('error' in responseData) {
-      throw new Error(responseData.error);
-    }
-    
     return responseData.data;
   } catch (error) {
-    throw error;
+    console.log('Response: ', error)
+    throw new Error('Erro ao conectar ao servidor');
   }
 }
 
@@ -48,6 +42,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
 
     let result = await serverLogin(email, password);
+
+    // Definir cookie com o token (não HttpOnly para acesso via JS, mas com flags seguros)
+    res.setHeader('Set-Cookie', `token=${result.jwt}; Secure; SameSite=Strict; Path=/; Max-Age=86400`);
 
     res.status(200).json(result);
   } catch (error: unknown) {

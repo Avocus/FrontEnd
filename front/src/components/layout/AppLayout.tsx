@@ -14,7 +14,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
-  const { config, isMobile, toggleSidebar } = useLayout();
+  const { config, isMobile, toggleSidebar, isCliente } = useLayout();
   const [ chatOpen, setChatOpen ] = React.useState(false);
   const { isAuthenticated } = useAuthStore();
   const { pendente } = useProfileStore();
@@ -51,6 +51,7 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
           setChatOpen={setChatOpen} 
           collapsed={config.sidebarCollapsed}
           onCollapsedChange={toggleSidebar}
+          isClient={isCliente}
         />
         
         {/* Chat Component */}

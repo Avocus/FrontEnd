@@ -1,39 +1,62 @@
-import { getToken } from '@/utils/authUtils';
+import api from '@/lib/api';
+import { ClienteLista } from '@/types/entities/Cliente';
 
-interface AdvogadoProfile {
-  id: string;
-  nome: string;
-  oab: string;
-  especialidades: string[];
-  estado: string;
-  cidade: string;
-  endereco: string;
-  telefone: string;
-  descricao: string;
-  fotoPerfil?: string;
-}
-
-/**
- * Obtém o perfil completo do advogado logado
- */
-export const getAdvogadoProfile = async (): Promise<AdvogadoProfile> => {
-  const token = getToken();
-  
-  if (!token) {
-    throw new Error('Usuário não autenticado');
+export const getAdvogadoProfile = async (): Promise<any> => {
+  try {
+    const response = await api.get('/user/profile');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter perfil do advogado:', error);
+    throw error;
   }
+};
 
-  const response = await fetch('/api/user/profile', {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
+export const getMeusClientes = async (): Promise<ClienteLista[]> => {
+  // TODO - impedir de bater diretamente no backend
+  try {
+    const response = await api.get('/advogado/meus-clientes');
+    const responseData = response.data as { data?: ClienteLista[] };
 
-  if (!response.ok) {
-    throw new Error('Erro ao obter perfil do advogado');
+    return responseData.data || [];
+  } catch (error) {
+    console.error('Erro ao obter lista de clientes:', error);
+    throw error;
   }
+};
 
-  return response.json();
+export const vincularCliente = async (email: string): Promise<void> => {
+  try {
+    await api.post('/advogado/vincular-cliente', null, {
+      params: { email }
+    });
+  } catch (error) {
+    console.error('Erro ao vincular cliente:', error);
+    throw error;
+  }
+};
+
+export const gerarLinkConvite = async (): Promise<string> => {
+  try {
+    const response = await api.get('/advogado/gerar-link-convite');
+    const responseData = response.data as { data?: string };
+
+    return responseData.data || '';
+  } catch (error) {
+    console.error('Erro ao gerar link de convite:', error);
+    throw error;
+  }
+};
+
+export const validarTokenConvite = async (token: string): Promise<any> => {
+  try {
+    const response = await api.post('/advogado/validar-token-convite', null, {
+      params: { token }
+    });
+    const responseData = response.data as { data?: any };
+
+    return responseData.data;
+  } catch (error) {
+    console.error('Erro ao validar token de convite:', error);
+    throw error;
+  }
 };

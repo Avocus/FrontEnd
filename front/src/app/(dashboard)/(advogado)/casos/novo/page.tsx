@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,28 +10,49 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, FileText } from "lucide-react";
+import { ArrowLeft, Save, FileText, Search, User, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useLayout } from "@/contexts/LayoutContext";
+import { ModalBuscaCliente } from "@/components/casos/ModalBuscaCliente";
+import { StatusProcesso, TipoProcesso } from "@/types/enums";
+import { ClienteLista } from "@/types/entities/Cliente";
+import { criarProcesso, CriarProcessoRequest } from "@/services/processo/processoService";
+import toast from "react-hot-toast";
 
 type ProcessoData = {
     clienteId: string;
     clienteNome: string;
-    categoria: string;
+    tipoProcesso: TipoProcesso | "";
     titulo: string;
     descricao: string;
-    isDraft: boolean;
+    status: StatusProcesso;
 };
 
 export default function NovoProcessoPage() {
     const { updateConfig } = useLayout();
+    const { user } = useAuthStore();
+    const router = useRouter();
+
+    useEffect(() => {
+        // Redirect clients away from this page
+        if (user && user.client) {
+            router.push('/casos');
+        }
+    }, [user, router]);
+
+    // Don't render if user is a client
+    if (user && user.client) {
+        return null;
+    }
+    const [isModalBuscaOpen, setIsModalBuscaOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState<ProcessoData>({
         clienteId: "",
         clienteNome: "",
-        categoria: "",
+        tipoProcesso: "",
         titulo: "",
         descricao: "",
-        isDraft: true,
+        status: StatusProcesso.RASCUNHO,
     });
 
     useEffect(() => {
@@ -40,44 +63,43 @@ export default function NovoProcessoPage() {
         });
     }, [updateConfig]);
 
-    const categorias = [
-        "Civil",
-        "Trabalhista",
-        "Penal",
-        "Família",
-        "Empresarial",
-        "Tributário",
-        "Ambiental",
-        "Outro",
-    ];
-
-    // Mock de clientes do advogado
-    const clientes = [
-        { id: "1", nome: "João Silva" },
-        { id: "2", nome: "Maria Santos" },
-        { id: "3", nome: "Pedro Oliveira" },
-    ];
-
     const handleInputChange = (field: keyof ProcessoData, value: string) => {
         setData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleClienteChange = (clienteId: string) => {
-        const cliente = clientes.find(c => c.id === clienteId);
+    const handleClienteSelect = (cliente: ClienteLista) => {
         setData((prev) => ({
             ...prev,
-            clienteId,
-            clienteNome: cliente?.nome || ""
+            clienteId: cliente.id,
+            clienteNome: cliente.nome
         }));
     };
 
-    const handleSave = () => {
-        console.log("Salvando rascunho:", data);
-        // Aqui seria a lógica para salvar no backend
-        // Por enquanto, apenas log
+    const handleSave = async () => {
+        if (!isFormValid) return;
+
+        setIsLoading(true);
+        try {
+            const processoData: CriarProcessoRequest = {
+                clienteId: data.clienteId,
+                tipoProcesso: data.tipoProcesso,
+                titulo: data.titulo,
+                descricao: data.descricao,
+                status: data.status
+            };
+
+            await criarProcesso(processoData);
+            toast.success("Processo criado com sucesso!");
+            router.push("/casos");
+        } catch (error) {
+            console.error("Erro ao criar processo:", error);
+            toast.error("Erro ao criar processo. Tente novamente.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const isFormValid = data.clienteId && data.categoria && data.titulo;
+    const isFormValid = data.clienteId && data.tipoProcesso && data.titulo;
 
     return (
         <div className="min-h-screen bg-background">
@@ -112,30 +134,49 @@ export default function NovoProcessoPage() {
                             <CardContent className="space-y-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="cliente">Cliente *</Label>
-                                    <Select value={data.clienteId} onValueChange={handleClienteChange}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecione um cliente" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {clientes.map((cliente) => (
-                                                <SelectItem key={cliente.id} value={cliente.id}>
-                                                    {cliente.nome}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {data.clienteId ? (
+                                        <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                                    <User className="h-5 w-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium">{data.clienteNome}</div>
+                                                    <div className="text-sm text-muted-foreground">Cliente selecionado</div>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setIsModalBuscaOpen(true)}
+                                            >
+                                                Alterar
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Button
+                                            variant="outline"
+                                            className="w-full h-12 border-dashed"
+                                            onClick={() => setIsModalBuscaOpen(true)}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Search className="h-4 w-4" />
+                                                <span>Buscar Cliente</span>
+                                            </div>
+                                        </Button>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="categoria">Categoria do Processo *</Label>
-                                    <Select value={data.categoria} onValueChange={(value) => handleInputChange("categoria", value)}>
+                                    <Label htmlFor="tipoProcesso">Tipo do Processo *</Label>
+                                    <Select value={data.tipoProcesso} onValueChange={(value) => handleInputChange("tipoProcesso", value)}>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Selecione uma categoria" />
+                                            <SelectValue placeholder="Selecione um tipo" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {categorias.map((cat) => (
-                                                <SelectItem key={cat} value={cat}>
-                                                    {cat}
+                                            {Object.values(TipoProcesso).map((tipo) => (
+                                                <SelectItem key={tipo} value={tipo}>
+                                                    {tipo}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -181,9 +222,9 @@ export default function NovoProcessoPage() {
                                 </div>
 
                                 <div>
-                                    <Label className="text-sm font-medium">Categoria</Label>
+                                    <Label className="text-sm font-medium">Tipo do Processo</Label>
                                     <p className="text-sm text-muted-foreground">
-                                        {data.categoria || "Não selecionada"}
+                                        {data.tipoProcesso || "Não selecionado"}
                                     </p>
                                 </div>
 
@@ -196,7 +237,7 @@ export default function NovoProcessoPage() {
 
                                 <div>
                                     <Label className="text-sm font-medium">Status</Label>
-                                    <Badge variant="outline">Rascunho</Badge>
+                                    <Badge variant="outline">{data.status}</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -235,16 +276,27 @@ export default function NovoProcessoPage() {
                         <div className="flex gap-3">
                             <Button
                                 onClick={handleSave}
-                                disabled={!isFormValid}
+                                disabled={!isFormValid || isLoading}
                                 className="flex-1"
                             >
-                                <Save className="h-4 w-4 mr-2" />
-                                Salvar Rascunho
+                                {isLoading ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                    <Save className="h-4 w-4 mr-2" />
+                                )}
+                                {isLoading ? "Salvando..." : "Salvar Rascunho"}
                             </Button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Modal de Busca de Cliente */}
+            <ModalBuscaCliente
+                isOpen={isModalBuscaOpen}
+                onOpenChange={setIsModalBuscaOpen}
+                onClienteSelect={handleClienteSelect}
+            />
         </div>
     );
 }

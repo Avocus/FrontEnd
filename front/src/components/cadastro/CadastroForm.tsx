@@ -14,10 +14,10 @@ import { Label } from "@/components/ui/label"
 import { useCallback, useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { cadastroSchema, type CadastroFormData, PASSWORD_REGEX } from '../../schemas/cadastroSchema';
+import { cadastroSchema, type CadastroFormData } from '../../schemas/cadastroSchema';
 import { cadastrarUsuario } from '../../services/user/cadastroService';
 import { useRouter } from "next/navigation"
+import { getErrorMessage } from '@/utils/formValidation';
 import { ArrowLeft } from "lucide-react"
 import { UserTypeSelector } from './UserTypeSelector';
 import { PasswordRequirements } from './PasswordRequirements';
@@ -28,7 +28,9 @@ export function CadastroForm({
   className,
   inviteData,
   ...props
-}: React.ComponentPropsWithoutRef<"div"> & { inviteData?: any }) {
+}: React.ComponentPropsWithoutRef<"div"> & { 
+  inviteData?: any;
+}) {
   const [cadastroError, setCadastroError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { success, error: showError } = useToast();
@@ -52,14 +54,13 @@ export function CadastroForm({
     }
   });
 
-  // Definir role como cliente quando é invite
   useEffect(() => {
-    if (inviteData) {
+    if (inviteData?.isInvite) {
       setValue("role", "cliente");
     }
   }, [inviteData, setValue]);
 
-  const selectedRole = inviteData ? "cliente" : watch("role");
+  const selectedRole = inviteData?.isInvite ? "cliente" : watch("role");
   const passwordValue = watch("password");
 
   const getFieldValidationClassLocal = (fieldName: keyof CadastroFormData) => {
@@ -67,7 +68,6 @@ export function CadastroForm({
     const hasError = errors[fieldName];
     const isDirty = dirtyFields[fieldName];
     
-    // Para confirmar senha, fazer validação manual
     if (fieldName === 'confirmPassword') {
       const passwordValue = watch("password");
       const confirmValue = watch("confirmPassword");
@@ -76,7 +76,6 @@ export function CadastroForm({
       
       if (!confirmTouched || !passwordTouched) return "";
       
-      // Verificar se coincidem
       const matches = confirmValue === passwordValue && confirmValue.length > 0;
       
       if (hasError || !matches) return "border-red-500 focus:border-red-500";
@@ -85,12 +84,10 @@ export function CadastroForm({
       return "";
     }
     
-    // Para role, se é invite, sempre considerar válido
-    if (fieldName === 'role' && inviteData) {
+    if (fieldName === 'role' && inviteData?.isInvite) {
       return "";
     }
     
-    // Para outros campos, usar a utilitária
     return getFieldValidationClass(!!isTouched, !!hasError, !!isDirty);
   };
 
@@ -101,7 +98,6 @@ export function CadastroForm({
   const onSubmit = useCallback(async (data: CadastroFormData) => {
     setIsLoading(true);
     
-    // Se é invite, garantir que o role seja "cliente"
     const finalData = inviteData 
       ? { ...data, role: "cliente" as const }
       : data;
@@ -111,10 +107,7 @@ export function CadastroForm({
       client: finalData.role === "cliente",
       username: finalData.email,
       password: finalData.password,
-      inviteData: inviteData ? {
-        invitedBy: inviteData.invitedBy,
-        inviteToken: inviteData
-      } : undefined
+      inviteToken: inviteData?.token
     };
 
     try {
@@ -123,16 +116,12 @@ export function CadastroForm({
       success("Cadastro realizado com sucesso!");
       router.push('/login');
     } catch (error: unknown) {
-      if ((error as { response?: { data?: { error?: string } } })?.response?.data?.error) {
-        showError((error as { response: { data: { error: string } } }).response.data.error);
-      } else {
-        console.error("Erro no cadastro:", error);
-        showError("Erro ao fazer cadastro. Tente novamente.");
-      }
+      const errorMessage = getErrorMessage(error, "Erro ao fazer cadastro. Tente novamente.");
+      showError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [router]);
+  }, [router, inviteData]);
 
   return (
     <div className={cn("flex flex-col gap-6 w-full", className)} {...props}>
@@ -149,10 +138,10 @@ export function CadastroForm({
               <ArrowLeft className="h-5 w-5" />
             </Button>  
             <span>
-              {inviteData ? "Cadastro de Cliente" : "AVOCUSS"}
+              {inviteData?.isInvite ? "Cadastro de Cliente" : "AVOCUSS"}
             </span>
           </CardTitle>
-          {inviteData && (
+          {inviteData?.isInvite && (
             <p className="text-sm text-muted-foreground">
               Você foi convidado para se cadastrar como cliente
             </p>

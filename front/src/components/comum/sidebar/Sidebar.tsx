@@ -26,7 +26,7 @@ type SidebarItemProps = {
   active?: boolean;
   onClick?: () => void;
   collapsed?: boolean;
-  disabled?: boolean; // Adicionada a propriedade 'disabled'
+  disabled?: boolean;
 };
 
 const SidebarItem = ({ label, href, icon, active, onClick, collapsed, disabled }: SidebarItemProps) => {
@@ -68,6 +68,7 @@ interface SidebarProps {
   setChatOpen?: (open: boolean) => void;
   collapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
+  isClient?: boolean;
 }
 
 export function Sidebar({ 
@@ -75,7 +76,8 @@ export function Sidebar({
   activePath = "", 
   setChatOpen,
   collapsed: externalCollapsed,
-  onCollapsedChange 
+  onCollapsedChange,
+  isClient = false
 }: SidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   
@@ -99,9 +101,9 @@ export function Sidebar({
 
   const casosItems: SidebarItemProps[] = [
     { label: "Meus Casos", href: "/casos", icon: <Briefcase className="h-5 w-5" /> },
-    { label: "Novo Caso", href: "/casos/novo", icon: <FilePlus className="h-5 w-5" /> },
+    ...(isClient ? [] : [{ label: "Novo Caso", href: "/casos/novo", icon: <FilePlus className="h-5 w-5" /> }]),
     { label: "Documentos", href: "/documentos", icon: <FileText className="h-5 w-5" /> , disabled: true },
-    { label: "Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />},
+    ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}] : [{ label: "Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}])
   ];
 
   const gerencialItems: SidebarItemProps[] = [

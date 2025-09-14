@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import AuthGuard from "@/components/auth/AuthGuard"
 import { useAuth } from "@/contexts/AuthContext"
 import { useLayout } from "@/contexts/LayoutContext"
 import { LoginForm } from '@/components/login/LoginForm'
@@ -26,7 +25,7 @@ function LoginContent() {
   useEffect(() => {
     updateAuth({
       requireAuth: false,
-      redirectTo: "/home"
+      redirectTo: "/"
     });
   }, [updateAuth]);
 
@@ -39,19 +38,17 @@ function LoginContent() {
   }, [updateConfig]); 
 
   return (
-    <AuthGuard>
-      <div className="relative flex w-full max-w-sm flex-col gap-6">
-        {showExpiredMessage && (
-          <Alert variant="destructive" className="animate-fadeIn">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Sua sessão expirou. Por favor, faça login novamente.
-          </AlertDescription>
-        </Alert>
+    <div className="relative flex w-full max-w-sm flex-col gap-6">
+      {showExpiredMessage && (
+        <Alert variant="destructive" className="animate-fadeIn">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Sua sessão expirou. Por favor, faça login novamente.
+        </AlertDescription>
+      </Alert>
       )}
       <LoginForm />
     </div>
-    </AuthGuard>
   )
 }
 

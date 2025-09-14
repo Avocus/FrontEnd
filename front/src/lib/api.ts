@@ -24,21 +24,16 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para tratar erros de resposta
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Se o erro for 401 (Unauthorized), deslogar o usuário
     if (error.response && error.response.status === 401) {
-      // Evitar loop infinito de redirecionamento se já estiver na página de login
       const isLoginPage = typeof window !== 'undefined' && window.location.pathname.includes('/login');
       
       if (!isLoginPage) {
-        // Limpar o token usando a função removeToken
         if (typeof window !== 'undefined') {
           removeToken();
           
-          // Redirecionar para a página de login
           window.location.href = '/login?expired=true';
         }
       }
