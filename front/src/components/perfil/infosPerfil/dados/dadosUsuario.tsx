@@ -9,8 +9,9 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PerfilCliente } from "@/types/entities/Cliente";
+import { ClienteProfile } from "@/types/entities/Profile";
 import { getToken } from "@/utils/authUtils";
-import { useProfileStore } from "@/store";
+import { useProfileStore, useAuthStore } from "@/store";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
@@ -20,6 +21,7 @@ import toast from "react-hot-toast";
 
 export function DadosUsuario() {
     const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
+    const { user } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState("");
     const [activeTab, setActiveTab] = useState("informacoes");
@@ -52,8 +54,24 @@ export function DadosUsuario() {
                 }
                 
                 const responseData = await response.json();
-                updateProfileStore(responseData.data as PerfilCliente);
-                form.reset(responseData.data);
+                const perfilData: PerfilCliente = responseData.data;
+                
+                const clienteProfile: ClienteProfile = {
+                    id: user?.id || '',
+                    userId: user?.id || '',
+                    nome: perfilData.nome,
+                    email: perfilData.email,
+                    telefone: perfilData.telefone,
+                    cpf: perfilData.cpf,
+                    dataNascimento: perfilData.dataNascimento,
+                    endereco: perfilData.endereco,
+                    cidade: perfilData.cidade,
+                    estado: perfilData.estado,
+                    foto: perfilData.fotoPerfil,
+                };
+                
+                updateProfileStore(clienteProfile);
+                form.reset(perfilData);
             } catch (err) {
                 setError("Não foi possível carregar os dados do perfil");
                 console.error(err);
@@ -61,7 +79,7 @@ export function DadosUsuario() {
         };
 
         fetchProfile();
-    }, [updateProfileStore, form]);
+    }, [updateProfileStore, form, user]);
 
     const onSubmit = async (data: ProfileFormData) => {
         try {
@@ -81,7 +99,21 @@ export function DadosUsuario() {
                 throw new Error('Erro ao atualizar perfil');
             }
 
-            updateProfileStore(data as PerfilCliente);
+            const updatedProfile: ClienteProfile = {
+                id: user?.id || '',
+                userId: user?.id || '',
+                nome: data.nome,
+                email: data.email,
+                telefone: data.telefone,
+                cpf: data.cpf,
+                dataNascimento: data.dataNascimento,
+                endereco: data.endereco,
+                cidade: data.cidade,
+                estado: data.estado,
+                foto: data.fotoPerfil,
+            };
+            
+            updateProfileStore(updatedProfile);
             setIsEditing(false);
             toast.success('Perfil atualizado com sucesso!');
         } catch (error) {
@@ -292,7 +324,7 @@ export function DadosUsuario() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-5">
-                    {profile.processos.map((processo) => (
+                    {profile && (profile as any).processos && (profile as any).processos.map((processo: any) => (
                         <div key={processo.id} className="flex items-center justify-between p-4 rounded-lg border">
                             <div>
                                 <h3 className="font-medium">{processo.titulo}</h3>
