@@ -14,10 +14,9 @@ import {
     Send,
     FolderOpen,
     Timer,
-    Plus,
     BarChart3,
     Target,
-    Activity
+    Activity,
 } from "lucide-react";
 
 export function HomeAdvogado() {
@@ -229,17 +228,17 @@ function DesktopView() {
 
                 {/* Ações Rápidas */}
                 <section className="grid grid-cols-4 gap-6">
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/documentos"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-blue-light p-4 rounded-full mb-4">
-                                <Plus className="w-8 h-8 text-dashboard-blue" />
+                                <FileText className="w-8 h-8 text-dashboard-blue" />
                             </div>
-                            <h3 className="font-semibold mb-2 text-foreground">Novo Caso</h3>
-                            <p className="text-sm text-muted-foreground">Criar um novo processo</p>
+                            <h3 className="font-semibold mb-2 text-foreground">Documentos</h3>
+                            <p className="text-sm text-muted-foreground">Gerenciar documentos</p>
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/agenda"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-green-light p-4 rounded-full mb-4">
                                 <Calendar className="w-8 h-8 text-dashboard-green" />
@@ -249,7 +248,7 @@ function DesktopView() {
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/clientes"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-purple-light p-4 rounded-full mb-4">
                                 <Users className="w-8 h-8 text-dashboard-purple" />
@@ -259,7 +258,7 @@ function DesktopView() {
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/estatisticas"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-orange-light p-4 rounded-full mb-4">
                                 <BarChart3 className="w-8 h-8 text-dashboard-orange" />
@@ -399,12 +398,12 @@ function MobileView() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => window.location.href = "/documentos"}>
                             <CardContent className="p-4 flex flex-col items-center justify-center">
                                 <div className="bg-dashboard-blue-light p-3 rounded-full mb-2">
-                                    <Plus className="w-6 h-6 text-dashboard-blue" />
+                                    <FileText className="w-6 h-6 text-dashboard-blue" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground">Novos Casos</div>
+                                <div className="text-sm font-medium text-center text-foreground">Documentos</div>
                             </CardContent>
                         </Card>
                         
@@ -413,7 +412,7 @@ function MobileView() {
                                 <div className="bg-dashboard-green-light p-3 rounded-full mb-2">
                                     <Calendar className="w-6 h-6 text-dashboard-green" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground">Agenda</div>
+                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/agenda"}>Agenda</div>
                             </CardContent>
                         </Card>
                         
@@ -422,7 +421,7 @@ function MobileView() {
                                 <div className="bg-dashboard-purple-light p-3 rounded-full mb-2">
                                     <Users className="w-6 h-6 text-dashboard-purple" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground">Clientes</div>
+                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/clientes"}>Clientes</div>
                             </CardContent>
                         </Card>
                         
@@ -431,7 +430,7 @@ function MobileView() {
                                 <div className="bg-dashboard-orange-light p-3 rounded-full mb-2">
                                     <BarChart3 className="w-6 h-6 text-dashboard-orange" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground">Relatórios</div>
+                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/estatisticas"}>Relatórios</div>
                             </CardContent>
                         </Card>
                     </div>

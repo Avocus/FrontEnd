@@ -254,7 +254,7 @@ function DesktopView() {
 
                 {/* Ações Rápidas */}
                 <section className="grid grid-cols-4 gap-6">
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/casos/novo"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-blue-light p-4 rounded-full mb-4">
                                 <Plus className="w-8 h-8 text-dashboard-blue" />
@@ -264,7 +264,7 @@ function DesktopView() {
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/agenda"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-green-light p-4 rounded-full mb-4">
                                 <Calendar className="w-8 h-8 text-dashboard-green" />
@@ -274,7 +274,7 @@ function DesktopView() {
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md"  onClick={() => window.location.href = "/biblioteca"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-purple-light p-4 rounded-full mb-4">
                                 <Book className="w-8 h-8 text-dashboard-purple" />
@@ -284,7 +284,7 @@ function DesktopView() {
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md">
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/conta"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-orange-light p-4 rounded-full mb-4">
                                 <Download className="w-8 h-8 text-dashboard-orange" />
@@ -471,7 +471,7 @@ function MobileView() {
                                 <div className="bg-dashboard-blue-light p-3 rounded-full mb-2">
                                     <Plus className="w-6 h-6 text-dashboard-blue" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground">Novo Processo</div>
+                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/casos/novo"}>Novo Processo</div>
                             </CardContent>
                         </Card>
                         
@@ -480,11 +480,11 @@ function MobileView() {
                                 <div className="bg-dashboard-green-light p-3 rounded-full mb-2">
                                     <Calendar className="w-6 h-6 text-dashboard-green" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground">Agendar</div>
+                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/agenda"}>Agendar</div>
                             </CardContent>
                         </Card>
                         
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => window.location.href = "/biblioteca"}>
                             <CardContent className="p-4 flex flex-col items-center justify-center">
                                 <div className="bg-dashboard-purple-light p-3 rounded-full mb-2">
                                     <Book className="w-6 h-6 text-dashboard-purple" />
@@ -493,7 +493,7 @@ function MobileView() {
                             </CardContent>
                         </Card>
                         
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => window.location.href = "/conta"}>
                             <CardContent className="p-4 flex flex-col items-center justify-center">
                                 <div className="bg-dashboard-orange-light p-3 rounded-full mb-2">
                                     <Download className="w-6 h-6 text-dashboard-orange" />
