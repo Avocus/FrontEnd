@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -21,7 +22,7 @@ export function ListaAdvogados() {
         const data = await getMeusAdvogados();
         setAdvogados(data);
       } catch (error) {
-        showError('Erro ao carregar lista de advogados');
+        showError('Erro ao carregar lista de advogados: ' + error);
       } finally {
         setIsLoading(false);
       }

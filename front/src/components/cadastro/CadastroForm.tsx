@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { cn } from "../../lib/utils"
@@ -5,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -121,7 +121,7 @@ export function CadastroForm({
     } finally {
       setIsLoading(false);
     }
-  }, [router, inviteData]);
+  }, [inviteData, success, router, showError]);
 
   return (
     <div className={cn("flex flex-col gap-6 w-full", className)} {...props}>

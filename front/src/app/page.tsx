@@ -27,7 +27,7 @@ export default function Home() {
       showSidebar: false,
       showFooter: false
     });
-  }, [updateConfig, router]);
+  }, [updateConfig, router, isAuthenticated]);
 
   return (
     <div className="bg-background text-foreground min-h-screen">

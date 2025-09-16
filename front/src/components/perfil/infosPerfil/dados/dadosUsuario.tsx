@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User, Save, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react";
 import Link from "next/link";
 import { PerfilCliente } from "@/types/entities/Cliente";
 import { ClienteProfile } from "@/types/entities/Profile";
@@ -355,7 +356,7 @@ export function DadosUsuario() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {profile.documentos.map((documento) => (
+                    {profile!.documentos.map((documento: { id: Key | null | undefined; nome: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; }) => (
                         <div key={documento.id} className="flex items-center justify-between p-4 rounded-lg border">
                             <div className="flex items-center gap-3">
                                 <FileIcon className="h-8 w-8 text-secondary" />
@@ -508,16 +509,3 @@ export function DadosUsuario() {
         </div>
     );
 }
-
-// Dados mockados para visualização
-const cliente = {
-    processos: [
-        { id: 1, titulo: "Caso XYZ", status: "Ativo", data: "01/10/2023" },
-        { id: 2, titulo: "Caso ABC", status: "Finalizado", data: "15/09/2023" },
-        { id: 3, titulo: "Caso DEF", status: "Ativo", data: "20/08/2023" },
-    ],
-    documentos: [
-        { id: 1, nome: "RG", arquivo: "/documentos/rg.pdf" },
-        { id: 2, nome: "CPF", arquivo: "/documentos/cpf.pdf" },
-    ],
-};

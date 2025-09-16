@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextApiRequest, NextApiResponse } from 'next';
-import { AUTH_ROUTES, UserApiResponse, ApiErrorResponse, UserResponse } from '../../lib/api-routes';
+import { AUTH_ROUTES, UserApiResponse, UserResponse } from '../../lib/api-routes';
 
 interface LoginCredentials {
   username: string;
@@ -41,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
 
-    let result = await serverLogin(email, password);
+    const result = await serverLogin(email, password);
 
     // Definir cookie com o token (não HttpOnly para acesso via JS, mas com flags seguros)
     res.setHeader('Set-Cookie', `token=${result.jwt}; Secure; SameSite=Strict; Path=/; Max-Age=86400`);

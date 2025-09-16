@@ -9,7 +9,7 @@ export const getToken = (): string | null => {
   
   try {
     const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
+    for (const cookie of cookies) {
       const [name, value] = cookie.trim().split('=');
       if (name === 'token') {
         return decodeURIComponent(value);

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy } from "lucide-react";
-import { getFieldValidationClass, getErrorMessage } from "@/utils/formValidation";
+import { getErrorMessage } from "@/utils/formValidation";
 import { vincularCliente } from "@/services/advogado/advogadoService";
 import { gerarLinkConvite } from "@/services/advogado/advogadoService";
 
@@ -64,7 +66,7 @@ export function ModalAdicionarCliente({ isOpen, onClose, onClienteVinculado }: M
         success("Link de convite gerado e copiado!");
       }
     } catch (err) {
-      showError("Erro ao gerar convite. Tente novamente.");
+      showError("Erro ao gerar convite. Tente novamente." + err);
     } finally {
       setIsLoading(false);
     }

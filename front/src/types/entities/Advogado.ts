@@ -1,5 +1,3 @@
-import { AdvogadoProfile } from './Profile';
-
 export interface PerfilAdvogado {
   nome: string;
   email: string;

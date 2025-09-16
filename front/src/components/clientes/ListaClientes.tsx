@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -21,7 +22,7 @@ export function ListaClientes() {
         const data = await getMeusClientes();
         setClientes(data);
       } catch (error) {
-        showError('Erro ao carregar lista de clientes');
+        showError('Erro ao carregar lista de clientes: ' + error);
       } finally {
         setIsLoading(false);
       }

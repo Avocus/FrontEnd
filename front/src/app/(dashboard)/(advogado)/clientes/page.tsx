@@ -27,15 +27,6 @@ export default function ClientesPage() {
     return null;
   }
 
-  const handleShare = () => {
-    const url = window.location.origin + "/cadastro";
-    navigator.share?.({
-      title: "Cadastre-se no Avocuss",
-      text: "Junte-se à nossa plataforma jurídica",
-      url,
-    }) || navigator.clipboard.writeText(url);
-  };
-
   const handleClienteVinculado = () => {
     setRefreshKey(prev => prev + 1); // Força recarga da lista
   };

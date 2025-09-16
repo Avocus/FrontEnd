@@ -78,7 +78,7 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
       
       return newConfig;
     });
-  }, [isAdvogado, isMobile, isMounted]);
+  }, [isAdvogado, isCliente, isMobile, isMounted]);
 
   const updateConfig = useCallback((newConfig: Partial<LayoutConfig>) => {
     setConfig(prevConfig => ({

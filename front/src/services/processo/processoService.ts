@@ -1,6 +1,5 @@
 import api from '@/lib/api';
 import { ProcessoDTO } from '@/types/entities/Processo';
-import { StatusProcesso, TipoProcesso } from '@/types/enums';
 
 export interface CriarProcessoRequest {
   clienteId: string;

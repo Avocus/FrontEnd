@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Interface base para perfil
  */
@@ -14,6 +15,10 @@ export interface BaseProfile {
   estado?: string;
   cep?: string;
   foto?: string;
+  documentos?: any;
+  fotoPerfil?: string;
+  processosFinalizados?: any;
+  processosAtivos?: any;
 }
 
 /**

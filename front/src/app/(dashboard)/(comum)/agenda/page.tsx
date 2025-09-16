@@ -22,7 +22,7 @@ export default function AgendaPage() {
       showSidebar: isAdvogado,
       showFooter: true
     });
-  }, [updateConfig]);
+  }, [isAdvogado, updateConfig]);
 
   return (
     <AuthGuard>
