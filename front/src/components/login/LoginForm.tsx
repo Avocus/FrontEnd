@@ -22,8 +22,8 @@ import Link from "next/link";
 import { loginSchema, resetPasswordSchema, type LoginFormData, type ResetPasswordData } from "../../schemas/loginSchema";
 import { getFieldValidationClass } from "../../utils/formValidation";
 import { useToast } from "@/hooks/useToast";
-import { PrivacyPolicy } from "./PrivacyPolicy";
-import { ServiceTerms } from "./ServiceTerms";
+import { PrivacyPolicy } from "@/components/login/PrivacyPolicy";
+import { ServiceTerms } from "@/components/login/ServiceTerms";
 
 export function LoginForm({
   className,

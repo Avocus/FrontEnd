@@ -3,8 +3,8 @@ import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 
 import { useRouter } from "next/navigation";
-import { PrivacyPolicy } from "../login/PrivacyPolicy";
-import { ServiceTerms } from "../login/ServiceTerms";
+import { PrivacyPolicy } from "@/components/login/PrivacyPolicy";
+import { ServiceTerms } from "@/components/login/ServiceTerms";
 import { ModeToggle } from "../ui/modeToggle";
 import { useAuthStore } from "@/store";
 
