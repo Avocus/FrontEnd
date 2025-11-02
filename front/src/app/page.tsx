@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Gavel, Users, FileText, MessageCircle, Calendar, Library, Briefcase, Clock, Shield, UserCheck, Zap } from 'lucide-react';
@@ -23,9 +22,9 @@ export default function Home() {
       return;
     }
     updateConfig({
-      showNavbar: false,
+      showNavbar: true,
       showSidebar: false,
-      showFooter: false
+      showFooter: true
     });
   }, [updateConfig, router, isAuthenticated]);
 
@@ -75,9 +74,6 @@ export default function Home() {
           >
             <Button className="bg-primary hover:bg-white/10 px-8 py-6 text-lg text-secondary-foreground" onClick={() => router.push("/login")}>
               Comece Agora
-            </Button>
-            <Button variant="outline" className="text-secondary-foreground  hover:bg-white/10 px-8 py-6 text-lg">
-              Saiba Mais
             </Button>
           </motion.div>
         </div>
@@ -305,46 +301,6 @@ export default function Home() {
             ))}
           </CarouselContent>
         </Carousel>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-primary/90 text-secondary-foreground">
-        <div className="max-w-4xl mx-auto text-center px-8">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold mb-6"
-          >
-            Pronto para transformar sua experiência jurídica?
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-xl mb-8"
-          >
-            Cadastre-se agora e tenha acesso a todas as funcionalidades.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <Input
-              type="email"
-              placeholder="Seu melhor e-mail"
-              className="max-w-md bg-white/10 border-white/30 text-secondary-foreground placeholder:text-secondary-foreground/70"
-            />
-            <Button variant="secondary" className="px-8 py-6 text-lg hover:bg-white/10" onClick={() => router.push("/cadastro")}>
-              Comece Agora
-            </Button>
-          </motion.div>
-        </div>
       </section>
     </div>
   );

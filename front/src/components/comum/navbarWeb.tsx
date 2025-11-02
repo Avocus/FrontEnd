@@ -30,13 +30,17 @@ export const NavbarWeb = memo(function NavbarWeb({ showFullNavigation = true, sh
   const { logout, user } = useAuthStore();
   const router = useRouter();
 
-  const navItems: NavItem[] = [
+  const navItems: NavItem[] = user ? [
     { label: "Agenda", href: "/agenda" },
     { label: "Serviços", href: "#" },
     { label: "Chat", onClick: () => setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca" },
     { label: "Videoteca", href: "/videoteca" },
     { label: "Casos", href: "/casos" },
+  ] : [
+    { label: "Chat", onClick: () => setChatOpen(true) },
+    { label: "Biblioteca", href: "/biblioteca" },
+    { label: "Videoteca", href: "/videoteca" },
   ];
 
   const profileItems = [
