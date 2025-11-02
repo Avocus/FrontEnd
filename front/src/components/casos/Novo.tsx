@@ -1,0 +1,496 @@
+"use client"
+
+import { useState, useCallback } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAuthStore } from "@/store"
+import { useToast } from "@/hooks/useToast"
+import { TipoProcesso } from "@/types/enums"
+import { ArrowLeft, FileText, AlertCircle, CheckCircle2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+// Schema de validação para o formulário
+const novoCasoSchema = z.object({
+  titulo: z.string()
+    .min(5, "Título deve ter pelo menos 5 caracteres")
+    .max(100, "Título deve ter no máximo 100 caracteres"),
+  tipoProcesso: z.nativeEnum(TipoProcesso, {
+    message: "Selecione um tipo de processo válido"
+  }),
+  descricao: z.string()
+    .min(20, "Descrição deve ter pelo menos 20 caracteres")
+    .max(1000, "Descrição deve ter no máximo 1000 caracteres"),
+  situacaoAtual: z.string()
+    .min(10, "Situação atual deve ter pelo menos 10 caracteres")
+    .max(500, "Situação atual deve ter no máximo 500 caracteres"),
+  objetivos: z.string()
+    .min(10, "Objetivos devem ter pelo menos 10 caracteres")
+    .max(500, "Objetivos devem ter no máximo 500 caracteres"),
+  urgencia: z.enum(["baixa", "media", "alta"], {
+    message: "Selecione um nível de urgência"
+  }),
+  documentosDisponiveis: z.string().optional(),
+})
+
+type NovoCasoFormData = z.infer<typeof novoCasoSchema>
+
+interface CasoCliente {
+  id: string
+  clienteId: string
+  clienteNome: string
+  titulo: string
+  tipoProcesso: TipoProcesso
+  descricao: string
+  situacaoAtual: string
+  objetivos: string
+  urgencia: "baixa" | "media" | "alta"
+  documentosDisponiveis?: string
+  dataSolicitacao: string
+  status: "pendente" | "em_analise" | "aceito" | "rejeitado"
+}
+
+export default function NovoCaso() {
+  const { user } = useAuthStore()
+  const { success, error: showError } = useToast()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, touchedFields },
+    setValue,
+    watch,
+    getValues,
+    reset
+  } = useForm<NovoCasoFormData>({
+    resolver: zodResolver(novoCasoSchema),
+    mode: "onChange",
+    defaultValues: {
+      titulo: "",
+      tipoProcesso: undefined,
+      descricao: "",
+      situacaoAtual: "",
+      objetivos: "",
+      urgencia: undefined,
+      documentosDisponiveis: "",
+    }
+  })
+
+  const watchedValues = watch()
+
+  const getFieldValidationClass = (fieldName: keyof NovoCasoFormData) => {
+    const isTouched = touchedFields[fieldName]
+    const hasError = errors[fieldName]
+    
+    if (!isTouched) return ""
+    
+    if (hasError) return "border-red-500 focus:border-red-500"
+    return "border-green-500 focus:border-green-500"
+  }
+
+  const getTipoProcessoLabel = (tipo: TipoProcesso) => {
+    const labels: Record<TipoProcesso, string> = {
+      [TipoProcesso.CIVIL]: "Civil",
+      [TipoProcesso.PENAL]: "Penal", 
+      [TipoProcesso.TRABALHISTA]: "Trabalhista",
+      [TipoProcesso.ADMINISTRATIVO]: "Administrativo",
+      [TipoProcesso.CONSUMIDOR]: "Direito do Consumidor",
+      [TipoProcesso.FAMILIAR]: "Direito de Família",
+      [TipoProcesso.PREVIDENCIARIO]: "Previdenciário",
+      [TipoProcesso.OUTROS]: "Outros"
+    }
+    return labels[tipo] || tipo
+  }
+
+  const getUrgenciaLabel = (urgencia: "baixa" | "media" | "alta") => {
+    const labels = {
+      baixa: "Baixa",
+      media: "Média", 
+      alta: "Alta"
+    }
+    return labels[urgencia]
+  }
+
+  const getUrgenciaColor = (urgencia: "baixa" | "media" | "alta") => {
+    const colors = {
+      baixa: "text-green-600 bg-green-50 border-green-200",
+      media: "text-yellow-600 bg-yellow-50 border-yellow-200",
+      alta: "text-red-600 bg-red-50 border-red-200"
+    }
+    return colors[urgencia]
+  }
+
+  const onSubmit = useCallback(async (data: NovoCasoFormData) => {
+    if (!user) {
+      showError("Usuário não autenticado")
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const novoCaso: CasoCliente = {
+        id: Date.now().toString(),
+        clienteId: user.client?.toString() || "unknown",
+        clienteNome: user.nome || "Nome não informado",
+        titulo: data.titulo,
+        tipoProcesso: data.tipoProcesso,
+        descricao: data.descricao,
+        situacaoAtual: data.situacaoAtual,
+        objetivos: data.objetivos,
+        urgencia: data.urgencia,
+        documentosDisponiveis: data.documentosDisponiveis,
+        dataSolicitacao: new Date().toISOString(),
+        status: "pendente"
+      }
+
+      // Recuperar casos existentes do localStorage
+      const casosExistentes = JSON.parse(localStorage.getItem("casoCliente") || "[]")
+      
+      // Adicionar o novo caso
+      const novosCasos = [...casosExistentes, novoCaso]
+      
+      // Salvar no localStorage
+      localStorage.setItem("casoCliente", JSON.stringify(novosCasos))
+
+      success("Solicitação de caso enviada com sucesso!")
+      reset()
+      setShowPreview(false)
+      
+      // Redirecionar após um breve delay
+      setTimeout(() => {
+        router.push("/#")
+      }, 2000)
+
+    } catch (error) {
+      console.error("Erro ao salvar caso:", error)
+      showError("Erro ao enviar solicitação. Tente novamente.")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [user, success, showError, reset, router])
+
+  const handlePreview = () => {
+    if (isValid) {
+      setShowPreview(true)
+    }
+  }
+
+  const handleBackToForm = () => {
+    setShowPreview(false)
+  }
+
+  if (showPreview) {
+    const formData = getValues()
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+        <div className="max-w-4xl mx-auto">
+          <Card className="shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-6 w-6" />
+                  <CardTitle className="text-xl">Revisão da Solicitação</CardTitle>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-white hover:bg-white/20"
+                  onClick={handleBackToForm}
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-6 space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 text-sm font-medium">
+                  ⚠️ Revise cuidadosamente as informações antes de enviar sua solicitação
+                </p>
+              </div>
+
+              <div className="grid gap-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Cliente</Label>
+                    <p className="mt-1 text-gray-900">{user?.nome}</p>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Tipo de Processo</Label>
+                    <p className="mt-1 text-gray-900">{getTipoProcessoLabel(formData.tipoProcesso)}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Título do Caso</Label>
+                  <p className="mt-1 text-gray-900 font-medium">{formData.titulo}</p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Descrição do Caso</Label>
+                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.descricao}</p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Situação Atual</Label>
+                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.situacaoAtual}</p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">Objetivos</Label>
+                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.objetivos}</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Nível de Urgência</Label>
+                    <div className={cn("mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block", getUrgenciaColor(formData.urgencia))}>
+                      {getUrgenciaLabel(formData.urgencia)}
+                    </div>
+                  </div>
+                </div>
+
+                {formData.documentosDisponiveis && (
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Documentos Disponíveis</Label>
+                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.documentosDisponiveis}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-4 pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBackToForm}
+                  className="flex-1"
+                >
+                  Voltar para Edição
+                </Button>
+                <Button
+                  onClick={() => onSubmit(formData)}
+                  disabled={isLoading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {isLoading ? "Enviando..." : "Solicitar Abertura de Caso"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen  p-4">
+      <div className="max-w-4xl mx-auto">
+        <Card className="shadow-lg">
+          <CardHeader className="bg-primary text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="h-6 w-6" />
+                <CardTitle className="text-xl">Nova Solicitação de Caso Jurídico</CardTitle>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={() => router.back()}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Informações do Cliente */}
+              <div className="bg-secondary rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  Informações do Cliente
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Cliente: <span className="font-medium">{user?.nome}</span>
+                </p>
+              </div>
+
+              {/* Campos do Formulário */}
+              <div className="grid gap-6">
+                {/* Título e Tipo de Processo */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="titulo">Título do Caso *</Label>
+                    <Input
+                      id="titulo"
+                      placeholder="Ex: Rescisão de contrato de trabalho"
+                      className={getFieldValidationClass("titulo")}
+                      {...register("titulo")}
+                    />
+                    {errors.titulo && touchedFields.titulo && (
+                      <p className="text-red-500 text-sm">{errors.titulo.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tipoProcesso">Tipo de Processo *</Label>
+                    <Select
+                      value={watchedValues.tipoProcesso}
+                      onValueChange={(value) => setValue("tipoProcesso", value as TipoProcesso, { shouldValidate: true })}
+                    >
+                      <SelectTrigger className={getFieldValidationClass("tipoProcesso")}>
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(TipoProcesso).map((tipo) => (
+                          <SelectItem key={tipo} value={tipo}>
+                            {getTipoProcessoLabel(tipo)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.tipoProcesso && (
+                      <p className="text-red-500 text-sm">{errors.tipoProcesso.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Descrição */}
+                <div className="space-y-2">
+                  <Label htmlFor="descricao">Descrição Detalhada do Caso *</Label>
+                  <Textarea
+                    id="descricao"
+                    placeholder="Descreva detalhadamente o seu caso, incluindo datas, valores, partes envolvidas e outros detalhes relevantes..."
+                    className={cn("min-h-[120px]", getFieldValidationClass("descricao"))}
+                    {...register("descricao")}
+                  />
+                  <p className="text-xs text-gray-500">
+                    {watchedValues.descricao?.length || 0}/1000 caracteres
+                  </p>
+                  {errors.descricao && touchedFields.descricao && (
+                    <p className="text-red-500 text-sm">{errors.descricao.message}</p>
+                  )}
+                </div>
+
+                {/* Situação Atual */}
+                <div className="space-y-2">
+                  <Label htmlFor="situacaoAtual">Situação Atual *</Label>
+                  <Textarea
+                    id="situacaoAtual"
+                    placeholder="Descreva a situação atual do problema, o que já foi tentado, prazos envolvidos..."
+                    className={cn("min-h-[100px]", getFieldValidationClass("situacaoAtual"))}
+                    {...register("situacaoAtual")}
+                  />
+                  <p className="text-xs text-gray-500">
+                    {watchedValues.situacaoAtual?.length || 0}/500 caracteres
+                  </p>
+                  {errors.situacaoAtual && touchedFields.situacaoAtual && (
+                    <p className="text-red-500 text-sm">{errors.situacaoAtual.message}</p>
+                  )}
+                </div>
+
+                {/* Objetivos */}
+                <div className="space-y-2">
+                  <Label htmlFor="objetivos">Objetivos e Resultado Esperado *</Label>
+                  <Textarea
+                    id="objetivos"
+                    placeholder="O que você espera alcançar com este caso? Quais são seus objetivos principais?"
+                    className={cn("min-h-[100px]", getFieldValidationClass("objetivos"))}
+                    {...register("objetivos")}
+                  />
+                  <p className="text-xs text-gray-500">
+                    {watchedValues.objetivos?.length || 0}/500 caracteres
+                  </p>
+                  {errors.objetivos && touchedFields.objetivos && (
+                    <p className="text-red-500 text-sm">{errors.objetivos.message}</p>
+                  )}
+                </div>
+
+                {/* Urgência */}
+                <div className="space-y-2">
+                  <Label htmlFor="urgencia">Nível de Urgência *</Label>
+                  <Select
+                    value={watchedValues.urgencia}
+                    onValueChange={(value) => setValue("urgencia", value as "baixa" | "media" | "alta", { shouldValidate: true })}
+                  >
+                    <SelectTrigger className={getFieldValidationClass("urgencia")}>
+                      <SelectValue placeholder="Selecione o nível de urgência" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baixa">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                          Baixa - Não há pressa
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="media">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                          Média - Algumas semanas
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="alta">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                          Alta - Urgente
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.urgencia && (
+                    <p className="text-red-500 text-sm">{errors.urgencia.message}</p>
+                  )}
+                </div>
+
+                {/* Documentos Disponíveis */}
+                <div className="space-y-2">
+                  <Label htmlFor="documentosDisponiveis">Documentos Disponíveis (Opcional)</Label>
+                  <Textarea
+                    id="documentosDisponiveis"
+                    placeholder="Liste os documentos que você possui relacionados ao caso (contratos, e-mails, fotos, etc.)"
+                    className="min-h-[80px]"
+                    {...register("documentosDisponiveis")}
+                  />
+                </div>
+              </div>
+
+              {/* Botões */}
+              <div className="flex gap-4 pt-6 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handlePreview}
+                  disabled={!isValid}
+                  className="flex-1 bg-secondary hover:bg-blue-700 "
+                >
+                  Revisar Solicitação
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
