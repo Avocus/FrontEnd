@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useNotificationStore } from "@/store";
+import { NotificacaoTipo } from "@/types";
+import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { 
     Briefcase, 
     Clock, 
@@ -19,17 +24,140 @@ import {
     Activity,
 } from "lucide-react";
 
-export function HomeAdvogado() {
-    const { isMobile } = useResponsive();
-
-    if (isMobile) {
-        return <MobileView />;
-    }
-
-    return <DesktopView />;
+// Interface para os casos do localStorage
+interface CasoCliente {
+  id: string;
+  clienteId: string;
+  clienteNome: string;
+  titulo: string;
+  tipoProcesso: string;
+  descricao: string;
+  situacaoAtual: string;
+  objetivos: string;
+  urgencia: "baixa" | "media" | "alta";
+  documentosDisponiveis?: string;
+  dataSolicitacao: string;
+  status: "pendente" | "em_analise" | "aceito" | "rejeitado" | "aguardando_documentos" | "documentos_enviados" | "aguardando_analise_documentos" | "em_andamento" | "protocolado";
+  advogadoNome?: string;
 }
 
-function DesktopView() {
+// Hook para verificar casos pendentes
+function useCasosPendentes() {
+  const [casosPendentes, setCasosPendentes] = useState<CasoCliente[]>([]);
+  const [casosNotificados, setCasosNotificados] = useState<Set<string>>(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { addNotification } = useNotificationStore();
+  
+  // Debug: verificar se o store está funcionando
+  useEffect(() => {
+    console.log("🔧 Hook useCasosPendentes inicializado");
+    console.log("📦 addNotification disponível:", typeof addNotification === 'function');
+  }, [addNotification]);
+
+  const verificarCasosPendentes = useCallback(() => {
+    if (!isInitialized) return; // Aguardar inicialização completa
+    
+    try {
+      const casosExistentes = JSON.parse(localStorage.getItem("casoCliente") || "[]");
+      const pendentes = casosExistentes.filter((caso: CasoCliente) => caso.status === "pendente");
+      
+      console.log("Verificando casos pendentes:", pendentes.length);
+      console.log("Casos já notificados:", Array.from(casosNotificados));
+      
+      // Verificar se há casos novos que ainda não foram notificados
+      const casosNovos = pendentes.filter((caso: CasoCliente) => !casosNotificados.has(caso.id));
+      
+      console.log("Casos novos encontrados:", casosNovos.length, casosNovos.map((c: CasoCliente) => c.id));
+      
+      if (casosNovos.length > 0) {
+        console.log("🔔 Adicionando notificação para casos novos...");
+        
+        const notificacao = {
+          titulo: "Novos casos disponíveis",
+          mensagem: `Você tem ${casosNovos.length} novo${casosNovos.length > 1 ? 's' : ''} caso${casosNovos.length > 1 ? 's' : ''} pendente${casosNovos.length > 1 ? 's' : ''} para análise`,
+          tipo: NotificacaoTipo.INFO,
+          link: "/casos"
+        };
+        
+        console.log("📤 Chamando addNotification com:", notificacao);
+        
+        // Marcar os casos novos como notificados
+        const novosNotificados = new Set([...casosNotificados, ...casosNovos.map((caso: CasoCliente) => caso.id)]);
+        setCasosNotificados(novosNotificados);
+        
+        // Salvar no localStorage para persistir entre sessões
+        localStorage.setItem("casosNotificados", JSON.stringify([...novosNotificados]));
+        console.log("💾 Casos marcados como notificados:", [...novosNotificados]);
+      }
+      
+      // Remover casos que não estão mais pendentes da lista de notificados
+      const casosPendentesIds = new Set(pendentes.map((caso: CasoCliente) => caso.id));
+      const casosNotificadosAtualizados = new Set([...casosNotificados].filter(id => casosPendentesIds.has(id)));
+      
+      if (casosNotificadosAtualizados.size !== casosNotificados.size) {
+        setCasosNotificados(casosNotificadosAtualizados);
+        localStorage.setItem("casosNotificados", JSON.stringify([...casosNotificadosAtualizados]));
+      }
+      
+      setCasosPendentes(pendentes);
+    } catch (error) {
+      console.error("Erro ao verificar casos pendentes:", error);
+      setCasosPendentes([]);
+    }
+  }, [casosNotificados, addNotification, isInitialized]);
+
+  useEffect(() => {
+    // Carregar casos já notificados do localStorage
+    try {
+      const casosNotificadosSalvos = JSON.parse(localStorage.getItem("casosNotificados") || "[]");
+      setCasosNotificados(new Set(casosNotificadosSalvos));
+      console.log("Casos notificados carregados do localStorage:", casosNotificadosSalvos);
+    } catch (error) {
+      console.error("Erro ao carregar casos notificados:", error);
+    }
+    setIsInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    verificarCasosPendentes();
+    
+    // Escutar mudanças no localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "casoCliente") {
+        verificarCasosPendentes();
+      }
+    };
+
+    const handleCustomStorageChange = () => verificarCasosPendentes();
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("casoClienteUpdated", handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("casoClienteUpdated", handleCustomStorageChange);
+    };
+  }, [verificarCasosPendentes]);
+
+  return { casosPendentes, totalPendentes: casosPendentes.length };
+}
+
+export function HomeAdvogado() {
+    const { isMobile } = useResponsive();
+    
+    // Verificar casos pendentes - apenas uma vez no componente principal
+    const { totalPendentes } = useCasosPendentes();
+
+    if (isMobile) {
+        return <MobileView totalPendentes={totalPendentes} />;
+    }
+
+    return <DesktopView totalPendentes={totalPendentes} />;
+}
+
+function DesktopView({ totalPendentes }: { totalPendentes: number }) {
+    const router = useRouter();
+
     return (
         <div className="min-h-screen bg-background text-foreground">
             {/* Header com boas-vindas */}
@@ -44,6 +172,16 @@ function DesktopView() {
                             <Activity className="w-4 h-4 inline mr-1" />
                             Sistema Ativo
                         </div>
+                        {/* Indicador de casos pendentes */}
+                        {totalPendentes > 0 && (
+                            <div 
+                                className="bg-dashboard-card-orange text-dashboard-orange px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => router.push("/casos")}
+                            >
+                                <AlertTriangle className="w-4 h-4 inline mr-1" />
+                                {totalPendentes} caso{totalPendentes > 1 ? 's' : ''} pendente{totalPendentes > 1 ? 's' : ''}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -52,16 +190,45 @@ function DesktopView() {
             <div className="flex-1 p-8">
                 {/* KPIs principais */}
                 <section className="grid grid-cols-4 gap-6 mb-8">
-                    <Card className="bg-gradient-dashboard-blue border-0 shadow-lg hover:shadow-xl transition-shadow">
+                    <Card 
+                        className={`border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1 ${
+                            totalPendentes > 0 
+                                ? 'bg-gradient-dashboard-orange' 
+                                : 'bg-gradient-dashboard-blue'
+                        }`}
+                        onClick={() => router.push("/casos")}
+                    >
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-dashboard-card-blue-light text-sm font-medium">Casos Ativos</p>
-                                    <p className="text-3xl font-bold text-dashboard-card-primary">12</p>
-                                    <p className="text-dashboard-card-blue-light text-xs">+2 este mês</p>
+                                    <p className={`text-sm font-medium ${
+                                        totalPendentes > 0 
+                                            ? 'text-dashboard-card-orange-light' 
+                                            : 'text-dashboard-card-blue-light'
+                                    }`}>
+                                        {totalPendentes > 0 ? 'Casos Pendentes' : 'Casos Ativos'}
+                                    </p>
+                                    <p className="text-3xl font-bold text-dashboard-card-primary">
+                                        {totalPendentes > 0 ? totalPendentes : '12'}
+                                    </p>
+                                    <p className={`text-xs ${
+                                        totalPendentes > 0 
+                                            ? 'text-dashboard-card-orange-light' 
+                                            : 'text-dashboard-card-blue-light'
+                                    }`}>
+                                        {totalPendentes > 0 ? 'Aguardando análise' : '+2 este mês'}
+                                    </p>
                                 </div>
-                                <div className="bg-white/20 dark:bg-blue-400/40 p-3 rounded-full">
-                                    <Briefcase className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
+                                <div className={`p-3 rounded-full ${
+                                    totalPendentes > 0 
+                                        ? 'bg-white/20 dark:bg-orange-400/40' 
+                                        : 'bg-white/20 dark:bg-blue-400/40'
+                                }`}>
+                                    {totalPendentes > 0 ? (
+                                        <AlertTriangle className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
+                                    ) : (
+                                        <Briefcase className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
+                                    )}
                                 </div>
                             </div>
                         </CardContent>
@@ -228,7 +395,40 @@ function DesktopView() {
 
                 {/* Ações Rápidas */}
                 <section className="grid grid-cols-4 gap-6">
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/documentos"}>
+                    <Card 
+                        className={`cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md relative ${
+                            totalPendentes > 0 ? 'ring-2 ring-dashboard-orange' : ''
+                        }`} 
+                        onClick={() => router.push("/casos")}
+                    >
+                        <CardContent className="p-6 flex flex-col items-center text-center">
+                            {totalPendentes > 0 && (
+                                <div className="absolute -top-2 -right-2 bg-dashboard-orange text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
+                                    {totalPendentes > 9 ? '9+' : totalPendentes}
+                                </div>
+                            )}
+                            <div className={`p-4 rounded-full mb-4 ${
+                                totalPendentes > 0 
+                                    ? 'bg-dashboard-orange-light' 
+                                    : 'bg-dashboard-blue-light'
+                            }`}>
+                                {totalPendentes > 0 ? (
+                                    <AlertTriangle className="w-8 h-8 text-dashboard-orange" />
+                                ) : (
+                                    <Briefcase className="w-8 h-8 text-dashboard-blue" />
+                                )}
+                            </div>
+                            <h3 className="font-semibold mb-2 text-foreground">Casos</h3>
+                            <p className="text-sm text-muted-foreground">
+                                {totalPendentes > 0 
+                                    ? `${totalPendentes} pendente${totalPendentes > 1 ? 's' : ''}` 
+                                    : 'Gerenciar casos'
+                                }
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => router.push("/documentos")}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-blue-light p-4 rounded-full mb-4">
                                 <FileText className="w-8 h-8 text-dashboard-blue" />
@@ -238,7 +438,7 @@ function DesktopView() {
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/agenda"}>
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => router.push("/agenda")}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-green-light p-4 rounded-full mb-4">
                                 <Calendar className="w-8 h-8 text-dashboard-green" />
@@ -248,7 +448,7 @@ function DesktopView() {
                         </CardContent>
                     </Card>
 
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/clientes"}>
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => router.push("/clientes")}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-purple-light p-4 rounded-full mb-4">
                                 <Users className="w-8 h-8 text-dashboard-purple" />
@@ -257,29 +457,35 @@ function DesktopView() {
                             <p className="text-sm text-muted-foreground">Gerenciar clientes</p>
                         </CardContent>
                     </Card>
-
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/estatisticas"}>
-                        <CardContent className="p-6 flex flex-col items-center text-center">
-                            <div className="bg-dashboard-orange-light p-4 rounded-full mb-4">
-                                <BarChart3 className="w-8 h-8 text-dashboard-orange" />
-                            </div>
-                            <h3 className="font-semibold mb-2 text-foreground">Relatórios</h3>
-                            <p className="text-sm text-muted-foreground">Análises e métricas</p>
-                        </CardContent>
-                    </Card>
                 </section>
             </div>
         </div>
     );
 }
 
-function MobileView() {
+function MobileView({ totalPendentes }: { totalPendentes: number }) {
+    const router = useRouter();
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header mobile */}
             <div className="bg-card shadow-sm px-4 py-6 border-b">
-                <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Gerencie sua prática jurídica</p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+                        <p className="text-sm text-muted-foreground">Gerencie sua prática jurídica</p>
+                    </div>
+                    {/* Indicador de casos pendentes mobile */}
+                    {totalPendentes > 0 && (
+                        <div 
+                            className="bg-dashboard-card-orange text-dashboard-orange px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity flex items-center"
+                            onClick={() => router.push("/casos")}
+                        >
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            {totalPendentes}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="min-h-fit-content">
@@ -288,19 +494,55 @@ function MobileView() {
                     <Carousel className="w-full">
                         <CarouselContent>
                             <CarouselItem>
-                                <Card className="bg-gradient-dashboard-blue shadow-lg min-h-36">
+                                <Card 
+                                    className={`shadow-lg min-h-36 cursor-pointer hover:shadow-xl transition-shadow ${
+                                        totalPendentes > 0 
+                                            ? 'bg-gradient-dashboard-orange' 
+                                            : 'bg-gradient-dashboard-blue'
+                                    }`}
+                                    onClick={() => router.push("/casos")}
+                                >
                                     <CardContent className="p-5">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-dashboard-card-blue-light text-sm">Processos ativos</p>
-                                                <div className="text-3xl font-bold text-dashboard-card-primary">12</div>
-                                                <div className="flex items-center text-dashboard-card-blue-light text-xs mt-1">
-                                                    <TrendingUp className="w-3 h-3 mr-1" />
-                                                    +2 novos esta semana
+                                                <p className={`text-sm ${
+                                                    totalPendentes > 0 
+                                                        ? 'text-dashboard-card-orange-light' 
+                                                        : 'text-dashboard-card-blue-light'
+                                                }`}>
+                                                    {totalPendentes > 0 ? 'Casos pendentes' : 'Processos ativos'}
+                                                </p>
+                                                <div className="text-3xl font-bold text-dashboard-card-primary">
+                                                    {totalPendentes > 0 ? totalPendentes : '12'}
+                                                </div>
+                                                <div className={`flex items-center text-xs mt-1 ${
+                                                    totalPendentes > 0 
+                                                        ? 'text-dashboard-card-orange-light' 
+                                                        : 'text-dashboard-card-blue-light'
+                                                }`}>
+                                                    {totalPendentes > 0 ? (
+                                                        <>
+                                                            <AlertTriangle className="w-3 h-3 mr-1" />
+                                                            Aguardando análise
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <TrendingUp className="w-3 h-3 mr-1" />
+                                                            +2 novos esta semana
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div className="bg-blue-400/60 dark:bg-blue-400/40 p-3 rounded-full">
-                                                <Briefcase className="w-6 h-6 text-dashboard-card-primary" />
+                                            <div className={`p-3 rounded-full ${
+                                                totalPendentes > 0 
+                                                    ? 'bg-orange-400/60 dark:bg-orange-400/40' 
+                                                    : 'bg-blue-400/60 dark:bg-blue-400/40'
+                                            }`}>
+                                                {totalPendentes > 0 ? (
+                                                    <AlertTriangle className="w-6 h-6 text-dashboard-card-primary" />
+                                                ) : (
+                                                    <Briefcase className="w-6 h-6 text-dashboard-card-primary" />
+                                                )}
                                             </div>
                                         </div>
                                     </CardContent>
@@ -398,7 +640,34 @@ function MobileView() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => window.location.href = "/documentos"}>
+                        <Card 
+                            className={`bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0 ${
+                                totalPendentes > 0 ? 'ring-2 ring-dashboard-orange' : ''
+                            }`} 
+                            onClick={() => router.push("/casos")}
+                        >
+                            <CardContent className="p-4 flex flex-col items-center justify-center relative">
+                                {totalPendentes > 0 && (
+                                    <div className="absolute -top-1 -right-1 bg-dashboard-orange text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {totalPendentes > 9 ? '9+' : totalPendentes}
+                                    </div>
+                                )}
+                                <div className={`p-3 rounded-full mb-2 ${
+                                    totalPendentes > 0 
+                                        ? 'bg-dashboard-orange-light' 
+                                        : 'bg-dashboard-blue-light'
+                                }`}>
+                                    {totalPendentes > 0 ? (
+                                        <AlertTriangle className="w-6 h-6 text-dashboard-orange" />
+                                    ) : (
+                                        <Briefcase className="w-6 h-6 text-dashboard-blue" />
+                                    )}
+                                </div>
+                                <div className="text-sm font-medium text-center text-foreground">Casos</div>
+                            </CardContent>
+                        </Card>
+                        
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => router.push("/documentos")}>
                             <CardContent className="p-4 flex flex-col items-center justify-center">
                                 <div className="bg-dashboard-blue-light p-3 rounded-full mb-2">
                                     <FileText className="w-6 h-6 text-dashboard-blue" />
@@ -407,30 +676,21 @@ function MobileView() {
                             </CardContent>
                         </Card>
                         
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => router.push("/agenda")}>
                             <CardContent className="p-4 flex flex-col items-center justify-center">
                                 <div className="bg-dashboard-green-light p-3 rounded-full mb-2">
                                     <Calendar className="w-6 h-6 text-dashboard-green" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/agenda"}>Agenda</div>
+                                <div className="text-sm font-medium text-center text-foreground">Agenda</div>
                             </CardContent>
                         </Card>
                         
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
+                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => router.push("/clientes")}>
                             <CardContent className="p-4 flex flex-col items-center justify-center">
                                 <div className="bg-dashboard-purple-light p-3 rounded-full mb-2">
                                     <Users className="w-6 h-6 text-dashboard-purple" />
                                 </div>
-                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/clientes"}>Clientes</div>
-                            </CardContent>
-                        </Card>
-                        
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
-                            <CardContent className="p-4 flex flex-col items-center justify-center">
-                                <div className="bg-dashboard-orange-light p-3 rounded-full mb-2">
-                                    <BarChart3 className="w-6 h-6 text-dashboard-orange" />
-                                </div>
-                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/estatisticas"}>Relatórios</div>
+                                <div className="text-sm font-medium text-center text-foreground">Clientes</div>
                             </CardContent>
                         </Card>
                     </div>
