@@ -23,6 +23,17 @@ interface DocumentoAnexado {
   conteudo: string; // Base64 do arquivo
 }
 
+// Interface para entradas do timeline
+interface TimelineEntry {
+  id: string;
+  data: string;
+  statusAnterior?: string;
+  novoStatus: string;
+  descricao: string;
+  autor: "cliente" | "advogado" | "sistema";
+  observacoes?: string;
+}
+
 // Interface para os casos do localStorage
 interface CasoCliente {
   id: string;
@@ -39,6 +50,7 @@ interface CasoCliente {
   status: "pendente" | "em_analise" | "aceito" | "rejeitado" | "aguardando_documentos" | "documentos_enviados" | "aguardando_analise_documentos" | "em_andamento" | "protocolado";
   advogadoNome?: string;
   documentosAnexados?: DocumentoAnexado[];
+  timeline?: TimelineEntry[];
 }
 
 // Hook para carregar casos do localStorage
@@ -119,6 +131,25 @@ const podeGerenciarDocumentos = (status: CasoCliente["status"]) => {
     "aguardando_analise_documentos"
   ];
   return statusPermitidos.includes(status);
+};
+
+// Função utilitária para adicionar entrada no timeline
+const addTimelineEntry = (
+  statusAnterior: string | undefined,
+  novoStatus: string,
+  descricao: string,
+  autor: "cliente" | "advogado" | "sistema",
+  observacoes?: string
+): TimelineEntry => {
+  return {
+    id: `timeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    data: new Date().toISOString(),
+    statusAnterior,
+    novoStatus,
+    descricao,
+    autor,
+    observacoes
+  };
 };
 
 // Função utilitária para obter advogado responsável
@@ -405,10 +436,19 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
       // Atualizar o caso no localStorage
       const casosAtualizados = casos.map(c => {
         if (c.id === casoId) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "aguardando_analise_documentos",
+            `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
+            "cliente",
+            `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
+          );
+          
           return {
             ...c,
             status: "aguardando_analise_documentos" as const,
-            documentosAnexados: [...(c.documentosAnexados || []), ...documentosConvertidos]
+            documentosAnexados: [...(c.documentosAnexados || []), ...documentosConvertidos],
+            timeline: [...(c.timeline || []), timelineEntry]
           };
         }
         return c;
@@ -425,10 +465,19 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
       const casosAdvogadoAtualizados = casosAdvogado.map((c: Record<string, unknown>) => {
         if (c.id === casoId || c.casoClienteId === casoId) {
           const documentosExistentes = (c.documentosAnexados as DocumentoAnexado[]) || [];
+          const timelineEntry = addTimelineEntry(
+            c.status as string,
+            "aguardando_analise_documentos",
+            `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
+            "cliente",
+            `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
+          );
+          
           return {
             ...c,
             status: "aguardando_analise_documentos",
-            documentosAnexados: [...documentosExistentes, ...documentosConvertidos]
+            documentosAnexados: [...documentosExistentes, ...documentosConvertidos],
+            timeline: [...((c.timeline as TimelineEntry[]) || []), timelineEntry]
           };
         }
         return c;
@@ -440,6 +489,14 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
       );
 
       if (!casoExistente && caso) {
+        const timelineEntry = addTimelineEntry(
+          caso.status,
+          "aguardando_analise_documentos",
+          `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
+          "cliente",
+          `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
+        );
+        
         const novoCasoAdvogado = {
           ...caso,
           casoClienteId: caso.id,
@@ -447,7 +504,8 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
           documentosAnexados: documentosConvertidos,
           advogadoId: "temp-advogado",
           advogadoNome: caso.advogadoNome || "Advogado Responsável",
-          dataAceite: new Date().toISOString()
+          dataAceite: new Date().toISOString(),
+          timeline: [timelineEntry]
         };
         casosAdvogadoAtualizados.push(novoCasoAdvogado);
       }
@@ -766,24 +824,76 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
           <div className="border rounded-lg p-4">
             <h2 className="text-xl font-semibold mb-4">Andamentos do Processo</h2>
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-3 h-3 bg-primary rounded-full"></div>
+              {/* Timeline baseado no array de timeline do caso */}
+              {caso.timeline && caso.timeline.length > 0 ? (
+                <div className="space-y-6">
+                  {[...caso.timeline].reverse().map((entry, index) => (
+                    <div key={entry.id} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className={`w-3 h-3 rounded-full ${
+                          entry.autor === "cliente" ? "bg-blue-500" :
+                          entry.autor === "advogado" ? "bg-green-500" : "bg-gray-500"
+                        }`}></div>
+                        {index < caso.timeline!.length - 1 && (
+                          <div className="w-0.5 h-16 bg-gray-200 mt-2"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 pb-8">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(entry.data).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit', 
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            entry.autor === "cliente" ? "bg-blue-100 text-blue-800" :
+                            entry.autor === "advogado" ? "bg-green-100 text-green-800" : 
+                            "bg-gray-100 text-gray-800"
+                          }`}>
+                            {entry.autor === "cliente" ? "Cliente" : 
+                             entry.autor === "advogado" ? "Advogado" : "Sistema"}
+                          </span>
+                        </div>
+                        <p className="font-medium mb-1">{entry.descricao}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Status: {entry.statusAnterior ? `${getStatusLabel(entry.statusAnterior as CasoCliente["status"])} → ` : ""}{getStatusLabel(entry.novoStatus as CasoCliente["status"])}
+                        </p>
+                        {entry.observacoes && (
+                          <p className="text-sm text-muted-foreground mt-1 italic">
+                            {entry.observacoes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="pb-8">
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(caso.dataSolicitacao).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit', 
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  <p className="font-medium">Caso solicitado</p>
-                  <p className="text-sm text-muted-foreground">Solicitação de caso enviada com sucesso</p>
+              ) : (
+                <div className="space-y-6">
+                  {/* Timeline padrão quando não há entradas específicas */}
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 bg-primary rounded-full"></div>
+                    </div>
+                    <div className="pb-8">
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(caso.dataSolicitacao).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit', 
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                      <p className="font-medium">Caso solicitado</p>
+                      <p className="text-sm text-muted-foreground">Solicitação de caso enviada com sucesso</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </TabsContent>

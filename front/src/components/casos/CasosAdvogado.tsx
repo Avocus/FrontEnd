@@ -31,6 +31,7 @@ interface CasoCliente {
   status: "pendente" | "em_analise" | "aceito" | "rejeitado" | "aguardando_documentos" | "protocolado";
   advogadoId?: string;
   advogadoNome?: string;
+  timeline?: TimelineEntry[];
 }
 
 // Interface para documentos anexados
@@ -41,6 +42,17 @@ interface DocumentoAnexado {
   tamanho: number;
   dataEnvio: string;
   conteudo: string; // Base64 do arquivo
+}
+
+// Interface para entradas do timeline
+interface TimelineEntry {
+  id: string;
+  data: string;
+  statusAnterior?: string;
+  novoStatus: string;
+  descricao: string;
+  autor: "cliente" | "advogado" | "sistema";
+  observacoes?: string;
 }
 
 // Interface para casos do advogado
@@ -62,6 +74,7 @@ interface CasoAdvogado {
   dataAceite: string;
   status: "aceito" | "em_andamento" | "concluido" | "arquivado" | "esperando_documentos" | "aguardando_analise_documentos" | "protocolado";
   documentosAnexados?: DocumentoAnexado[];
+  timeline?: TimelineEntry[];
 }
 
 // Hook para carregar casos pendentes do localStorage
@@ -143,6 +156,25 @@ const getStatusBadgeVariant = (status: CasoAdvogado["status"]) => {
     protocolado: "default" as const
   };
   return variants[status] || "outline";
+};
+
+// Função utilitária para adicionar entrada no timeline
+const addTimelineEntry = (
+  statusAnterior: string | undefined,
+  novoStatus: string,
+  descricao: string,
+  autor: "cliente" | "advogado" | "sistema",
+  observacoes?: string
+): TimelineEntry => {
+  return {
+    id: `timeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    data: new Date().toISOString(),
+    statusAnterior,
+    novoStatus,
+    descricao,
+    autor,
+    observacoes
+  };
 };
 
 // Modal para aceitar/declinar caso
@@ -264,16 +296,26 @@ function CasosAdvogadoWeb() {
     try {
       // Atualizar o caso no localStorage casoCliente
       const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosAtualizados = casosCliente.map((c: CasoCliente) => 
-        c.id === caso.id 
-          ? { 
-              ...c, 
-              status: "aceito", 
-              advogadoId: user.id?.toString(),
-              advogadoNome: user.nome || "Advogado"
-            }
-          : c
-      );
+      const casosAtualizados = casosCliente.map((c: CasoCliente) => {
+        if (c.id === caso.id) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "aceito",
+            `Caso aceito pelo advogado ${user.nome || "Advogado"}`,
+            "advogado",
+            `Advogado responsável: ${user.nome || "Advogado"}`
+          );
+          
+          return { 
+            ...c, 
+            status: "aceito", 
+            advogadoId: user.id?.toString(),
+            advogadoNome: user.nome || "Advogado",
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casoCliente", JSON.stringify(casosAtualizados));
 
       // Criar novo caso no localStorage casosAdvogado
@@ -459,16 +501,26 @@ function CasosAdvogadoMobile() {
     try {
       // Atualizar o caso no localStorage casoCliente
       const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosAtualizados = casosCliente.map((c: CasoCliente) => 
-        c.id === caso.id 
-          ? { 
-              ...c, 
-              status: "aceito", 
-              advogadoId: user.id?.toString(),
-              advogadoNome: user.nome || "Advogado"
-            }
-          : c
-      );
+      const casosAtualizados = casosCliente.map((c: CasoCliente) => {
+        if (c.id === caso.id) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "aceito",
+            `Caso aceito pelo advogado ${user.nome || "Advogado"}`,
+            "advogado",
+            `Advogado responsável: ${user.nome || "Advogado"}`
+          );
+          
+          return { 
+            ...c, 
+            status: "aceito", 
+            advogadoId: user.id?.toString(),
+            advogadoNome: user.nome || "Advogado",
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casoCliente", JSON.stringify(casosAtualizados));
 
       // Criar novo caso no localStorage casosAdvogado
@@ -624,20 +676,46 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     try {
       // Atualizar o caso do cliente no localStorage
       const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => 
-        c.id === caso.casoClienteId 
-          ? { ...c, status: "aguardando_documentos" }
-          : c
-      );
+      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
+        if (c.id === caso.casoClienteId) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "aguardando_documentos",
+            `Advogado solicitou documentos adicionais`,
+            "advogado",
+            `Solicitação feita pelo advogado ${caso.advogadoNome}`
+          );
+          
+          return { 
+            ...c, 
+            status: "aguardando_documentos", 
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
 
       // Atualizar o caso do advogado no localStorage
       const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => 
-        c.id === caso.id 
-          ? { ...c, status: "esperando_documentos" }
-          : c
-      );
+      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
+        if (c.id === caso.id) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "esperando_documentos",
+            `Advogado solicitou documentos adicionais`,
+            "advogado",
+            `Solicitação feita pelo advogado ${caso.advogadoNome}`
+          );
+          
+          return { 
+            ...c, 
+            status: "esperando_documentos", 
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
 
       // Atualizar o estado local
@@ -660,20 +738,46 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     try {
       // Atualizar o caso do cliente no localStorage
       const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => 
-        c.id === caso.casoClienteId 
-          ? { ...c, status: "protocolado" }
-          : c
-      );
+      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
+        if (c.id === caso.casoClienteId) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "protocolado",
+            `Caso protocolado no fórum competente`,
+            "advogado",
+            `Protocolado pelo advogado ${caso.advogadoNome}`
+          );
+          
+          return { 
+            ...c, 
+            status: "protocolado", 
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
 
       // Atualizar o caso do advogado no localStorage
       const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => 
-        c.id === caso.id 
-          ? { ...c, status: "protocolado" }
-          : c
-      );
+      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
+        if (c.id === caso.id) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "protocolado",
+            `Caso protocolado no fórum competente`,
+            "advogado",
+            `Protocolado pelo advogado ${caso.advogadoNome}`
+          );
+          
+          return { 
+            ...c, 
+            status: "protocolado", 
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
 
       // Atualizar o estado local
@@ -696,20 +800,46 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     try {
       // Atualizar o caso do cliente no localStorage
       const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => 
-        c.id === caso.casoClienteId 
-          ? { ...c, status: "em_andamento" }
-          : c
-      );
+      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
+        if (c.id === caso.casoClienteId) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "em_andamento",
+            `Documentos aprovados - caso em andamento`,
+            "advogado",
+            `Documentos aprovados pelo advogado ${caso.advogadoNome}`
+          );
+          
+          return { 
+            ...c, 
+            status: "em_andamento", 
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
 
       // Atualizar o caso do advogado no localStorage
       const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => 
-        c.id === caso.id 
-          ? { ...c, status: "em_andamento" }
-          : c
-      );
+      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
+        if (c.id === caso.id) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "em_andamento",
+            `Documentos aprovados - caso em andamento`,
+            "advogado",
+            `Documentos aprovados pelo advogado ${caso.advogadoNome}`
+          );
+          
+          return { 
+            ...c, 
+            status: "em_andamento", 
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
 
       // Atualizar o estado local
@@ -741,30 +871,50 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     try {
       // Atualizar o caso do cliente no localStorage
       const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => 
-        c.id === caso.casoClienteId 
-          ? { 
-              ...c, 
-              status: "aguardando_documentos",
-              motivoRejeicao: motivo,
-              documentosAnexados: [] // Limpar documentos rejeitados
-            }
-          : c
-      );
+      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
+        if (c.id === caso.casoClienteId) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "aguardando_documentos",
+            `Documentos rejeitados - reenvio solicitado`,
+            "advogado",
+            `Motivo: ${motivo}`
+          );
+          
+          return { 
+            ...c, 
+            status: "aguardando_documentos",
+            motivoRejeicao: motivo,
+            documentosAnexados: [], // Limpar documentos rejeitados
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
 
       // Atualizar o caso do advogado no localStorage
       const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => 
-        c.id === caso.id 
-          ? { 
-              ...c, 
-              status: "esperando_documentos",
-              motivoRejeicao: motivo,
-              documentosAnexados: [] // Limpar documentos rejeitados
-            }
-          : c
-      );
+      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
+        if (c.id === caso.id) {
+          const timelineEntry = addTimelineEntry(
+            c.status,
+            "esperando_documentos",
+            `Documentos rejeitados - reenvio solicitado`,
+            "advogado",
+            `Motivo: ${motivo}`
+          );
+          
+          return { 
+            ...c, 
+            status: "esperando_documentos",
+            motivoRejeicao: motivo,
+            documentosAnexados: [], // Limpar documentos rejeitados
+            timeline: [...(c.timeline || []), timelineEntry]
+          };
+        }
+        return c;
+      });
       localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
 
       // Atualizar o estado local
@@ -1075,43 +1225,95 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
           <div className="border rounded-lg p-4">
             <h2 className="text-xl font-semibold mb-4">Andamentos do Processo</h2>
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-3 h-3 bg-primary rounded-full"></div>
-                  <div className="w-0.5 h-16 bg-muted mt-2"></div>
+              {/* Timeline baseado no array de timeline do caso */}
+              {caso.timeline && caso.timeline.length > 0 ? (
+                <div className="space-y-6">
+                  {[...caso.timeline].reverse().map((entry, index) => (
+                    <div key={entry.id} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className={`w-3 h-3 rounded-full ${
+                          entry.autor === "cliente" ? "bg-blue-500" :
+                          entry.autor === "advogado" ? "bg-green-500" : "bg-gray-500"
+                        }`}></div>
+                        {index < caso.timeline!.length - 1 && (
+                          <div className="w-0.5 h-16 bg-gray-200 mt-2"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 pb-8">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(entry.data).toLocaleDateString('pt-BR', {
+                              day: '2-digit',
+                              month: '2-digit', 
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            entry.autor === "cliente" ? "bg-blue-100 text-blue-800" :
+                            entry.autor === "advogado" ? "bg-green-100 text-green-800" : 
+                            "bg-gray-100 text-gray-800"
+                          }`}>
+                            {entry.autor === "cliente" ? "Cliente" : 
+                             entry.autor === "advogado" ? "Advogado" : "Sistema"}
+                          </span>
+                        </div>
+                        <p className="font-medium mb-1">{entry.descricao}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Status: {entry.statusAnterior ? `${getStatusLabel(entry.statusAnterior as CasoAdvogado["status"])} → ` : ""}{getStatusLabel(entry.novoStatus as CasoAdvogado["status"])}
+                        </p>
+                        {entry.observacoes && (
+                          <p className="text-sm text-muted-foreground mt-1 italic">
+                            {entry.observacoes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="pb-8">
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(caso.dataAceite).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit', 
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  <p className="font-medium">Caso aceito pelo advogado</p>
-                  <p className="text-sm text-muted-foreground">O advogado {caso.advogadoNome} aceitou o caso</p>
+              ) : (
+                <div className="space-y-6">
+                  {/* Timeline padrão quando não há entradas específicas */}
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 bg-primary rounded-full"></div>
+                      <div className="w-0.5 h-16 bg-muted mt-2"></div>
+                    </div>
+                    <div className="pb-8">
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(caso.dataAceite).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit', 
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                      <p className="font-medium">Caso aceito pelo advogado</p>
+                      <p className="text-sm text-muted-foreground">O advogado {caso.advogadoNome} aceitou o caso</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 bg-muted rounded-full"></div>
+                    </div>
+                    <div className="pb-8">
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(caso.dataSolicitacao).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit', 
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </p>
+                      <p className="font-medium">Caso solicitado</p>
+                      <p className="text-sm text-muted-foreground">Solicitação de caso enviada pelo cliente</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-3 h-3 bg-muted rounded-full"></div>
-                </div>
-                <div className="pb-8">
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(caso.dataSolicitacao).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit', 
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  <p className="font-medium">Caso solicitado</p>
-                  <p className="text-sm text-muted-foreground">Solicitação de caso enviada pelo cliente</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </TabsContent>
