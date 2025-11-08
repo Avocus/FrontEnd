@@ -157,7 +157,7 @@ function EventoCard({ evento, onEdit, onDelete }: {
             {evento.notificarPorEmail && (
               <div className="flex items-center gap-2">
                 <Mail className="h-3 w-3" />
-                <span className={evento.emailNotificado ? "text-green-600" : "text-blue-600"}>
+                <span className={evento.emailNotificado ? "text-green-600" : "text-blue-300"}>
                   {evento.emailNotificado ? "E-mail enviado" : "Notificar por e-mail"}
                 </span>
               </div>
@@ -512,7 +512,7 @@ export function AgendaCompleta() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Tipo</Label>
+                <Label>Tipo *</Label>
                 <Select value={tipo} onValueChange={(value) => setTipo(value as EventoTipo)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -527,7 +527,7 @@ export function AgendaCompleta() {
               </div>
 
               <div className="grid gap-2">
-                <Label>Status</Label>
+                <Label>Status *</Label>
                 <Select value={status} onValueChange={(value) => setStatus(value as EventoStatus)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -549,12 +549,12 @@ export function AgendaCompleta() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Horário de Início</Label>
+                <Label>Horário de Início *</Label>
                 <TimePicker date={selectedTime} setDate={setSelectedTime} />
               </div>
 
               <div className="grid gap-2">
-                <Label>Horário de Fim (opcional)</Label>
+                <Label>Horário de Término (opcional)</Label>
                 <TimePicker 
                   date={selectedEndTime || new Date()} 
                   setDate={setSelectedEndTime}
@@ -574,7 +574,7 @@ export function AgendaCompleta() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Lembrar antes (minutos)</Label>
+                <Label>Lembrar antes (minutos) *</Label>
                 <Select 
                   value={lembrarAntes.toString()} 
                   onValueChange={(value) => setLembrarAntes(parseInt(value))}

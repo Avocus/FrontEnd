@@ -18,7 +18,7 @@ import { cadastroSchema, type CadastroFormData } from '../../schemas/cadastroSch
 import { cadastrarUsuario } from '../../services/user/cadastroService';
 import { useRouter } from "next/navigation"
 import { getErrorMessage } from '@/utils/formValidation';
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import { UserTypeSelector } from './UserTypeSelector';
 import { PasswordRequirements } from './PasswordRequirements';
 import { useToast } from '../../hooks/useToast';
@@ -33,6 +33,8 @@ export function CadastroForm({
 }) {
   const [cadastroError, setCadastroError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const { success, error: showError } = useToast();
   const router = useRouter();
 
@@ -182,27 +184,49 @@ export function CadastroForm({
                 </div>
 
                 {/* Campo Senha */}
-                <div className="md:col-span-2 grid gap-2">
+                <div className="md:col-span-2 grid gap-2 relative">
                   <Label htmlFor="password">Senha</Label>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    className={getFieldValidationClassLocal("password")}
-                    {...register("password")} 
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"} // alterna entre texto e senha
+                      className={getFieldValidationClassLocal("password") + " pr-10"} // padding direito pro ícone não sobrepor texto
+                      {...register("password")}
+                    />
+                    {/* Botão de mostrar/ocultar */}
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   <PasswordRequirements password={passwordValue || ""} />
                 </div>
 
                 {/* Campo Confirmar Senha */}
                 <div className="md:col-span-2 grid gap-2">
                   <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-                  <Input 
-                    id="confirmPassword" 
-                    type="password" 
-                    className={getFieldValidationClassLocal("confirmPassword")}
-                    {...register("confirmPassword")} 
-                  />
-                  {errors.confirmPassword && touchedFields.confirmPassword && <span className="text-red-500 text-sm">{errors.confirmPassword.message}</span>}
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirm ? "text" : "password"}
+                      className={getFieldValidationClassLocal("confirmPassword") + " pr-10"}
+                      {...register("confirmPassword")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+
+                  {errors.confirmPassword && touchedFields.confirmPassword && (
+                    <span className="text-red-500 text-sm">{errors.confirmPassword.message}</span>
+                  )}
                 </div>
 
                 {/* Seleção de Tipo de Usuário - só mostrar se não for convite */}
@@ -217,7 +241,7 @@ export function CadastroForm({
                 <div className="md:col-span-2">
                   <Button 
                     type="submit" 
-                    className="w-full bg-secondary text-secondary-foreground" 
+                    className="w-full bg-secondary text-white hover:bg-gray-300 hover:text-secondary-foreground transition-colors duration-200"
                     disabled={!isValid || isLoading}
                   >
                     {isLoading ? "Cadastrando..." : "Cadastrar"}
