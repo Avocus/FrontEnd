@@ -1,19 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { AUTH_ROUTES, UserApiResponse, ApiErrorResponse, UserResponse } from "../../lib/api-routes";
-
-// Interfaces para tipagem
-interface RegisterCredentials {
-    name: string;
-    client: boolean;
-    username: string;
-    password: string;
-    inviteToken: string;
-}
+import { ApiRegisterCredentials } from '@/types/api';
 
 // Função para registro pelo servidor
 async function serverRegister(name: string, client: boolean, username: string, password: string, inviteToken: string): Promise<UserResponse> {
     try {
-        const credentials: RegisterCredentials = { name, client, username, password, inviteToken };
+        const credentials: ApiRegisterCredentials = { name, client, username, password, inviteToken };
 
         const response = await fetch(AUTH_ROUTES.REGISTER, {
             method: 'POST',

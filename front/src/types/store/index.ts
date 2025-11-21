@@ -1,8 +1,8 @@
-import { User } from '../entities/User';
-import { Credentials } from '../entities/User';
-import { AgendaState } from '../entities/Evento';
-import { NotificacaoState } from '../entities/Notificacao';
-import { ProfileState } from '../entities/Profile';
+import { User } from '@/types/entities/User';
+import { Credentials } from '@/types/entities/User';
+import { AgendaState } from '@/types/entities/Evento';
+import { NotificacaoState } from '@/types/entities/Notificacao';
+import { ProfileState } from '@/types/entities/Profile';
 
 /**
  * Interface para o estado de autenticação

@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextApiRequest, NextApiResponse } from 'next';
 import { AUTH_ROUTES, UserApiResponse, UserResponse } from '../../lib/api-routes';
-
-interface LoginCredentials {
-  username: string;
-  password: string;
-}
+import { LoginCredentials } from '@/types/api';
 
 async function serverLogin(email: string, password: string): Promise<UserResponse> {
   try {

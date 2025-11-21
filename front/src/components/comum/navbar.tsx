@@ -21,7 +21,6 @@ type NavItem = {
   onClick?: () => void;
 };
 
-// Usar memo para evitar re-renderizações desnecessárias
 export const Navbar = memo(function Navbar() {
   const [chatOpen, setChatOpen] = useState(false);
   const [notificacoesOpen, setNotificacoesOpen] = useState(false);

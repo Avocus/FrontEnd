@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken, removeToken } from '../utils/authUtils';
+import { getToken, removeToken } from '@/utils/authUtils';
 
 // Criar uma instância do axios com configurações padrão
 const api = axios.create({

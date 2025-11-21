@@ -2,7 +2,7 @@
 "use client"
 
 import { useEffect } from "react";
-import { Casos } from "@/components/casos/Casos";
+import MeusCasos from "@/components/casos/MeusCasos";
 import { useLayout } from "@/contexts/LayoutContext";
 
 export default function CasosPage() {
@@ -17,6 +17,6 @@ export default function CasosPage() {
     }, [updateConfig]);
 
     return (
-        <Casos />
+        <MeusCasos />
     );
 }

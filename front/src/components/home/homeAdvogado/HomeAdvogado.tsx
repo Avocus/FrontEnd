@@ -24,7 +24,6 @@ import {
     Activity,
 } from "lucide-react";
 
-// Interface para os casos do localStorage
 interface CasoCliente {
   id: string;
   clienteId: string;
@@ -41,14 +40,12 @@ interface CasoCliente {
   advogadoNome?: string;
 }
 
-// Hook para verificar casos pendentes
 function useCasosPendentes() {
   const [casosPendentes, setCasosPendentes] = useState<CasoCliente[]>([]);
   const [casosNotificados, setCasosNotificados] = useState<Set<string>>(new Set());
   const [isInitialized, setIsInitialized] = useState(false);
   const { addNotification } = useNotificationStore();
   
-  // Debug: verificar se o store está funcionando
   useEffect(() => {
     console.log("🔧 Hook useCasosPendentes inicializado");
     console.log("📦 addNotification disponível:", typeof addNotification === 'function');

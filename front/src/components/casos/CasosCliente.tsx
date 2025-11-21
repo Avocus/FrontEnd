@@ -9,49 +9,9 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { TipoProcesso } from "@/types/enums";
 import { Upload, X, FileText, Send } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
-
-// Interface para documentos anexados
-interface DocumentoAnexado {
-  id: string;
-  nome: string;
-  tipo: string;
-  tamanho: number;
-  dataEnvio: string;
-  conteudo: string; // Base64 do arquivo
-}
-
-// Interface para entradas do timeline
-interface TimelineEntry {
-  id: string;
-  data: string;
-  statusAnterior?: string;
-  novoStatus: string;
-  descricao: string;
-  autor: "cliente" | "advogado" | "sistema";
-  observacoes?: string;
-}
-
-// Interface para os casos do localStorage
-interface CasoCliente {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  titulo: string;
-  tipoProcesso: TipoProcesso;
-  descricao: string;
-  situacaoAtual: string;
-  objetivos: string;
-  urgencia: "baixa" | "media" | "alta";
-  documentosDisponiveis?: string;
-  dataSolicitacao: string;
-  status: "pendente" | "em_analise" | "aceito" | "rejeitado" | "aguardando_documentos" | "documentos_enviados" | "aguardando_analise_documentos" | "em_andamento" | "protocolado";
-  advogadoNome?: string;
-  documentosAnexados?: DocumentoAnexado[];
-  timeline?: TimelineEntry[];
-}
+import { CasoCliente, DocumentoAnexado, TimelineEntry } from "@/types/entities";
 
 // Hook para carregar casos do localStorage
 function useCasosFromLocalStorage() {

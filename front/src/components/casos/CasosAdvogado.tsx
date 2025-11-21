@@ -14,68 +14,7 @@ import { Grid, List, Calendar, User, AlertCircle, CheckCircle, XCircle, FileText
 import { TipoProcesso } from "@/types/enums";
 import { useAuthStore } from "@/store";
 import { useToast } from "@/hooks/useToast";
-
-// Interface para casos do cliente
-interface CasoCliente {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  titulo: string;
-  tipoProcesso: TipoProcesso;
-  descricao: string;
-  situacaoAtual: string;
-  objetivos: string;
-  urgencia: "baixa" | "media" | "alta";
-  documentosDisponiveis?: string;
-  dataSolicitacao: string;
-  status: "pendente" | "em_analise" | "aceito" | "rejeitado" | "aguardando_documentos" | "protocolado";
-  advogadoId?: string;
-  advogadoNome?: string;
-  timeline?: TimelineEntry[];
-}
-
-// Interface para documentos anexados
-interface DocumentoAnexado {
-  id: string;
-  nome: string;
-  tipo: string;
-  tamanho: number;
-  dataEnvio: string;
-  conteudo: string; // Base64 do arquivo
-}
-
-// Interface para entradas do timeline
-interface TimelineEntry {
-  id: string;
-  data: string;
-  statusAnterior?: string;
-  novoStatus: string;
-  descricao: string;
-  autor: "cliente" | "advogado" | "sistema";
-  observacoes?: string;
-}
-
-// Interface para casos do advogado
-interface CasoAdvogado {
-  id: string;
-  casoClienteId: string;
-  advogadoId: string;
-  advogadoNome: string;
-  clienteId: string;
-  clienteNome: string;
-  titulo: string;
-  tipoProcesso: TipoProcesso;
-  descricao: string;
-  situacaoAtual: string;
-  objetivos: string;
-  urgencia: "baixa" | "media" | "alta";
-  documentosDisponiveis?: string;
-  dataSolicitacao: string;
-  dataAceite: string;
-  status: "aceito" | "em_andamento" | "concluido" | "arquivado" | "esperando_documentos" | "aguardando_analise_documentos" | "protocolado";
-  documentosAnexados?: DocumentoAnexado[];
-  timeline?: TimelineEntry[];
-}
+import { CasoCliente, CasoAdvogado, DocumentoAnexado, TimelineEntry } from "@/types/entities";
 
 // Hook para carregar casos pendentes do localStorage
 function useCasosPendentes() {

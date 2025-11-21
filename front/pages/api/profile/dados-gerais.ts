@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { USER_ROUTES } from '../../../lib/api-routes';
+import { ApiError } from '@/types/api';
 
 type ProfileData = {
   id: string;
@@ -12,15 +13,6 @@ type ResponseData = {
   success: boolean;
   data?: ProfileData;
   error?: string;
-}
-
-interface ApiError {
-  response?: {
-    status?: number;
-    data?: {
-      message?: string;
-    };
-  };
 }
 
 /**

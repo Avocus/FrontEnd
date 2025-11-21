@@ -4,6 +4,7 @@ export * from './Advogado';
 export * from './Avaliacao';
 // Cliente.ts é importado diretamente para evitar ambiguidade com ClienteProfile
 // export * from './Cliente';
+export * from './Caso';
 export * from './Documento';
 export * from './Endereco';
 export * from './Evento';

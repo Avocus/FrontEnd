@@ -28,7 +28,6 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
   // Determinamos qual componente de navbar mostrar
   const NavbarComponent = isMobile ? Navbar : NavbarWeb;
 
-  // Se o componente não está montado no cliente, renderizamos um layout simplificado
   if (!isMounted) {
     return (
       <div className="flex h-screen bg-background">

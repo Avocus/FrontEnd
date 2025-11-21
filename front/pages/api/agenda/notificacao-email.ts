@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Resend } from 'resend';
+import { EmailRequest } from '@/types/api';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -8,14 +9,6 @@ type NotificacaoEmailData = {
   message: string;
   error?: string;
 };
-
-interface EmailRequest {
-  para: string;
-  titulo: string;
-  dataEvento: string;
-  descricao?: string;
-  localizacao?: string;
-}
 
 export default async function handler(
   req: NextApiRequest,

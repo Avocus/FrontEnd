@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ADVOGADO_ROUTES } from '../../../lib/api-routes';
-import { ClienteLista } from '../../../src/types/entities/Cliente';
+import { ClienteLista } from '@/types/entities/Cliente';
 
 type ResponseData = {
   success: boolean;
