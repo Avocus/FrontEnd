@@ -144,7 +144,7 @@ export function CadastroForm({
             </span>
           </CardTitle>
           {inviteData?.isInvite && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-foreground/80">
               Você foi convidado para se cadastrar como cliente
             </p>
           )}

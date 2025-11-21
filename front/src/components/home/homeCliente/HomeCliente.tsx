@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useLayout } from "@/contexts/LayoutContext";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 export function HomeCliente() {
 

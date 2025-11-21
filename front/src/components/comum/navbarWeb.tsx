@@ -31,6 +31,7 @@ export const NavbarWeb = memo(function NavbarWeb({ showFullNavigation = true, sh
   const router = useRouter();
 
   const navItems: NavItem[] = user ? [
+    { label: "Home", href: "/home" },
     { label: "Agenda", href: "/agenda" },
     { label: "Serviços", href: "#" },
     { label: "Chat", onClick: () => setChatOpen(true) },

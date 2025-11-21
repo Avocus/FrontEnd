@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Mail, Phone, Loader2, Search } from "lucide-react";
 import { ClienteLista } from "@/types/entities/Cliente";
 import { getMeusClientes } from "@/services/advogado/advogadoService";
 import { useToast } from "@/hooks/useToast";
@@ -13,6 +14,7 @@ import { useToast } from "@/hooks/useToast";
 export function ListaClientes() {
   const [clientes, setClientes] = useState<ClienteLista[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const { error: showError } = useToast();
 
   useEffect(() => {
@@ -40,14 +42,28 @@ export function ListaClientes() {
     );
   }
 
+  const filteredClientes = clientes.filter(cliente =>
+    cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-4">
-      {clientes.length === 0 ? (
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Buscar clientes por nome ou email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+      {filteredClientes.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          Nenhum cliente cadastrado ainda.
+          {clientes.length === 0 ? "Nenhum cliente cadastrado ainda." : "Nenhum cliente encontrado."}
         </div>
       ) : (
-        clientes.map((cliente) => (
+        filteredClientes.map((cliente) => (
           <Card key={cliente.id}>
             <CardContent className="p-6">
               <div className="flex justify-between items-start">

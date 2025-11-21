@@ -13,7 +13,8 @@ import {
   Clock,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Home
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -93,6 +94,7 @@ export function Sidebar({
   };
 
   const mainItems: SidebarItemProps[] = [
+    { label: "Home", href: "/home", icon: <Home className="h-5 w-5" /> },
     { label: "Agenda", href: "/agenda", icon: <Calendar className="h-5 w-5" /> },
     { label: "Chat", icon: <MessageCircle className="h-5 w-5" />, onClick: () => setChatOpen && setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca", icon: <BookOpen className="h-5 w-5" /> },

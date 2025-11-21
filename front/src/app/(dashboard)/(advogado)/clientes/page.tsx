@@ -43,14 +43,7 @@ export default function ClientesPage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Clientes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ListaClientes key={refreshKey} />
-        </CardContent>
-      </Card>
+      <ListaClientes key={refreshKey} />
 
       <ModalAdicionarCliente
         isOpen={isModalOpen}

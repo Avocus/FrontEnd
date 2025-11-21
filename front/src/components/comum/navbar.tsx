@@ -33,7 +33,7 @@ export const Navbar = memo(function Navbar() {
   const router = useRouter();
 
   const navItems: NavItem[] = [
-    { label: "Home", href: "/", icon: <Home className="h-5 w-5 mr-2" /> },
+    { label: "Home", href: "/home", icon: <Home className="h-5 w-5 mr-2" /> },
     { label: "Agenda", href: "/agenda", icon: <Calendar className="h-5 w-5" /> },
     // { label: "Serviços", href: "#" },
     // { label: "Chat", onClick: () => setChatOpen(true), icon: <MessageCircle className="h-5 w-5 mr-2" /> },
