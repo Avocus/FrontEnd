@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuthStore } from "@/store"
+import { useAuthStore, useCasoStore } from "@/store"
 import { useToast } from "@/hooks/useToast"
 import { TipoProcesso } from "@/types/enums"
 import { ArrowLeft, FileText, AlertCircle, CheckCircle2 } from "lucide-react"
@@ -61,6 +61,7 @@ export default function NovoCaso() {
   const { user } = useAuthStore()
   const { success, error: showError } = useToast()
   const router = useRouter()
+  const { adicionarCasoCliente } = useCasoStore()
   const [isLoading, setIsLoading] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
 
@@ -154,14 +155,8 @@ export default function NovoCaso() {
         status: "pendente"
       }
 
-      // Recuperar casos existentes do localStorage
-      const casosExistentes = JSON.parse(localStorage.getItem("casoCliente") || "[]")
-      
-      // Adicionar o novo caso
-      const novosCasos = [...casosExistentes, novoCaso]
-      
-      // Salvar no localStorage
-      localStorage.setItem("casoCliente", JSON.stringify(novosCasos))
+      // Adicionar caso usando a store
+      adicionarCasoCliente(novoCaso)
 
       success("Solicitação de caso enviada com sucesso!")
       reset()
@@ -178,7 +173,7 @@ export default function NovoCaso() {
     } finally {
       setIsLoading(false)
     }
-  }, [user, success, showError, reset, router])
+  }, [user, success, showError, reset, router, adicionarCasoCliente])
 
   const handlePreview = () => {
     if (isValid) {

@@ -2,7 +2,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useNotificationStore } from "@/store";
+import { useNotificationStore, useCasoStore } from "@/store";
 import { NotificacaoTipo } from "@/types";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -42,78 +42,51 @@ interface CasoCliente {
 
 function useCasosPendentes() {
   const [casosPendentes, setCasosPendentes] = useState<CasoCliente[]>([]);
-  const [casosNotificados, setCasosNotificados] = useState<Set<string>>(new Set());
   const [isInitialized, setIsInitialized] = useState(false);
   const { addNotification } = useNotificationStore();
+  const { casosCliente, casosNotificados, marcarCasoComoNotificado, carregarCasosCliente } = useCasoStore();
   
   useEffect(() => {
-    console.log("🔧 Hook useCasosPendentes inicializado");
-    console.log("📦 addNotification disponível:", typeof addNotification === 'function');
+    // Hook inicializado - sem logs de debug
   }, [addNotification]);
 
   const verificarCasosPendentes = useCallback(() => {
     if (!isInitialized) return; // Aguardar inicialização completa
-    
+
     try {
-      const casosExistentes = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const pendentes = casosExistentes.filter((caso: CasoCliente) => caso.status === "pendente");
-      
-      console.log("Verificando casos pendentes:", pendentes.length);
-      console.log("Casos já notificados:", Array.from(casosNotificados));
-      
+      // Usar dados da store em vez de localStorage
+      const pendentes = casosCliente.filter((caso: CasoCliente) => caso.status === "pendente");
+
       // Verificar se há casos novos que ainda não foram notificados
       const casosNovos = pendentes.filter((caso: CasoCliente) => !casosNotificados.has(caso.id));
-      
-      console.log("Casos novos encontrados:", casosNovos.length, casosNovos.map((c: CasoCliente) => c.id));
-      
+
       if (casosNovos.length > 0) {
-        console.log("🔔 Adicionando notificação para casos novos...");
-        
         const notificacao = {
           titulo: "Novos casos disponíveis",
           mensagem: `Você tem ${casosNovos.length} novo${casosNovos.length > 1 ? 's' : ''} caso${casosNovos.length > 1 ? 's' : ''} pendente${casosNovos.length > 1 ? 's' : ''} para análise`,
           tipo: NotificacaoTipo.INFO,
           link: "/casos"
         };
-        
-        console.log("📤 Chamando addNotification com:", notificacao);
-        
-        // Marcar os casos novos como notificados
-        const novosNotificados = new Set([...casosNotificados, ...casosNovos.map((caso: CasoCliente) => caso.id)]);
-        setCasosNotificados(novosNotificados);
-        
-        // Salvar no localStorage para persistir entre sessões
-        localStorage.setItem("casosNotificados", JSON.stringify([...novosNotificados]));
-        console.log("💾 Casos marcados como notificados:", [...novosNotificados]);
+
+        // Adicionar notificação
+        addNotification(notificacao);
+
+        // Marcar os casos novos como notificados usando a store
+        casosNovos.forEach(caso => marcarCasoComoNotificado(caso.id));
       }
-      
-      // Remover casos que não estão mais pendentes da lista de notificados
-      const casosPendentesIds = new Set(pendentes.map((caso: CasoCliente) => caso.id));
-      const casosNotificadosAtualizados = new Set([...casosNotificados].filter(id => casosPendentesIds.has(id)));
-      
-      if (casosNotificadosAtualizados.size !== casosNotificados.size) {
-        setCasosNotificados(casosNotificadosAtualizados);
-        localStorage.setItem("casosNotificados", JSON.stringify([...casosNotificadosAtualizados]));
-      }
-      
+
       setCasosPendentes(pendentes);
     } catch (error) {
       console.error("Erro ao verificar casos pendentes:", error);
       setCasosPendentes([]);
     }
-  }, [casosNotificados, addNotification, isInitialized]);
+  }, [casosCliente, casosNotificados, marcarCasoComoNotificado, addNotification, isInitialized]);
 
   useEffect(() => {
-    // Carregar casos já notificados do localStorage
-    try {
-      const casosNotificadosSalvos = JSON.parse(localStorage.getItem("casosNotificados") || "[]");
-      setCasosNotificados(new Set(casosNotificadosSalvos));
-      console.log("Casos notificados carregados do localStorage:", casosNotificadosSalvos);
-    } catch (error) {
-      console.error("Erro ao carregar casos notificados:", error);
-    }
+    // Carregar dados da store e inicializar
+    carregarCasosCliente();
     setIsInitialized(true);
-  }, []);
+  }, [carregarCasosCliente]);
 
   useEffect(() => {
     verificarCasosPendentes();

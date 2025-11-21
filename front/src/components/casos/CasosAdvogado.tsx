@@ -12,24 +12,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Grid, List, Calendar, User, AlertCircle, CheckCircle, XCircle, FileText, Send } from "lucide-react";
 import { TipoProcesso } from "@/types/enums";
-import { useAuthStore } from "@/store";
+import { useAuthStore, useCasoStore } from "@/store";
 import { useToast } from "@/hooks/useToast";
 import { CasoCliente, CasoAdvogado, DocumentoAnexado, TimelineEntry } from "@/types/entities";
 
-// Hook para carregar casos pendentes do localStorage
+// Hook para carregar casos pendentes da store
 function useCasosPendentes() {
-  const [casosPendentes, setCasosPendentes] = useState<CasoCliente[]>([]);
+  const { casosCliente } = useCasoStore();
   const [loading, setLoading] = useState(true);
 
   const carregarCasosPendentes = useCallback(() => {
     try {
-      const casosExistentes = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const pendentes = casosExistentes.filter((caso: CasoCliente) => caso.status === "pendente");
-      setCasosPendentes(pendentes);
+      setLoading(false);
     } catch (error) {
       console.error("Erro ao carregar casos pendentes:", error);
-      setCasosPendentes([]);
-    } finally {
       setLoading(false);
     }
   }, []);
@@ -38,26 +34,24 @@ function useCasosPendentes() {
     carregarCasosPendentes();
   }, [carregarCasosPendentes]);
 
+  const casosPendentes = casosCliente.filter((caso: CasoCliente) => caso.status === "pendente");
+
   return { casosPendentes, loading, recarregar: carregarCasosPendentes };
 }
 
-// Hook para carregar casos do advogado do localStorage
+// Hook para carregar casos do advogado da store
 function useCasosAdvogado() {
-  const [casosAdvogado, setCasosAdvogado] = useState<CasoAdvogado[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuthStore();
+  const { casosAdvogado } = useCasoStore();
 
   const carregarCasosAdvogado = useCallback(() => {
     if (!user) return;
 
     try {
-      const casosExistentes = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosDoAdvogado = casosExistentes;
-      setCasosAdvogado(casosDoAdvogado);
+      setLoading(false);
     } catch (error) {
       console.error("Erro ao carregar casos do advogado:", error);
-      setCasosAdvogado([]);
-    } finally {
       setLoading(false);
     }
   }, [user]);
@@ -214,6 +208,7 @@ function CasosAdvogadoWeb() {
   const [modalFoiFechada, setModalFoiFechada] = useState(false);
   const { user } = useAuthStore();
   const { success, error } = useToast();
+  const { atualizarCasoCliente, adicionarCasoAdvogado } = useCasoStore();
 
   // Verificar casos pendentes ao carregar (apenas na primeira vez)
   useEffect(() => {
@@ -233,32 +228,23 @@ function CasosAdvogadoWeb() {
     if (!user) return;
 
     try {
-      // Atualizar o caso no localStorage casoCliente
-      const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosAtualizados = casosCliente.map((c: CasoCliente) => {
-        if (c.id === caso.id) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "aceito",
-            `Caso aceito pelo advogado ${user.nome || "Advogado"}`,
-            "advogado",
-            `Advogado responsável: ${user.nome || "Advogado"}`
-          );
-          
-          return { 
-            ...c, 
-            status: "aceito", 
-            advogadoId: user.id?.toString(),
-            advogadoNome: user.nome || "Advogado",
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-      localStorage.setItem("casoCliente", JSON.stringify(casosAtualizados));
+      // Atualizar o caso na store
+      const timelineEntry = addTimelineEntry(
+        caso.status,
+        "aceito",
+        `Caso aceito pelo advogado ${user.nome || "Advogado"}`,
+        "advogado",
+        `Advogado responsável: ${user.nome || "Advogado"}`
+      );
 
-      // Criar novo caso no localStorage casosAdvogado
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
+      atualizarCasoCliente(caso.id, {
+        status: "aceito",
+        advogadoId: user.id?.toString(),
+        advogadoNome: user.nome || "Advogado",
+        timeline: [...(caso.timeline || []), timelineEntry]
+      });
+
+      // Criar novo caso na store casosAdvogado
       const novoCasoAdvogado: CasoAdvogado = {
         id: `adv_${Date.now()}`,
         casoClienteId: caso.id,
@@ -278,12 +264,7 @@ function CasosAdvogadoWeb() {
         status: "aceito"
       };
 
-      casosAdvogado.push(novoCasoAdvogado);
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogado));
-
-      // Disparar eventos de atualização
-      window.dispatchEvent(new CustomEvent("casoClienteUpdated"));
-      window.dispatchEvent(new CustomEvent("casosAdvogadoUpdated"));
+      adicionarCasoAdvogado(novoCasoAdvogado);
 
       success("Caso aceito com sucesso!");
       setModalAberto(false);
@@ -419,6 +400,7 @@ function CasosAdvogadoMobile() {
   const [modalFoiFechada, setModalFoiFechada] = useState(false);
   const { user } = useAuthStore();
   const { success, error } = useToast();
+  const { atualizarCasoCliente, adicionarCasoAdvogado } = useCasoStore();
 
   // Verificar casos pendentes ao carregar (apenas na primeira vez)
   useEffect(() => {
@@ -438,32 +420,23 @@ function CasosAdvogadoMobile() {
     if (!user) return;
 
     try {
-      // Atualizar o caso no localStorage casoCliente
-      const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosAtualizados = casosCliente.map((c: CasoCliente) => {
-        if (c.id === caso.id) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "aceito",
-            `Caso aceito pelo advogado ${user.nome || "Advogado"}`,
-            "advogado",
-            `Advogado responsável: ${user.nome || "Advogado"}`
-          );
-          
-          return { 
-            ...c, 
-            status: "aceito", 
-            advogadoId: user.id?.toString(),
-            advogadoNome: user.nome || "Advogado",
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-      localStorage.setItem("casoCliente", JSON.stringify(casosAtualizados));
+      // Atualizar o caso na store
+      const timelineEntry = addTimelineEntry(
+        caso.status,
+        "aceito",
+        `Caso aceito pelo advogado ${user.nome || "Advogado"}`,
+        "advogado",
+        `Advogado responsável: ${user.nome || "Advogado"}`
+      );
 
-      // Criar novo caso no localStorage casosAdvogado
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
+      atualizarCasoCliente(caso.id, {
+        status: "aceito",
+        advogadoId: user.id?.toString(),
+        advogadoNome: user.nome || "Advogado",
+        timeline: [...(caso.timeline || []), timelineEntry]
+      });
+
+      // Criar novo caso na store casosAdvogado
       const novoCasoAdvogado: CasoAdvogado = {
         id: `adv_${Date.now()}`,
         casoClienteId: caso.id,
@@ -483,12 +456,7 @@ function CasosAdvogadoMobile() {
         status: "aceito"
       };
 
-      casosAdvogado.push(novoCasoAdvogado);
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogado));
-
-      // Disparar eventos de atualização
-      window.dispatchEvent(new CustomEvent("casoClienteUpdated"));
-      window.dispatchEvent(new CustomEvent("casosAdvogadoUpdated"));
+      adicionarCasoAdvogado(novoCasoAdvogado);
 
       success("Caso aceito com sucesso!");
       setModalAberto(false);
@@ -589,11 +557,11 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
   const [caso, setCaso] = useState<CasoAdvogado | null>(null);
   const [loading, setLoading] = useState(true);
   const { success, error } = useToast();
+  const { atualizarCasoCliente, atualizarCasoAdvogado, casosAdvogado } = useCasoStore();
 
   useEffect(() => {
     const carregarCaso = () => {
       try {
-        const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
         const casoEncontrado = casosAdvogado.find((c: CasoAdvogado) => c.id === casoId);
         setCaso(casoEncontrado || null);
       } catch (error) {
@@ -607,62 +575,42 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     if (casoId) {
       carregarCaso();
     }
-  }, [casoId]);
+  }, [casoId, casosAdvogado]);
 
   const solicitarDocumentos = () => {
     if (!caso) return;
 
     try {
-      // Atualizar o caso do cliente no localStorage
-      const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
-        if (c.id === caso.casoClienteId) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "aguardando_documentos",
-            `Advogado solicitou documentos adicionais`,
-            "advogado",
-            `Solicitação feita pelo advogado ${caso.advogadoNome}`
-          );
-          
-          return { 
-            ...c, 
-            status: "aguardando_documentos", 
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-      localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
+      // Atualizar o caso do cliente na store
+      const timelineEntryCliente = addTimelineEntry(
+        "aceito", // status atual do caso cliente
+        "aguardando_documentos",
+        `Advogado solicitou documentos adicionais`,
+        "advogado",
+        `Solicitação feita pelo advogado ${caso.advogadoNome}`
+      );
 
-      // Atualizar o caso do advogado no localStorage
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
-        if (c.id === caso.id) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "esperando_documentos",
-            `Advogado solicitou documentos adicionais`,
-            "advogado",
-            `Solicitação feita pelo advogado ${caso.advogadoNome}`
-          );
-          
-          return { 
-            ...c, 
-            status: "esperando_documentos", 
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
+      atualizarCasoCliente(caso.casoClienteId, {
+        status: "aguardando_documentos",
+        timeline: [...(caso.timeline || []), timelineEntryCliente]
       });
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
+
+      // Atualizar o caso do advogado na store
+      const timelineEntryAdvogado = addTimelineEntry(
+        caso.status,
+        "esperando_documentos",
+        `Advogado solicitou documentos adicionais`,
+        "advogado",
+        `Solicitação feita pelo advogado ${caso.advogadoNome}`
+      );
+
+      atualizarCasoAdvogado(caso.id, {
+        status: "esperando_documentos",
+        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+      });
 
       // Atualizar o estado local
       setCaso({ ...caso, status: "esperando_documentos" });
-
-      // Disparar eventos de atualização
-      window.dispatchEvent(new CustomEvent("casoClienteUpdated"));
-      window.dispatchEvent(new CustomEvent("casosAdvogadoUpdated"));
 
       success("Solicitação de documentos enviada ao cliente!");
     } catch (err) {
@@ -675,56 +623,36 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     if (!caso) return;
 
     try {
-      // Atualizar o caso do cliente no localStorage
-      const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
-        if (c.id === caso.casoClienteId) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "protocolado",
-            `Caso protocolado no fórum competente`,
-            "advogado",
-            `Protocolado pelo advogado ${caso.advogadoNome}`
-          );
-          
-          return { 
-            ...c, 
-            status: "protocolado", 
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-      localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
+      // Atualizar o caso do cliente na store
+      const timelineEntryCliente = addTimelineEntry(
+        "em_andamento", // status atual do caso cliente
+        "protocolado",
+        `Caso protocolado no fórum competente`,
+        "advogado",
+        `Protocolado pelo advogado ${caso.advogadoNome}`
+      );
 
-      // Atualizar o caso do advogado no localStorage
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
-        if (c.id === caso.id) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "protocolado",
-            `Caso protocolado no fórum competente`,
-            "advogado",
-            `Protocolado pelo advogado ${caso.advogadoNome}`
-          );
-          
-          return { 
-            ...c, 
-            status: "protocolado", 
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
+      atualizarCasoCliente(caso.casoClienteId, {
+        status: "protocolado",
+        timeline: [...(caso.timeline || []), timelineEntryCliente]
       });
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
+
+      // Atualizar o caso do advogado na store
+      const timelineEntryAdvogado = addTimelineEntry(
+        caso.status,
+        "protocolado",
+        `Caso protocolado no fórum competente`,
+        "advogado",
+        `Protocolado pelo advogado ${caso.advogadoNome}`
+      );
+
+      atualizarCasoAdvogado(caso.id, {
+        status: "protocolado",
+        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+      });
 
       // Atualizar o estado local
       setCaso({ ...caso, status: "protocolado" });
-
-      // Disparar eventos de atualização
-      window.dispatchEvent(new CustomEvent("casoClienteUpdated"));
-      window.dispatchEvent(new CustomEvent("casosAdvogadoUpdated"));
 
       success("Caso protocolado com sucesso! Aguardando análise do fórum competente.");
     } catch (err) {
@@ -737,56 +665,36 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     if (!caso) return;
 
     try {
-      // Atualizar o caso do cliente no localStorage
-      const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
-        if (c.id === caso.casoClienteId) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "em_andamento",
-            `Documentos aprovados - caso em andamento`,
-            "advogado",
-            `Documentos aprovados pelo advogado ${caso.advogadoNome}`
-          );
-          
-          return { 
-            ...c, 
-            status: "em_andamento", 
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-      localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
+      // Atualizar o caso do cliente na store
+      const timelineEntryCliente = addTimelineEntry(
+        "aguardando_aprovacao", // status atual do caso cliente
+        "em_andamento",
+        `Documentos aprovados - caso em andamento`,
+        "advogado",
+        `Documentos aprovados pelo advogado ${caso.advogadoNome}`
+      );
 
-      // Atualizar o caso do advogado no localStorage
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
-        if (c.id === caso.id) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "em_andamento",
-            `Documentos aprovados - caso em andamento`,
-            "advogado",
-            `Documentos aprovados pelo advogado ${caso.advogadoNome}`
-          );
-          
-          return { 
-            ...c, 
-            status: "em_andamento", 
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
+      atualizarCasoCliente(caso.casoClienteId, {
+        status: "em_andamento",
+        timeline: [...(caso.timeline || []), timelineEntryCliente]
       });
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
+
+      // Atualizar o caso do advogado na store
+      const timelineEntryAdvogado = addTimelineEntry(
+        caso.status,
+        "em_andamento",
+        `Documentos aprovados - caso em andamento`,
+        "advogado",
+        `Documentos aprovados pelo advogado ${caso.advogadoNome}`
+      );
+
+      atualizarCasoAdvogado(caso.id, {
+        status: "em_andamento",
+        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+      });
 
       // Atualizar o estado local
       setCaso({ ...caso, status: "em_andamento" });
-
-      // Disparar eventos de atualização
-      window.dispatchEvent(new CustomEvent("casoClienteUpdated"));
-      window.dispatchEvent(new CustomEvent("casosAdvogadoUpdated"));
 
       success("Documentos aprovados! O caso agora está em andamento.");
       
@@ -808,60 +716,40 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
     if (!motivo) return;
 
     try {
-      // Atualizar o caso do cliente no localStorage
-      const casosCliente = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      const casosClienteAtualizados = casosCliente.map((c: CasoCliente) => {
-        if (c.id === caso.casoClienteId) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "aguardando_documentos",
-            `Documentos rejeitados - reenvio solicitado`,
-            "advogado",
-            `Motivo: ${motivo}`
-          );
-          
-          return { 
-            ...c, 
-            status: "aguardando_documentos",
-            motivoRejeicao: motivo,
-            documentosAnexados: [], // Limpar documentos rejeitados
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-      localStorage.setItem("casoCliente", JSON.stringify(casosClienteAtualizados));
+      // Atualizar o caso do cliente na store
+      const timelineEntryCliente = addTimelineEntry(
+        "aguardando_aprovacao", // status atual do caso cliente
+        "aguardando_documentos",
+        `Documentos rejeitados - reenvio solicitado`,
+        "advogado",
+        `Motivo: ${motivo}`
+      );
 
-      // Atualizar o caso do advogado no localStorage
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: CasoAdvogado) => {
-        if (c.id === caso.id) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "esperando_documentos",
-            `Documentos rejeitados - reenvio solicitado`,
-            "advogado",
-            `Motivo: ${motivo}`
-          );
-          
-          return { 
-            ...c, 
-            status: "esperando_documentos",
-            motivoRejeicao: motivo,
-            documentosAnexados: [], // Limpar documentos rejeitados
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
+      atualizarCasoCliente(caso.casoClienteId, {
+        status: "aguardando_documentos",
+        motivoRejeicao: motivo,
+        documentosAnexados: [], // Limpar documentos rejeitados
+        timeline: [...(caso.timeline || []), timelineEntryCliente]
       });
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
+
+      // Atualizar o caso do advogado na store
+      const timelineEntryAdvogado = addTimelineEntry(
+        caso.status,
+        "esperando_documentos",
+        `Documentos rejeitados - reenvio solicitado`,
+        "advogado",
+        `Motivo: ${motivo}`
+      );
+
+      atualizarCasoAdvogado(caso.id, {
+        status: "esperando_documentos",
+        motivoRejeicao: motivo,
+        documentosAnexados: [], // Limpar documentos rejeitados
+        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+      });
 
       // Atualizar o estado local
       setCaso({ ...caso, status: "esperando_documentos", documentosAnexados: [] });
-
-      // Disparar eventos de atualização
-      window.dispatchEvent(new CustomEvent("casoClienteUpdated"));
-      window.dispatchEvent(new CustomEvent("casosAdvogadoUpdated"));
 
       success("Documentos rejeitados. O cliente foi notificado para reenviar.");
       

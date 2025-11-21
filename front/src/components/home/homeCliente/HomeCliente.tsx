@@ -18,21 +18,11 @@ import {
     Download
 } from "lucide-react";
 import { useResponsive } from "@/hooks/useResponsive";
-import AuthGuard from "@/components/auth/AuthGuard";
-import { useAuth } from "@/contexts/AuthContext";
 import { useLayout } from "@/contexts/LayoutContext";
 
 export function HomeCliente() {
 
     const { updateConfig } = useLayout();
-
-    const { updateAuth } = useAuth();
-    useEffect(() => {
-        updateAuth({
-            requireAuth: true,
-            redirectTo: "/login"
-        });
-    }, [updateAuth]);
 
     useEffect(() => {
         updateConfig({

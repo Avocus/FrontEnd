@@ -86,11 +86,11 @@ export const NavbarWeb = memo(function NavbarWeb({ showFullNavigation = true, sh
                     {item.label}
                   </div>
                 ) : (
-                  <Link href={item.href || "#"} legacyBehavior passHref>
-                    <NavigationMenuLink className="px-4 py-2">
+                  <NavigationMenuLink asChild>
+                    <Link href={item.href || "#"} className="px-4 py-2">
                       {item.label}
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 )}
               </NavigationMenuItem>
             ))}

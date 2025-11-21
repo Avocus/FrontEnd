@@ -12,48 +12,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Upload, X, FileText, Send } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { CasoCliente, DocumentoAnexado, TimelineEntry } from "@/types/entities";
+import { useCasoStore } from "@/store";
 
-// Hook para carregar casos do localStorage
-function useCasosFromLocalStorage() {
-  const [casos, setCasos] = useState<CasoCliente[]>([]);
+// Hook para carregar casos da store Zustand
+function useCasosFromStore() {
+  const { casosCliente, carregarCasosCliente } = useCasoStore();
   const [isLoading, setIsLoading] = useState(true);
 
   const carregarCasos = useCallback(() => {
     try {
-      const casosExistentes = JSON.parse(localStorage.getItem("casoCliente") || "[]");
-      setCasos(casosExistentes);
+      carregarCasosCliente();
+      setIsLoading(false);
     } catch (error) {
       console.error("Erro ao carregar casos:", error);
-      setCasos([]);
-    } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [carregarCasosCliente]);
 
   useEffect(() => {
     carregarCasos();
   }, [carregarCasos]);
 
-  // Escutar mudanças no localStorage
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "casoCliente") {
-        carregarCasos();
-      }
-    };
-
-    const handleCustomStorageChange = () => carregarCasos();
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("casoClienteUpdated", handleCustomStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("casoClienteUpdated", handleCustomStorageChange);
-    };
-  }, [carregarCasos]);
-
-  return { casos, isLoading };
+  return { casos: casosCliente, isLoading };
 }
 
 // Função utilitária para obter label do status
@@ -114,7 +94,7 @@ const addTimelineEntry = (
 
 // Função utilitária para obter advogado responsável
 const getAdvogadoResponsavel = (caso: CasoCliente) => {
-  // Por enquanto, como não temos campo de advogado no localStorage,
+  // Por enquanto, como não temos campo de advogado na store,
   // vamos mostrar baseado no status do caso
   if (caso.status === "pendente") {
     return "Relacionando com advogado";
@@ -128,7 +108,7 @@ const getAdvogadoResponsavel = (caso: CasoCliente) => {
 // Versão Web para Clientes
 function CasosClienteWeb() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { casos, isLoading } = useCasosFromLocalStorage();
+  const { casos, isLoading } = useCasosFromStore();
   
   const filteredCasos = casos.filter(
     (caso) =>
@@ -212,7 +192,7 @@ function CasosClienteWeb() {
 // Versão Mobile para Clientes
 function CasosClienteMobile() {
   const [searchTerm, setSearchTerm] = useState("");
-  const { casos, isLoading } = useCasosFromLocalStorage();
+  const { casos, isLoading } = useCasosFromStore();
 
   const filteredCasos = casos.filter(
     (caso) =>
@@ -285,14 +265,14 @@ export function CasosCliente() {
 // Componente para detalhes de um caso específico (pode ser reutilizado em ambas versões)
 export function DetalheCasoCliente({ casoId }: { casoId: string }) {
   const { isMobile } = useLayout();
-  const { casos } = useCasosFromLocalStorage();
+  const { casosCliente, atualizarCasoCliente } = useCasoStore();
   const { success: showSuccess, error: showError } = useToast();
   
   const [modalAberto, setModalAberto] = useState(false);
   const [documentosParaEnvio, setDocumentosParaEnvio] = useState<File[]>([]);
   const [enviandoDocumentos, setEnviandoDocumentos] = useState(false);
   
-  const caso = casos.find((c) => c.id === casoId);
+  const caso = casosCliente.find((c) => c.id === casoId);
 
   // Função para converter arquivo para base64
   const fileToBase64 = (file: File): Promise<string> => {
@@ -324,44 +304,19 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
   // Função para remover documento já enviado
   const removerDocumentoEnviado = async (documentoId: string) => {
     try {
-      // Atualizar o caso no localStorage removendo o documento
-      const casosAtualizados = casos.map(c => {
-        if (c.id === casoId) {
-          return {
-            ...c,
-            documentosAnexados: (c.documentosAnexados || []).filter(doc => doc.id !== documentoId)
-          };
-        }
-        return c;
+      // Encontrar o caso atual
+      const casoAtual = casosCliente.find(c => c.id === casoId);
+      if (!casoAtual) return;
+
+      // Atualizar o caso removendo o documento
+      const documentosAtualizados = (casoAtual.documentosAnexados || []).filter(doc => doc.id !== documentoId);
+
+      atualizarCasoCliente(casoId, {
+        documentosAnexados: documentosAtualizados
       });
-
-      localStorage.setItem("casoCliente", JSON.stringify(casosAtualizados));
-
-      // Também atualizar no localStorage dos advogados
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: Record<string, unknown>) => {
-        if (c.id === casoId || c.casoClienteId === casoId) {
-          return {
-            ...c,
-            documentosAnexados: ((c.documentosAnexados as DocumentoAnexado[]) || []).filter(doc => doc.id !== documentoId)
-          };
-        }
-        return c;
-      });
-
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
-
-      // Disparar eventos para atualizar a interface
-      window.dispatchEvent(new Event('casosUpdated'));
-      window.dispatchEvent(new Event('casoClienteUpdated'));
 
       showSuccess("Documento removido com sucesso!");
-      
-      // Recarregar para refletir as mudanças
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-      
+
     } catch (error) {
       console.error("Erro ao remover documento:", error);
       showError("Erro ao remover documento. Tente novamente.");
@@ -393,99 +348,44 @@ export function DetalheCasoCliente({ casoId }: { casoId: string }) {
         })
       );
 
-      // Atualizar o caso no localStorage
-      const casosAtualizados = casos.map(c => {
-        if (c.id === casoId) {
-          const timelineEntry = addTimelineEntry(
-            c.status,
-            "aguardando_analise_documentos",
-            `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
-            "cliente",
-            `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
-          );
-          
-          return {
-            ...c,
-            status: "aguardando_analise_documentos" as const,
-            documentosAnexados: [...(c.documentosAnexados || []), ...documentosConvertidos],
-            timeline: [...(c.timeline || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-
-      localStorage.setItem("casoCliente", JSON.stringify(casosAtualizados));
-
-      // Também atualizar no localStorage dos advogados
-      const casosAdvogado = JSON.parse(localStorage.getItem("casosAdvogado") || "[]");
-      console.log("Casos advogado antes da atualização:", casosAdvogado);
-      console.log("Procurando por casoId:", casoId);
-      
-      // Procurar por id ou casoClienteId
-      const casosAdvogadoAtualizados = casosAdvogado.map((c: Record<string, unknown>) => {
-        if (c.id === casoId || c.casoClienteId === casoId) {
-          const documentosExistentes = (c.documentosAnexados as DocumentoAnexado[]) || [];
-          const timelineEntry = addTimelineEntry(
-            c.status as string,
-            "aguardando_analise_documentos",
-            `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
-            "cliente",
-            `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
-          );
-          
-          return {
-            ...c,
-            status: "aguardando_analise_documentos",
-            documentosAnexados: [...documentosExistentes, ...documentosConvertidos],
-            timeline: [...((c.timeline as TimelineEntry[]) || []), timelineEntry]
-          };
-        }
-        return c;
-      });
-
-      // Se não encontrou nenhum caso correspondente, criar um novo registro
-      const casoExistente = casosAdvogadoAtualizados.some((c: Record<string, unknown>) => 
-        c.id === casoId || c.casoClienteId === casoId
-      );
-
-      if (!casoExistente && caso) {
-        const timelineEntry = addTimelineEntry(
-          caso.status,
-          "aguardando_analise_documentos",
-          `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
-          "cliente",
-          `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
-        );
-        
-        const novoCasoAdvogado = {
-          ...caso,
-          casoClienteId: caso.id,
-          status: "aguardando_analise_documentos",
-          documentosAnexados: documentosConvertidos,
-          advogadoId: "temp-advogado",
-          advogadoNome: caso.advogadoNome || "Advogado Responsável",
-          dataAceite: new Date().toISOString(),
-          timeline: [timelineEntry]
-        };
-        casosAdvogadoAtualizados.push(novoCasoAdvogado);
+      // Encontrar o caso atual
+      const casoAtual = casosCliente.find(c => c.id === casoId);
+      if (!casoAtual) {
+        showError("Caso não encontrado");
+        return;
       }
 
-      localStorage.setItem("casosAdvogado", JSON.stringify(casosAdvogadoAtualizados));
-      console.log("Casos advogado após atualização:", casosAdvogadoAtualizados);
+      // Atualizar o caso na store
+      const timelineEntry = addTimelineEntry(
+        casoAtual.status,
+        "aguardando_analise_documentos",
+        `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
+        "cliente",
+        `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
+      );
 
-      // Disparar eventos personalizados para atualizar outros componentes
-      window.dispatchEvent(new Event('casosUpdated'));
-      window.dispatchEvent(new Event('casoClienteUpdated'));
-      window.dispatchEvent(new Event('storage'));
+      atualizarCasoCliente(casoId, {
+        status: "aguardando_analise_documentos",
+        documentosAnexados: [...(casoAtual.documentosAnexados || []), ...documentosConvertidos],
+        timeline: [...(casoAtual.timeline || []), timelineEntry]
+      });
+
+      // Também atualizar o caso no store dos advogados (se existir)
+      // Como não temos acesso direto ao store dos advogados aqui, vamos usar um evento
+      window.dispatchEvent(new CustomEvent("casoClienteUpdated", {
+        detail: {
+          casoId,
+          updates: {
+            status: "aguardando_analise_documentos",
+            documentosAnexados: documentosConvertidos,
+            timeline: timelineEntry
+          }
+        }
+      }));
 
       showSuccess(`${documentosParaEnvio.length} documento(s) enviado(s) com sucesso!`);
       setModalAberto(false);
       setDocumentosParaEnvio([]);
-      
-      // Recarregar a página para garantir que as mudanças sejam refletidas
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
       
     } catch (error) {
       console.error("Erro ao enviar documentos:", error);

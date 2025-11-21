@@ -45,9 +45,11 @@ export interface CasoCliente {
   documentosDisponiveis?: string;
   dataSolicitacao: string;
   status: "pendente" | "em_analise" | "aceito" | "rejeitado" | "aguardando_documentos" | "documentos_enviados" | "aguardando_analise_documentos" | "em_andamento" | "protocolado";
+  advogadoId?: string;
   advogadoNome?: string;
   documentosAnexados?: DocumentoAnexado[];
   timeline?: TimelineEntry[];
+  motivoRejeicao?: string;
 }
 
 /**
@@ -72,4 +74,5 @@ export interface CasoAdvogado {
   status: "aceito" | "em_andamento" | "concluido" | "arquivado" | "esperando_documentos" | "aguardando_analise_documentos" | "protocolado";
   documentosAnexados?: DocumentoAnexado[];
   timeline?: TimelineEntry[];
+  motivoRejeicao?: string;
 }
