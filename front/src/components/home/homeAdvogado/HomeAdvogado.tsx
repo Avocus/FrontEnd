@@ -130,7 +130,7 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
             {/* Dashboard */}
             <div className="flex-1 p-8">
                 {/* KPIs principais */}
-                <section className="grid grid-cols-4 gap-6 mb-8">
+                <section className="grid grid-cols-3 gap-6 mb-8">
                     <Card 
                         className={`border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1 ${
                             totalPendentes > 0 
@@ -200,24 +200,6 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                                 </div>
                                 <div className="bg-white/20 dark:bg-orange-400/40 p-3 rounded-full">
                                     <FileText className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-gradient-dashboard-green border-0 shadow-lg hover:shadow-xl transition-shadow">
-                        <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-dashboard-card-green-light text-sm font-medium">Rendimento Mensal</p>
-                                    <p className="text-2xl font-bold text-dashboard-card-primary">R$ 15.400</p>
-                                    <div className="flex items-center text-dashboard-card-green-light text-xs">
-                                        <TrendingUp className="w-3 h-3 mr-1" />
-                                        +8% vs mês anterior
-                                    </div>
-                                </div>
-                                <div className="bg-white/20 dark:bg-emerald-400/40 p-3 rounded-full">
-                                    <DollarSign className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
                                 </div>
                             </div>
                         </CardContent>

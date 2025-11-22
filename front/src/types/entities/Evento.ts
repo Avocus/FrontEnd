@@ -1,9 +1,6 @@
 import { TipoProcesso } from '@/types/enums';
 import { ProcessoStatus } from './Processo';
 
-/**
- * Interface que representa um evento de agenda
- */
 export interface Evento {
   id: number;
   titulo: string;
@@ -19,11 +16,10 @@ export interface Evento {
   cliente?: ClienteBasico;
   processo?: ProcessoBasico;
   advogado?: AdvogadoBasico;
+  processoId: number | undefined;
+  clienteId: number | undefined;
 }
 
-/**
- * Interface simplificada para cliente no contexto de evento
- */
 export interface ClienteBasico {
   id: number;
   nome: string;
@@ -32,9 +28,6 @@ export interface ClienteBasico {
   cpf: string;
 }
 
-/**
- * Interface simplificada para processo no contexto de evento
- */
 export interface ProcessoBasico {
   id: number;
   titulo: string;
@@ -45,9 +38,6 @@ export interface ProcessoBasico {
   advogado?: AdvogadoBasico;
 }
 
-/**
- * Interface simplificada para advogado no contexto de evento
- */
 export interface AdvogadoBasico {
   id: number;
   nome: string;
@@ -56,9 +46,6 @@ export interface AdvogadoBasico {
   email: string;
 }
 
-/**
- * Payload para criação de evento
- */
 export interface CreateEventoPayload {
   titulo: string;
   descricao: string;
@@ -77,17 +64,10 @@ export interface UpdateEventoPayload extends CreateEventoPayload {
   processoId?: number;
 }
 
-/**
- * Payload para atualização de evento com validação condicional:
- * - Se processoId estiver presente, clienteId é obrigatório
- */
 export type ValidatedUpdateEventoPayload =
   | (UpdateEventoPayload & { processoId?: undefined; clienteId?: number })
   | (UpdateEventoPayload & { processoId: number; clienteId: number });
 
-/**
- * Resposta da API para listagem de eventos
- */
 export interface EventosResponse {
   data: Evento[];
   message: string;
@@ -145,7 +125,7 @@ export interface AgendaState {
 
   loadEventos: () => Promise<void>;
   selectEvento: (id: number) => void;
-  addEvento: (evento: Omit<Evento, 'id'>) => Promise<Evento>;
+  addEvento: (evento: ValidatedUpdateEventoPayload) => Promise<Evento>;
   updateEvento: (id: number, eventoAtualizado: Partial<Evento>) => Promise<void>;
   removeEvento: (id: number) => Promise<void>;
   clearSelection: () => void;

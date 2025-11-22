@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { DetalheCaso } from "./DetalheCaso";
-import { DetalheCasoAdvogado } from "./CasosAdvogado";
+import { DetalheCasoAdvogado } from "./DetalheCasoAdvogado";
 import { useLayout } from "@/contexts/LayoutContext";
 
 export function DetalheCasoWrapper({ casoId }: { casoId: string | string[] | undefined }) {

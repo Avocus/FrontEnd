@@ -319,11 +319,9 @@ export function AgendaCompleta() {
       notificarPorEmail
     }
 
-    // Construir payload validado: se processoId existe, clienteId é obrigatório
     let eventoDataComRelacionamentos: ValidatedUpdateEventoPayload
 
     if (processoSelecionado?.id) {
-      // Se há processo, clienteId é obrigatório
       eventoDataComRelacionamentos = {
         ...eventoData,
         clienteId: clienteSelecionado?.id ? Number(clienteSelecionado.id) : (() => {
@@ -332,7 +330,6 @@ export function AgendaCompleta() {
         processoId: processoSelecionado.id
       }
     } else {
-      // Se não há processo, não há cliente
       eventoDataComRelacionamentos = {
         ...eventoData,
         clienteId: undefined,
@@ -344,7 +341,7 @@ export function AgendaCompleta() {
       if (eventoEditando) {
         await updateEvento(eventoEditando.id, eventoDataComRelacionamentos)
       } else {
-        await addEvento(eventoData)
+        await addEvento(eventoDataComRelacionamentos)
       }
       setIsDialogOpen(false)
       resetForm()

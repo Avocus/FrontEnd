@@ -3,6 +3,8 @@
  */
 
 import { TipoProcesso, StatusProcesso } from '@/types/enums';
+import { Evento } from './Evento';
+import { ClienteDTO, AdvogadoDTO } from './Processo';
 
 /**
  * Interface para documentos anexados a um caso
@@ -30,12 +32,10 @@ export interface TimelineEntry {
 }
 
 /**
- * Interface para casos visualizados pelo cliente
+ * Interface base para casos
  */
-export interface CasoCliente {
+export interface CasoBase {
   id: string;
-  clienteId: string;
-  clienteNome: string;
   titulo: string;
   tipoProcesso: TipoProcesso;
   descricao: string;
@@ -45,34 +45,25 @@ export interface CasoCliente {
   documentosDisponiveis?: string;
   dataSolicitacao: string;
   status: StatusProcesso;
-  advogadoId?: string;
-  advogadoNome?: string;
+  cliente: ClienteDTO;
+  advogado?: AdvogadoDTO;
   documentosAnexados?: DocumentoAnexado[];
   timeline?: TimelineEntry[];
+  eventos?: Evento[];
   motivoRejeicao?: string;
+}
+
+/**
+ * Interface para casos visualizados pelo cliente
+ */
+export interface CasoCliente extends CasoBase {
+  advogado?: AdvogadoDTO;
 }
 
 /**
  * Interface para casos visualizados pelo advogado
  */
-export interface CasoAdvogado {
-  id: string;
-  casoClienteId: string;
-  advogadoId: string;
-  advogadoNome: string;
-  clienteId: string;
-  clienteNome: string;
-  titulo: string;
-  tipoProcesso: TipoProcesso;
-  descricao: string;
-  situacaoAtual: string;
-  objetivos: string;
-  urgencia: "baixa" | "media" | "alta";
-  documentosDisponiveis?: string;
-  dataSolicitacao: string;
+export interface CasoAdvogado extends CasoBase {
   dataAceite: string;
-  status: StatusProcesso;
-  documentosAnexados?: DocumentoAnexado[];
-  timeline?: TimelineEntry[];
-  motivoRejeicao?: string;
+  advogado: AdvogadoDTO;
 }

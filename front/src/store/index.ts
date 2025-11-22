@@ -3,4 +3,13 @@ export { useProfileStore } from './useProfileStore';
 export { useNotificationStore } from './useNotificationStore';
 export { useThemeStore } from './useThemeStore';
 export { useAgendaStore } from './useAgendaStore';
-export { useCasoStore } from './useCasoStore'; 
+export {
+  useCasoStore,
+  useCasosClientePendentes,
+  useCasosAdvogadoAtivos,
+  useTotalCasosCliente,
+  useTotalCasosAdvogado,
+  useCasosPorStatus,
+  useCasoClientePorId,
+  useCasoAdvogadoPorId
+} from './useCasoStore'; 

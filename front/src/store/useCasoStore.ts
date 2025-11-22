@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { CasoCliente, CasoAdvogado } from '@/types/entities';
-import { listarProcessos } from '@/services/processo/processoService';
+import { listarProcessos, buscarProcessoPorId } from '@/services/processo/processoService';
 import { StatusProcesso } from '@/types/enums';
 
 interface CasoState {
@@ -12,12 +12,14 @@ interface CasoState {
 
   // Ações para casos do cliente
   carregarCasosCliente: () => void;
+  buscarCasoClientePorId: (id: string) => Promise<CasoCliente | null>;
   adicionarCasoCliente: (caso: CasoCliente) => void;
   atualizarCasoCliente: (id: string, updates: Partial<CasoCliente>) => void;
   removerCasoCliente: (id: string) => void;
 
   // Ações para casos do advogado
   carregarCasosAdvogado: () => void;
+  buscarCasoAdvogadoPorId: (id: string) => Promise<CasoAdvogado | null>;
   adicionarCasoAdvogado: (caso: CasoAdvogado) => void;
   atualizarCasoAdvogado: (id: string, updates: Partial<CasoAdvogado>) => void;
   removerCasoAdvogado: (id: string) => void;
@@ -46,35 +48,51 @@ export const useCasoStore = create<CasoState>()(
             const processos = await listarProcessos();
             // Mapear ProcessoDTO para CasoCliente
             const casosCliente: CasoCliente[] = processos.map(processo => ({
+              ...processo,
               id: processo.id.toString(),
-              clienteId: processo.cliente.id.toString(),
-              clienteNome: processo.cliente.nome,
-              titulo: processo.titulo,
-              tipoProcesso: processo.tipoProcesso,
-              descricao: processo.descricao,
-              situacaoAtual: '', // Campo não existe no DTO
-              objetivos: '', // Campo não existe no DTO
-              urgencia: 'media' as const, // Valor padrão
-              documentosDisponiveis: undefined,
+              situacaoAtual: processo.status,
               dataSolicitacao: processo.dataAbertura,
-              status: processo.status,
-              advogadoId: processo.advogado?.id?.toString(),
-              advogadoNome: processo.advogado?.nome || '',
+              // Campos que existem no frontend mas não no backend
+              objetivos: '',
+              urgencia: 'media',
+              documentosDisponiveis: undefined,
               documentosAnexados: [],
-              timeline: processo.linhaDoTempo?.map(update => ({
-                id: `timeline-${update.id}`,
-                data: update.dataAtualizacao,
-                statusAnterior: update.statusAnterior || undefined,
-                novoStatus: update.novoStatus,
-                descricao: update.descricao,
-                autor: 'sistema' as const, // Valor padrão
-                observacoes: undefined
-              })) || []
+              motivoRejeicao: undefined
             }));
             set({ casosCliente });
           } catch (error) {
             console.error('Erro ao carregar casos do cliente:', error);
             set({ casosCliente: [] });
+          }
+        },
+
+        buscarCasoClientePorId: async (id: string) => {
+          try {
+            const processo = await buscarProcessoPorId(id);
+
+            // Mapeamento usando destructuring para campos compatíveis
+            const casoCliente: CasoCliente = {
+              ...processo,
+              id: processo.id.toString(),
+              situacaoAtual: processo.status,
+              dataSolicitacao: processo.dataAbertura,
+              // Campos que existem no frontend mas não no backend
+              objetivos: '',
+              urgencia: 'media',
+              documentosDisponiveis: undefined,
+              documentosAnexados: [],
+              motivoRejeicao: undefined
+            };
+
+            // Adicionar à store
+            set((state) => ({
+              casosCliente: [...state.casosCliente.filter(c => c.id !== id), casoCliente]
+            }));
+
+            return casoCliente;
+          } catch (error) {
+            console.error('Erro ao buscar caso do cliente:', error);
+            return null;
           }
         },
 
@@ -106,37 +124,60 @@ export const useCasoStore = create<CasoState>()(
             const processosComAdvogado = processos.filter(processo => processo.advogado);
             // Mapear ProcessoDTO para CasoAdvogado
             const casosAdvogado: CasoAdvogado[] = processosComAdvogado.map(processo => ({
+              ...processo,
               id: processo.id.toString(),
-              casoClienteId: processo.id.toString(), // Mesmo ID por enquanto
-              advogadoId: processo.advogado!.id.toString(),
-              advogadoNome: processo.advogado!.nome,
-              clienteId: processo.cliente.id.toString(),
-              clienteNome: processo.cliente.nome,
-              titulo: processo.titulo,
-              tipoProcesso: processo.tipoProcesso,
-              descricao: processo.descricao,
-              situacaoAtual: '', // Campo não existe no DTO
-              objetivos: '', // Campo não existe no DTO
-              urgencia: 'media' as const, // Valor padrão
-              documentosDisponiveis: undefined,
+              situacaoAtual: processo.status,
               dataSolicitacao: processo.dataAbertura,
-              dataAceite: processo.dataAbertura, // Usar dataAbertura como fallback
-              status: processo.status,
+              dataAceite: processo.dataAbertura,
+              advogado: processo.advogado!,
+              // Campos que existem no frontend mas não no backend
+              objetivos: '',
+              urgencia: 'media',
+              documentosDisponiveis: undefined,
               documentosAnexados: [],
-              timeline: processo.linhaDoTempo?.map(update => ({
-                id: `timeline-${update.id}`,
-                data: update.dataAtualizacao,
-                statusAnterior: update.statusAnterior || undefined,
-                novoStatus: update.novoStatus,
-                descricao: update.descricao,
-                autor: 'sistema' as const, // Valor padrão
-                observacoes: undefined
-              })) || []
+              motivoRejeicao: undefined
             }));
             set({ casosAdvogado });
           } catch (error) {
             console.error('Erro ao carregar casos do advogado:', error);
             set({ casosAdvogado: [] });
+          }
+        },
+
+        buscarCasoAdvogadoPorId: async (id: string) => {
+          try {
+            const processo = await buscarProcessoPorId(id);
+
+            // Verificar se o processo tem advogado
+            if (!processo.advogado) {
+              return null;
+            }
+
+            // Mapeamento usando destructuring para campos compatíveis
+            const casoAdvogado: CasoAdvogado = {
+              ...processo,
+              id: processo.id.toString(),
+              situacaoAtual: processo.status,
+              dataSolicitacao: processo.dataAbertura,
+              dataAceite: processo.dataAbertura,
+              advogado: processo.advogado,
+              // Campos que existem no frontend mas não no backend
+              objetivos: '',
+              urgencia: 'media',
+              documentosDisponiveis: undefined,
+              documentosAnexados: [],
+              motivoRejeicao: undefined
+            };
+
+            // Adicionar à store
+            set((state) => ({
+              casosAdvogado: [...state.casosAdvogado.filter(c => c.id !== id), casoAdvogado]
+            }));
+
+            return casoAdvogado;
+          } catch (error) {
+            console.error('Erro ao buscar caso do advogado:', error);
+            return null;
           }
         },
 

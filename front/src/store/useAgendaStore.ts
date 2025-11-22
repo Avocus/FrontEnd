@@ -1,7 +1,7 @@
+import { createEvento, deleteEvento, getEventos, updateEvento } from '@/services/eventoService';
+import { AgendaState, Evento, ValidatedUpdateEventoPayload } from '@/types';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Evento, AgendaState, EventoTipo, EventoStatus } from '@/types';
-import { getEventos, getEventoById, createEvento, updateEvento, deleteEvento } from '@/services/eventoService';
 
 export const useAgendaStore = create<AgendaState>()(
   devtools(
@@ -33,25 +33,11 @@ export const useAgendaStore = create<AgendaState>()(
         },
 
         // Adicionar evento
-        addEvento: async (evento: Omit<Evento, 'id'>) => {
+        addEvento: async (evento: ValidatedUpdateEventoPayload) => {
           set({ isLoading: true, error: null });
           try {
-            const payload = {
-              titulo: evento.titulo,
-              descricao: evento.descricao,
-              tipo: evento.tipo,
-              status: evento.status,
-              cor: evento.cor,
-              dataInicio: evento.dataInicio,
-              dataFim: evento.dataFim,
-              local: evento.local,
-              diasLembrarAntes: evento.diasLembrarAntes,
-              notificarPorEmail: evento.notificarPorEmail,
-              clienteId: evento.cliente?.id,
-              processoId: evento.processo?.id
-            };
 
-            const novoEvento = await createEvento(payload);
+            const novoEvento = await createEvento(evento);
 
             set(state => ({
               eventos: [...state.eventos, novoEvento],
