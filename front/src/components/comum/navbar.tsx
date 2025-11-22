@@ -5,7 +5,6 @@ import { Bell } from "lucide-react";
 import { useState, memo, useCallback } from "react";
 import { ChatAvocuss } from "./chatAvocuss"; // Importação do ChatAvocuss
 import { Notificacoes } from "./notificacoes";
-import { ThemeToggle } from "./ThemeToggle"; // Importação do ThemeToggle
 import { NotificationButton } from "./NotificationButton"; // Importação do NotificationButton
 import { useNotificationStore, useAuthStore } from "@/store";
 import { useRouter } from "next/navigation";
@@ -119,9 +118,6 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
               </Button>
             </div>
             <Notificacoes open={notificacoesOpen} onOpenChange={setNotificacoesOpen} />
-            
-            {/* Toggle de tema */}
-            <ThemeToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -143,8 +139,6 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
           </>
         ) : (
           <>
-            {/* Toggle de tema */}
-            <ThemeToggle />
             
             {/* Botão de login */}
             <Button onClick={() => router.push("/login")}>

@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { useRouter } from "next/navigation";
 import { PrivacyPolicy } from "@/components/login/PrivacyPolicy";
 import { ServiceTerms } from "@/components/login/ServiceTerms";
-import { ModeToggle } from "../ui/modeToggle";
 import { useAuthStore } from "@/store";
 
 export function Configs() {
@@ -31,12 +30,6 @@ export function Configs() {
           <CardTitle className="text-2xl font-bold">Configurações</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-
-          {/* Mudar Tema */}
-          <div className="space-y-2 flex justify-start items-center">
-            <Label className="text-lg mr-10">Tema</Label>
-            <ModeToggle />
-          </div>
 
           {/* Redefinir Senha */}
           <div className="space-y-2">
