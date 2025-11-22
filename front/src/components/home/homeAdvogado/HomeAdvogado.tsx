@@ -85,23 +85,6 @@ function useCasosPendentes() {
 
   useEffect(() => {
     verificarCasosPendentes();
-    
-    // Escutar mudanças no localStorage
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "casoCliente") {
-        verificarCasosPendentes();
-      }
-    };
-
-    const handleCustomStorageChange = () => verificarCasosPendentes();
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("casoClienteUpdated", handleCustomStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("casoClienteUpdated", handleCustomStorageChange);
-    };
   }, [verificarCasosPendentes]);
 
   return { casosPendentes, totalPendentes: casosPendentes.length };

@@ -209,7 +209,7 @@ export const useCasosClientePendentes = () =>
 
 export const useCasosAdvogadoAtivos = () => 
   useCasoStore((state) => state.casosAdvogado.filter(caso => 
-    caso.status === StatusProcesso.ACEITO || caso.status === StatusProcesso.EM_ANDAMENTO || caso.status === StatusProcesso.AGUARDANDO_DOCUMENTOS
+    caso.status === StatusProcesso.ACEITO || caso.status === StatusProcesso.EM_ANDAMENTO || caso.status === StatusProcesso.AGUARDANDO_DADOS
   ));
 
 export const useTotalCasosCliente = () => 

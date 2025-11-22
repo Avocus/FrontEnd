@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 
-const Calendario = React.lazy(() => import("@/components/agenda/calendario").then(module => ({ default: module.Calendario })));
+const AgendaCompleta = React.lazy(() => import("@/components/agenda/AgendaCompleta").then(module => ({ default: module.AgendaCompleta })));
 
 export default function AgendaPage() {
   const { updateConfig } = useLayout();
@@ -37,7 +37,7 @@ export default function AgendaPage() {
             <span className="ml-2">Carregando agenda...</span>
           </div>
         }>
-          <Calendario />
+          <AgendaCompleta />
         </Suspense>
       </ErrorBoundary>
     </AuthGuard>

@@ -16,8 +16,8 @@ export function UserTypeSelector({ selectedRole, onChange }: UserTypeSelectorPro
         <div
           className={`relative border-2 rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 ${
             selectedRole === "cliente"
-              ? "border-blue-600 bg-blue-50 shadow-lg ring-2 ring-blue-200"
-              : "border-border hover:border-primary/50 hover:bg-primary/5"
+              ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-lg ring-2 ring-blue-200 dark:ring-blue-700"
+              : "border-border hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10"
           }`}
           onClick={() => onChange("cliente")}
         >
@@ -53,8 +53,8 @@ export function UserTypeSelector({ selectedRole, onChange }: UserTypeSelectorPro
         <div
           className={`relative border-2 rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 ${
             selectedRole === "advogado"
-              ? "border-blue-600 bg-blue-50 shadow-lg ring-2 ring-blue-200"
-              : "border-border hover:border-primary/50 hover:bg-primary/5"
+              ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-lg ring-2 ring-blue-200 dark:ring-blue-700"
+              : "border-border hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10"
           }`}
           onClick={() => onChange("advogado")}
         >

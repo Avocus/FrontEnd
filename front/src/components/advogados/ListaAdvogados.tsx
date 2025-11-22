@@ -14,7 +14,8 @@ export function ListaAdvogados() {
   return (
     <ListaEntidade<AdvogadoLista>
       loadFunction={getMeusAdvogados}
-      hasSearch={false}
+      hasSearch={true}
+      searchPlaceholder="Buscar advogados..."
       onDetailsClick={handleDetailsClick}
     />
   );

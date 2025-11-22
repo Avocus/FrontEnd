@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { AgendaCompleta } from '@/components/agenda/AgendaCompleta'
 import { Calendar } from "@/components/ui/calendar"
 import { useAgendaStore } from "@/store/useAgendaStore"
+import { ptBR } from "date-fns/locale"
 
 // Página completa da agenda
 export function AgendaPage() {
@@ -50,6 +51,7 @@ export function CalendarioSimples() {
       mode="single"
       selected={date}
       onSelect={(newDate) => newDate && setDate(newDate)}
+      locale={ptBR}
       modifiers={{
         hasEvent: (date) =>
           eventos.some((event) => isEventOnDate(event.dataInicio, date)),

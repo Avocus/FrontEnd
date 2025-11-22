@@ -20,9 +20,6 @@ export interface Evento {
   lembrarAntes?: number; // minutos antes para lembrar
 }
 
-/**
- * Enum com os tipos de evento
- */
 export enum EventoTipo {
   AUDIENCIA = 'AUDIENCIA',
   REUNIAO = 'REUNIAO',
@@ -30,9 +27,6 @@ export enum EventoTipo {
   OUTRO = 'OUTRO'
 }
 
-/**
- * Enum com os status de evento
- */
 export enum EventoStatus {
   PENDENTE = 'PENDENTE',
   CONFIRMADO = 'CONFIRMADO',
@@ -40,9 +34,6 @@ export enum EventoStatus {
   CANCELADO = 'CANCELADO'
 }
 
-/**
- * Enum com as cores disponíveis para eventos
- */
 export enum EventoCor {
   AZUL = '#3B82F6',
   VERDE = '#10B981',
@@ -56,9 +47,6 @@ export enum EventoCor {
   INDIGO = '#6366F1'
 }
 
-/**
- * Interface para filtros de eventos
- */
 export interface EventoFiltro {
   tipo?: EventoTipo[];
   status?: EventoStatus[];

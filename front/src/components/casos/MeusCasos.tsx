@@ -42,7 +42,6 @@ export default function MeusCasos() {
     if (!user) return
 
     try {
-      // Carregar casos baseado no tipo de usuário
       if (isAdvogado) {
         await carregarCasosAdvogado()
       } else {
@@ -84,7 +83,7 @@ export default function MeusCasos() {
     const colors: Record<string, string> = {
       [StatusProcesso.RASCUNHO]: "bg-yellow-100 text-yellow-800 border-yellow-200",
       [StatusProcesso.EM_ANDAMENTO]: "bg-blue-100 text-blue-800 border-blue-200",
-      [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "bg-orange-100 text-orange-800 border-orange-200",
+      [StatusProcesso.AGUARDANDO_DADOS]: "bg-orange-100 text-orange-800 border-orange-200",
       [StatusProcesso.EM_JULGAMENTO]: "bg-purple-100 text-purple-800 border-purple-200",
       [StatusProcesso.CONCLUIDO]: "bg-green-100 text-green-800 border-green-200",
       [StatusProcesso.ARQUIVADO]: "bg-red-100 text-red-800 border-red-200"
@@ -96,7 +95,7 @@ export default function MeusCasos() {
     const icons: Record<string, React.ReactElement> = {
       [StatusProcesso.RASCUNHO]: <Clock className="h-3 w-3" />,
       [StatusProcesso.EM_ANDAMENTO]: <Play className="h-3 w-3" />,
-      [StatusProcesso.AGUARDANDO_DOCUMENTOS]: <FileText className="h-3 w-3" />,
+      [StatusProcesso.AGUARDANDO_DADOS]: <FileText className="h-3 w-3" />,
       [StatusProcesso.EM_JULGAMENTO]: <Search className="h-3 w-3" />,
       [StatusProcesso.CONCLUIDO]: <CheckCircle2 className="h-3 w-3" />,
       [StatusProcesso.ARQUIVADO]: <AlertCircle className="h-3 w-3" />
@@ -108,7 +107,7 @@ export default function MeusCasos() {
     const labels: Record<string, string> = {
       [StatusProcesso.RASCUNHO]: "Rascunho",
       [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
-      [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "Aguardando Documentos",
+      [StatusProcesso.AGUARDANDO_DADOS]: "Aguardando Documentos",
       [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
       [StatusProcesso.CONCLUIDO]: "Concluído",
       [StatusProcesso.ARQUIVADO]: "Arquivado"
@@ -146,7 +145,7 @@ export default function MeusCasos() {
     const columns = [
       { key: 'rascunho', title: 'Rascunho', status: StatusProcesso.RASCUNHO, color: 'bg-yellow-50 border-yellow-200' },
       { key: 'em_andamento', title: 'Em Andamento', status: StatusProcesso.EM_ANDAMENTO, color: 'bg-blue-50 border-blue-200' },
-      { key: 'aguardando', title: 'Aguardando', status: StatusProcesso.AGUARDANDO_DOCUMENTOS, color: 'bg-orange-50 border-orange-200' },
+      { key: 'aguardando', title: 'Aguardando', status: StatusProcesso.AGUARDANDO_DADOS, color: 'bg-orange-50 border-orange-200' },
       { key: 'em_julgamento', title: 'Em Julgamento', status: StatusProcesso.EM_JULGAMENTO, color: 'bg-purple-50 border-purple-200' },
       { key: 'concluido', title: 'Concluído', status: StatusProcesso.CONCLUIDO, color: 'bg-green-50 border-green-200' },
       { key: 'arquivado', title: 'Arquivado', status: StatusProcesso.ARQUIVADO, color: 'bg-red-50 border-red-200' }

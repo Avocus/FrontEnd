@@ -18,7 +18,7 @@ const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
     [StatusProcesso.RASCUNHO]: "Rascunho",
     [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
-    [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "Aguardando Documentos",
+    [StatusProcesso.AGUARDANDO_DADOS]: "Aguardando Documentos",
     [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
     [StatusProcesso.CONCLUIDO]: "Concluído",
     [StatusProcesso.ARQUIVADO]: "Arquivado"
@@ -32,7 +32,7 @@ const podeModificarDocumentos = (status: StatusProcesso, isAdvogado: boolean) =>
   // Cliente pode modificar documentos apenas em determinados status
   const statusPermitidos = [
     StatusProcesso.RASCUNHO,
-    StatusProcesso.AGUARDANDO_DOCUMENTOS
+    StatusProcesso.AGUARDANDO_DADOS
   ];
   return statusPermitidos.includes(status);
 };
@@ -43,7 +43,7 @@ const podeGerenciarDocumentos = (status: StatusProcesso, isAdvogado: boolean) =>
   // Cliente pode ver opções de documento (mas talvez com restrições)
   const statusPermitidos = [
     StatusProcesso.RASCUNHO,
-    StatusProcesso.AGUARDANDO_DOCUMENTOS,
+    StatusProcesso.AGUARDANDO_DADOS,
     StatusProcesso.EM_ANDAMENTO
   ];
   return statusPermitidos.includes(status);
@@ -291,7 +291,7 @@ export function DetalheCaso({ casoId }: { casoId: string }) {
                     • <strong>Em andamento:</strong> Seu caso está sendo trabalhado pelo advogado. Acompanhe os updates na timeline.
                   </p>
                 )}
-                {caso.status === StatusProcesso.AGUARDANDO_DOCUMENTOS && (
+                {caso.status === StatusProcesso.AGUARDANDO_DADOS && (
                   <p className="text-sm text-green-800 dark:text-green-200">
                     • <strong>Ação necessária:</strong> O advogado solicitou documentos. Acesse a aba &quot;Documentos&quot; e envie os arquivos necessários.
                   </p>

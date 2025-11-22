@@ -46,7 +46,6 @@ import { useNotificacoes } from "@/hooks/useNotificacoes"
 import '@/styles/agenda.css'
 import { useLayout } from "@/contexts/LayoutContext"
 
-// Componente seletor de cores
 function ColorPicker({ value, onChange }: { value: EventoCor, onChange: (cor: EventoCor) => void }) {
     const { updateConfig, isAdvogado } = useLayout();
     
@@ -364,6 +363,7 @@ export function AgendaCompleta() {
                 selected={date}
                 onSelect={(newDate) => newDate && setDate(newDate)}
                 className="w-full"
+                locale={ptBR}
                 modifiers={{
                   hasEvent: (date) =>
                     eventos.some((event) => isEventOnDate(event.dataInicio, date)),
