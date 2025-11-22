@@ -1,8 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from '@/lib/api';
 import { ClienteLista } from '@/types/entities/Cliente';
 
-export const getAdvogadoProfile = async (): Promise<any> => {
+interface ValidationResult {
+  valido: boolean;
+  erro?: string;
+}
+
+export const getAdvogadoProfile = async (): Promise<unknown> => {
   try {
     const response = await api.get('/user/profile');
     return response.data;
@@ -47,12 +51,16 @@ export const gerarLinkConvite = async (): Promise<string> => {
   }
 };
 
-export const validarTokenConvite = async (token: string): Promise<any> => {
+export const validarTokenConvite = async (token: string): Promise<ValidationResult> => {
   try {
     const response = await api.post('/advogado/validar-token-convite', null, {
       params: { token }
     });
-    const responseData = response.data as { data?: any };
+    const responseData = response.data as { data?: ValidationResult };
+
+    if (!responseData.data) {
+      throw new Error('Dados de validação não encontrados');
+    }
 
     return responseData.data;
   } catch (error) {

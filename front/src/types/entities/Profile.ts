@@ -1,4 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Documento } from './Documento';
+import { Processo } from './Processo';
+
 /**
  * Interface base para perfil
  */
@@ -15,10 +17,11 @@ export interface BaseProfile {
   estado?: string;
   cep?: string;
   foto?: string;
-  documentos?: any;
+  documentos?: Documento[];
   fotoPerfil?: string;
-  processosFinalizados?: any;
-  processosAtivos?: any;
+  processosFinalizados?: Processo[];
+  processosAtivos?: Processo[];
+  processos?: Processo[];
 }
 
 /**

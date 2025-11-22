@@ -1,10 +1,10 @@
+
 "use client";
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useResponsive } from "@/hooks/useResponsive";
 import Image from "next/image";
 
 interface Content {
@@ -14,84 +14,54 @@ interface Content {
     thumbnail: string;
 }
 
-export function Videoteca() {
+export function Videoteca () {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedVideo, setSelectedVideo] = useState<Content | null>(null);
-    const { isMobile } = useResponsive();
 
     const filteredVideos = videos.filter((video) =>
         video.titulo.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className={`${isMobile ? 'p-4' : 'p-8'} bg-background text-foreground`}>
-            {!isMobile && <h1 className="text-3xl font-bold mb-6">Videoteca Jurídica</h1>}
+        <div className="p-8 bg-background text-foreground">
+            <h1 className="text-3xl font-bold mb-6">Videoteca Jurídica</h1>
 
             {/* Barra de Busca */}
-            <div className={`${isMobile ? 'mb-4' : 'mb-8'}`}>
+            <div className="mb-8">
                 <Input
                     placeholder="Buscar vídeos por título..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full ${!isMobile ? 'max-w-md' : ''}`}
+                    className="w-full max-w-md"
                 />
             </div>
 
             {/* Lista de Vídeos */}
-            {isMobile ? (
-                // Layout Mobile - Lista vertical
-                <div className="space-y-4">
-                    {filteredVideos.map((video) => (
-                        <Card
-                            key={video.id}
-                            className="cursor-pointer hover:shadow-lg transition-shadow"
-                            onClick={() => setSelectedVideo(video)}
-                        >
-                            <CardHeader>
-                                <CardTitle>{video.titulo}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Image
-                                    src={video.thumbnail}
-                                    alt={video.titulo}
-                                    width={640} // Largura padrão para thumbnails
-                                    height={360} // Altura padrão para thumbnails
-                                    className="w-full h-32 object-cover rounded-lg"
-                                />
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            ) : (
-                // Layout Desktop - Grid
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredVideos.map((video) => (
-                        <Card
-                            key={video.id}
-                            className="cursor-pointer hover:shadow-lg transition-shadow"
-                            onClick={() => setSelectedVideo(video)}
-                        >
-                            <CardHeader>
-                                <CardTitle>{video.titulo}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Image
-                                    src={video.thumbnail}
-                                    alt={video.titulo}
-                                    width={640} // Largura padrão para thumbnails
-                                    height={360} // Altura padrão para thumbnails
-                                    className="w-full h-48 object-cover rounded-lg"
-                                />
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredVideos.map((video) => (
+                    <Card
+                        key={video.id}
+                        className="cursor-pointer hover:shadow-lg transition-shadow"
+                        onClick={() => setSelectedVideo(video)}
+                    >
+                        <CardHeader>
+                            <CardTitle>{video.titulo}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Image
+                                src={video.thumbnail}
+                                alt={video.titulo}
+                                className="w-full h-48 object-cover rounded-lg"
+                            />
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
 
             {/* Reprodutor de Vídeo */}
             {selectedVideo && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <Card className={`w-full ${!isMobile ? 'max-w-2xl' : ''}`}>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8">
+                    <Card className="w-full max-w-2xl">
                         <CardHeader>
                             <CardTitle>{selectedVideo.titulo}</CardTitle>
                         </CardHeader>
@@ -99,7 +69,7 @@ export function Videoteca() {
                             <iframe
                                 src={selectedVideo.url}
                                 title={selectedVideo.titulo}
-                                className={`w-full ${isMobile ? 'h-48' : 'h-96'}`}
+                                className="w-full h-96"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
                             />

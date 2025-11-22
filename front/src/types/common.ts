@@ -86,7 +86,7 @@ export interface CadastroData {
   email: string;
   senha: string;
   tipo: 'advogado' | 'cliente';
-  [key: string]: any; // Para campos adicionais
+  [key: string]: unknown; // Para campos adicionais
 }
 
 // Tipos para eventos

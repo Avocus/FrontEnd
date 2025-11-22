@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User, Save, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getProfileData, updateProfileData } from '@/services/user/profileService';
 import { useForm } from "react-hook-form";
@@ -16,6 +15,9 @@ import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import toast from "react-hot-toast";
+import { useProfileStore, useAuthStore } from "@/store";
+import { ClienteProfile } from "@/types/entities/Profile";
+import { StatusProcesso } from "@/types/enums";
 
 export function DadosUsuario() {
     const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
@@ -26,7 +28,7 @@ export function DadosUsuario() {
 
     const form = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
-        defaultValues: profile as unknown as PerfilCliente
+        defaultValues: profile as unknown as ClienteProfile
     });
 
     useEffect(() => {
@@ -288,16 +290,16 @@ export function DadosUsuario() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-5">
-                    {profile && (profile as any).processos && (profile as any).processos.map((processo: any) => (
+                    {profile && profile.processos && profile.processos.map((processo) => (
                         <div key={processo.id} className="flex items-center justify-between p-4 rounded-lg border">
                             <div>
                                 <h3 className="font-medium">{processo.titulo}</h3>
                                 <div className="flex items-center gap-1 mt-1">
                                     <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">{processo.data}</span>
+                                    <span className="text-sm text-muted-foreground">{processo.dataInicio}</span>
                                 </div>
                             </div>
-                            <Badge variant={processo.status === "Ativo" ? "outline" : "default"}>
+                            <Badge variant={processo.status === StatusProcesso.EM_ANDAMENTO ? "outline" : "default"}>
                                 {processo.status}
                             </Badge>
                         </div>
@@ -319,7 +321,7 @@ export function DadosUsuario() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
-                    {profile!.documentos.map((documento: { id: Key | null | undefined; nome: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; }) => (
+                    {profile?.documentos?.map((documento) => (
                         <div key={documento.id} className="flex items-center justify-between p-4 rounded-lg border">
                             <div className="flex items-center gap-3">
                                 <FileIcon className="h-8 w-8 text-secondary" />
@@ -402,11 +404,11 @@ export function DadosUsuario() {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-lg bg-primary/10">
                         <h3 className="font-medium text-muted-foreground">Processos Ativos</h3>
-                        <p className="text-3xl font-bold">{profile?.processosAtivos || 0}</p>
+                        <p className="text-3xl font-bold">{profile?.processosAtivos?.length || 0}</p>
                     </div>
                     <div className="p-4 rounded-lg bg-primary/10">
                         <h3 className="font-medium text-muted-foreground">Finalizados</h3>
-                        <p className="text-3xl font-bold">{profile?.processosFinalizados || 0}</p>
+                        <p className="text-3xl font-bold">{profile?.processosFinalizados?.length || 0}</p>
                     </div>
                 </div>
             </CardContent>

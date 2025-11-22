@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuthStore, useCasoStore } from "@/store"
 import { useToast } from "@/hooks/useToast"
-import { TipoProcesso, StatusCaso } from "@/types/enums"
+import { TipoProcesso, StatusProcesso } from "@/types/enums"
 import { ArrowLeft, FileText, AlertCircle, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -54,7 +54,7 @@ interface CasoCliente {
   urgencia: "baixa" | "media" | "alta"
   documentosDisponiveis?: string
   dataSolicitacao: string
-  status: "pendente" | "em_analise" | "aceito" | "rejeitado"
+  status: StatusProcesso
 }
 
 export default function NovoCaso() {
@@ -152,7 +152,7 @@ export default function NovoCaso() {
         urgencia: data.urgencia,
         documentosDisponiveis: data.documentosDisponiveis,
         dataSolicitacao: new Date().toISOString(),
-        status: StatusCaso.PENDENTE
+        status: StatusProcesso.PENDENTE
       }
 
       // Adicionar caso usando a store

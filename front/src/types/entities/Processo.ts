@@ -10,7 +10,7 @@ export interface Processo {
   descricao?: string;
   dataInicio?: string;
   dataConclusao?: string;
-  status?: ProcessoStatus;
+  status?: StatusProcesso;
   advogadoId?: string;
   advogadoNome?: string;
   clienteId?: string;
@@ -18,7 +18,6 @@ export interface Processo {
   concluido?: boolean;
   mensagensNaoLidas?: number;
   prazosVencidos?: number;
-  steps?: ProcessoStep[];
   isDraft?: boolean;
 }
 
@@ -69,17 +68,6 @@ export interface StatusUpdateDTO {
   dataAtualizacao: string;
 }
 
-/**
- * Interface que representa uma etapa do processo
- */
-export interface ProcessoStep {
-  id: string;
-  titulo: string;
-  descricao: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  dataPrevista?: string;
-  dataConclusao?: string;
-}
 
 /**
  * Enumeração com os possíveis status de um processo

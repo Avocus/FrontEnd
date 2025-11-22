@@ -85,7 +85,8 @@ export function LoginForm({
     }
   }, [login]);
 
-  const handleForgotPassword = useCallback(async (data: ResetPasswordData) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleForgotPassword = useCallback(async (_data: ResetPasswordData) => {
     try {
       // TODO: Implementar recuperação de senha
       // await sendPasswordResetEmail(auth, data.resetEmail);

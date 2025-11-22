@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -41,10 +40,6 @@ export default function NovoProcessoPage() {
         }
     }, [user, router]);
 
-    // Don't render if user is a client
-    if (user && user.client) {
-        return null;
-    }
     const [isModalBuscaOpen, setIsModalBuscaOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState<ProcessoData>({
@@ -63,6 +58,11 @@ export default function NovoProcessoPage() {
             showFooter: true
         });
     }, [updateConfig]);
+
+    // Don't render if user is a client
+    if (user && user.client) {
+        return null;
+    }
 
     const handleInputChange = (field: keyof ProcessoData, value: string) => {
         setData((prev) => ({ ...prev, [field]: value }));

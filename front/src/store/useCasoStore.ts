@@ -205,11 +205,11 @@ export const useCasoStore = create<CasoState>()(
 
 // Selectors otimizados para performance
 export const useCasosClientePendentes = () => 
-  useCasoStore((state) => state.casosCliente.filter(caso => caso.status === 'pendente'));
+  useCasoStore((state) => state.casosCliente.filter(caso => caso.status === StatusProcesso.PENDENTE));
 
 export const useCasosAdvogadoAtivos = () => 
   useCasoStore((state) => state.casosAdvogado.filter(caso => 
-    caso.status === 'aceito' || caso.status === 'em_andamento' || caso.status === 'esperando_documentos'
+    caso.status === StatusProcesso.ACEITO || caso.status === StatusProcesso.EM_ANDAMENTO || caso.status === StatusProcesso.AGUARDANDO_DOCUMENTOS
   ));
 
 export const useTotalCasosCliente = () => 

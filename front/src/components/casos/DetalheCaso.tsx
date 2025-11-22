@@ -14,8 +14,8 @@ import { Upload, X, FileText, Send } from "lucide-react";
 import Link from "next/link";
 
 // Função utilitária para obter label do status
-const getStatusLabel = (status: StatusProcesso) => {
-  const labels: Record<StatusProcesso, string> = {
+const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
     [StatusProcesso.RASCUNHO]: "Rascunho",
     [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
     [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "Aguardando Documentos",

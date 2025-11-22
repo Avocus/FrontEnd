@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,10 +17,8 @@ import {
   Eye,
   Calendar,
   FileText,
-  Send,
   Search,
   Play,
-  FileCheck,
   HelpCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -74,8 +72,8 @@ export default function MeusCasos() {
     return labels[tipo] || tipo
   }
 
-  const getStatusColor = (status: StatusProcesso) => {
-    const colors: Record<StatusProcesso, string> = {
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
       [StatusProcesso.RASCUNHO]: "bg-yellow-100 text-yellow-800 border-yellow-200",
       [StatusProcesso.EM_ANDAMENTO]: "bg-blue-100 text-blue-800 border-blue-200",
       [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "bg-orange-100 text-orange-800 border-orange-200",
@@ -86,8 +84,8 @@ export default function MeusCasos() {
     return colors[status] || "bg-gray-100 text-gray-800 border-gray-200"
   }
 
-  const getStatusIcon = (status: StatusProcesso) => {
-    const icons: Record<StatusProcesso, JSX.Element> = {
+  const getStatusIcon = (status: string) => {
+    const icons: Record<string, React.ReactElement> = {
       [StatusProcesso.RASCUNHO]: <Clock className="h-3 w-3" />,
       [StatusProcesso.EM_ANDAMENTO]: <Play className="h-3 w-3" />,
       [StatusProcesso.AGUARDANDO_DOCUMENTOS]: <FileText className="h-3 w-3" />,
@@ -98,8 +96,8 @@ export default function MeusCasos() {
     return icons[status] || <HelpCircle className="h-3 w-3" />
   }
 
-  const getStatusLabel = (status: StatusProcesso) => {
-    const labels: Record<StatusProcesso, string> = {
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
       [StatusProcesso.RASCUNHO]: "Rascunho",
       [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
       [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "Aguardando Documentos",

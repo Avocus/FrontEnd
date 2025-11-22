@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -48,13 +46,7 @@ export function ModalAdicionarCliente({ isOpen, onClose, onClienteVinculado }: M
     mode: "onBlur",
   });
 
-  useEffect(() => {
-    if (isOpen && activeTab === "invite" && !inviteUrl) {
-      generateInvite(false);
-    }
-  }, [isOpen, activeTab, inviteUrl]);
-
-  const generateInvite = async (showToast = true) => {
+  const generateInvite = useCallback(async (showToast = true) => {
     setIsLoading(true);
     try {
       const inviteUrl = await gerarLinkConvite();
@@ -70,7 +62,7 @@ export function ModalAdicionarCliente({ isOpen, onClose, onClienteVinculado }: M
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [success, showError]);
 
   const copyInviteUrl = async () => {
     if (inviteUrl) {
@@ -78,6 +70,12 @@ export function ModalAdicionarCliente({ isOpen, onClose, onClienteVinculado }: M
       success("Link copiado!");
     }
   };
+
+  useEffect(() => {
+    if (isOpen && activeTab === "invite" && !inviteUrl) {
+      generateInvite(false);
+    }
+  }, [isOpen, activeTab, inviteUrl, generateInvite]);
 
   const onSubmitExisting = async (data: ExistingClientForm) => {
     setIsLoading(true);
@@ -87,7 +85,7 @@ export function ModalAdicionarCliente({ isOpen, onClose, onClienteVinculado }: M
       resetExisting(); // Limpa o formulário após sucesso
       onClienteVinculado?.(); // Chama callback para atualizar lista
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = getErrorMessage(err, "Cliente não encontrado ou erro ao vincular.");
       showError(errorMessage);
     } finally {

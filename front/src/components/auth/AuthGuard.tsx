@@ -4,7 +4,6 @@ import { useAuthStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import { useAuth } from '@/contexts/AuthContext';
 import { getToken } from '@/utils/authUtils';
 
 interface AuthGuardProps {

@@ -15,7 +15,7 @@ import { TipoProcesso } from "@/types/enums";
 import { useAuthStore, useCasoStore } from "@/store";
 import { useToast } from "@/hooks/useToast";
 import { CasoCliente, CasoAdvogado, DocumentoAnexado, TimelineEntry } from "@/types/entities";
-import { StatusCaso, StatusCasoAdvogado } from "@/types/enums";
+import { StatusProcesso } from "@/types/enums";
 
 // Hook para carregar casos pendentes da store
 function useCasosPendentes() {
@@ -35,7 +35,7 @@ function useCasosPendentes() {
     carregarCasosPendentes();
   }, [carregarCasosPendentes]);
 
-  const casosPendentes = casosCliente.filter((caso: CasoCliente) => caso.status === "pendente");
+  const casosPendentes = casosCliente.filter((caso: CasoCliente) => caso.status === StatusProcesso.PENDENTE);
 
   return { casosPendentes, loading, recarregar: carregarCasosPendentes };
 }
@@ -66,28 +66,40 @@ function useCasosAdvogado() {
 
 // Função para obter label do status do advogado
 const getStatusLabel = (status: CasoAdvogado["status"]) => {
-  const labels = {
-    aceito: "Aceito",
-    em_andamento: "Em Andamento",
-    concluido: "Concluído",
-    arquivado: "Arquivado",
-    esperando_documentos: "Esperando Documentos",
-    aguardando_analise_documentos: "Aguardando Análise de Documentos",
-    protocolado: "Protocolado"
+  const labels: Record<string, string> = {
+    [StatusProcesso.RASCUNHO]: "Rascunho",
+    [StatusProcesso.PENDENTE]: "Pendente",
+    [StatusProcesso.EM_ANALISE]: "Em Análise",
+    [StatusProcesso.ACEITO]: "Aceito",
+    [StatusProcesso.REJEITADO]: "Rejeitado",
+    [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "Aguardando Documentos",
+    [StatusProcesso.DOCUMENTOS_ENVIADOS]: "Documentos Enviados",
+    [StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS]: "Aguardando Análise de Documentos",
+    [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
+    [StatusProcesso.PROTOCOLADO]: "Protocolado",
+    [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
+    [StatusProcesso.CONCLUIDO]: "Concluído",
+    [StatusProcesso.ARQUIVADO]: "Arquivado"
   };
   return labels[status] || status;
 };
 
 // Função para obter cor do badge baseado no status
 const getStatusBadgeVariant = (status: CasoAdvogado["status"]) => {
-  const variants = {
-    aceito: "default" as const,
-    em_andamento: "secondary" as const,
-    concluido: "outline" as const,
-    arquivado: "destructive" as const,
-    esperando_documentos: "secondary" as const,
-    aguardando_analise_documentos: "default" as const,
-    protocolado: "default" as const
+  const variants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+    [StatusProcesso.RASCUNHO]: "outline",
+    [StatusProcesso.PENDENTE]: "secondary",
+    [StatusProcesso.EM_ANALISE]: "default",
+    [StatusProcesso.ACEITO]: "default",
+    [StatusProcesso.REJEITADO]: "destructive",
+    [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "secondary",
+    [StatusProcesso.DOCUMENTOS_ENVIADOS]: "default",
+    [StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS]: "default",
+    [StatusProcesso.EM_ANDAMENTO]: "secondary",
+    [StatusProcesso.PROTOCOLADO]: "default",
+    [StatusProcesso.EM_JULGAMENTO]: "secondary",
+    [StatusProcesso.CONCLUIDO]: "outline",
+    [StatusProcesso.ARQUIVADO]: "destructive"
   };
   return variants[status] || "outline";
 };
@@ -239,7 +251,7 @@ function CasosAdvogadoWeb() {
       );
 
       atualizarCasoCliente(caso.id, {
-        status: "aceito",
+        status: StatusProcesso.ACEITO,
         advogadoId: user.id?.toString(),
         advogadoNome: user.nome || "Advogado",
         timeline: [...(caso.timeline || []), timelineEntry]
@@ -262,7 +274,7 @@ function CasosAdvogadoWeb() {
         documentosDisponiveis: caso.documentosDisponiveis,
         dataSolicitacao: caso.dataSolicitacao,
         dataAceite: new Date().toISOString(),
-        status: "aceito"
+        status: StatusProcesso.ACEITO
       };
 
       adicionarCasoAdvogado(novoCasoAdvogado);
@@ -431,7 +443,7 @@ function CasosAdvogadoMobile() {
       );
 
       atualizarCasoCliente(caso.id, {
-        status: "aceito",
+        status: StatusProcesso.ACEITO,
         advogadoId: user.id?.toString(),
         advogadoNome: user.nome || "Advogado",
         timeline: [...(caso.timeline || []), timelineEntry]
@@ -454,7 +466,7 @@ function CasosAdvogadoMobile() {
         documentosDisponiveis: caso.documentosDisponiveis,
         dataSolicitacao: caso.dataSolicitacao,
         dataAceite: new Date().toISOString(),
-        status: "aceito"
+        status: StatusProcesso.ACEITO
       };
 
       adicionarCasoAdvogado(novoCasoAdvogado);
@@ -592,26 +604,26 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       );
 
       atualizarCasoCliente(caso.casoClienteId, {
-        status: "aguardando_documentos",
+        status: StatusProcesso.AGUARDANDO_DOCUMENTOS,
         timeline: [...(caso.timeline || []), timelineEntryCliente]
       });
 
       // Atualizar o caso do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
         caso.status,
-        "esperando_documentos",
+        StatusProcesso.AGUARDANDO_DOCUMENTOS,
         `Advogado solicitou documentos adicionais`,
         "advogado",
         `Solicitação feita pelo advogado ${caso.advogadoNome}`
       );
 
       atualizarCasoAdvogado(caso.id, {
-        status: "esperando_documentos",
+        status: StatusProcesso.AGUARDANDO_DOCUMENTOS,
         timeline: [...(caso.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: "esperando_documentos" });
+      setCaso({ ...caso, status: StatusProcesso.AGUARDANDO_DOCUMENTOS });
 
       success("Solicitação de documentos enviada ao cliente!");
     } catch (err) {
@@ -634,7 +646,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       );
 
       atualizarCasoCliente(caso.casoClienteId, {
-        status: "protocolado",
+        status: StatusProcesso.PROTOCOLADO,
         timeline: [...(caso.timeline || []), timelineEntryCliente]
       });
 
@@ -648,12 +660,12 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       );
 
       atualizarCasoAdvogado(caso.id, {
-        status: "protocolado",
+        status: StatusProcesso.PROTOCOLADO,
         timeline: [...(caso.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: "protocolado" });
+      setCaso({ ...caso, status: StatusProcesso.PROTOCOLADO });
 
       success("Caso protocolado com sucesso! Aguardando análise do fórum competente.");
     } catch (err) {
@@ -676,7 +688,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       );
 
       atualizarCasoCliente(caso.casoClienteId, {
-        status: "em_andamento",
+        status: StatusProcesso.EM_ANDAMENTO,
         timeline: [...(caso.timeline || []), timelineEntryCliente]
       });
 
@@ -690,12 +702,12 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       );
 
       atualizarCasoAdvogado(caso.id, {
-        status: "em_andamento",
+        status: StatusProcesso.EM_ANDAMENTO,
         timeline: [...(caso.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: "em_andamento" });
+      setCaso({ ...caso, status: StatusProcesso.EM_ANDAMENTO });
 
       success("Documentos aprovados! O caso agora está em andamento.");
       
@@ -727,7 +739,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       );
 
       atualizarCasoCliente(caso.casoClienteId, {
-        status: "aguardando_documentos",
+        status: StatusProcesso.AGUARDANDO_DOCUMENTOS,
         motivoRejeicao: motivo,
         documentosAnexados: [], // Limpar documentos rejeitados
         timeline: [...(caso.timeline || []), timelineEntryCliente]
@@ -736,21 +748,21 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       // Atualizar o caso do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
         caso.status,
-        "esperando_documentos",
+        StatusProcesso.AGUARDANDO_DOCUMENTOS,
         `Documentos rejeitados - reenvio solicitado`,
         "advogado",
         `Motivo: ${motivo}`
       );
 
       atualizarCasoAdvogado(caso.id, {
-        status: "esperando_documentos",
+        status: StatusProcesso.AGUARDANDO_DOCUMENTOS,
         motivoRejeicao: motivo,
         documentosAnexados: [], // Limpar documentos rejeitados
         timeline: [...(caso.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: "esperando_documentos", documentosAnexados: [] });
+      setCaso({ ...caso, status: StatusProcesso.AGUARDANDO_DOCUMENTOS, documentosAnexados: [] });
 
       success("Documentos rejeitados. O cliente foi notificado para reenviar.");
       
@@ -800,7 +812,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       <div className={`mb-6 ${isMobile ? 'flex flex-col gap-2' : 'flex gap-4 flex-wrap'}`}>
         <Button
           onClick={solicitarDocumentos}
-          disabled={caso.status === "esperando_documentos" || caso.status === "protocolado" || caso.status === "aguardando_analise_documentos"}
+          disabled={caso.status === StatusProcesso.AGUARDANDO_DOCUMENTOS || caso.status === StatusProcesso.PROTOCOLADO || caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS}
           className="flex items-center gap-2"
           variant="outline"
         >
@@ -808,7 +820,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
           Solicitar Documentos
         </Button>
         
-        {caso.status === "aguardando_analise_documentos" && caso.documentosAnexados && caso.documentosAnexados.length > 0 && (
+        {caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS && caso.documentosAnexados && caso.documentosAnexados.length > 0 && (
           <>
             <Button
               onClick={aprovarDocumentos}
@@ -831,7 +843,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
         
         <Button
           onClick={protocolarCaso}
-          disabled={caso.status === "protocolado" || caso.status === "aguardando_analise_documentos"}
+          disabled={caso.status === StatusProcesso.PROTOCOLADO || caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS}
           className="flex items-center gap-2"
         >
           <Send className="h-4 w-4" />
@@ -852,27 +864,27 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
           <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
             <h2 className="text-xl font-semibold mb-3 text-blue-900 dark:text-blue-100">🎯 Ações Necessárias</h2>
             <div className="space-y-2">
-              {caso.status === "aceito" && (
+              {caso.status === StatusProcesso.ACEITO && (
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   • <strong>Próximo passo:</strong> Solicite os documentos necessários do cliente ou inicie o desenvolvimento do caso.
                 </p>
               )}
-              {caso.status === "esperando_documentos" && (
+              {caso.status === StatusProcesso.AGUARDANDO_DOCUMENTOS && (
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   • <strong>Aguardando:</strong> Cliente deve enviar os documentos solicitados. Você será notificado quando os documentos forem enviados.
                 </p>
               )}
-              {caso.status === "aguardando_analise_documentos" && (
+              {caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS && (
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   • <strong>Ação requerida:</strong> Analise os {caso.documentosAnexados?.length || 0} documento(s) enviado(s) pelo cliente. Aprove ou rejeite os documentos.
                 </p>
               )}
-              {caso.status === "em_andamento" && (
+              {caso.status === StatusProcesso.EM_ANDAMENTO && (
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   • <strong>Em andamento:</strong> Documentos aprovados. Continue com o desenvolvimento do caso e protocole quando estiver pronto.
                 </p>
               )}
-              {caso.status === "protocolado" && (
+              {caso.status === StatusProcesso.PROTOCOLADO && (
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   • <strong>Protocolado:</strong> Caso enviado ao fórum competente. Aguarde retorno da análise judicial.
                 </p>
@@ -912,7 +924,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
 
         <TabsContent value="documents" className="space-y-4">
           {/* Aviso quando documentos estão em análise */}
-          {caso.status === "aguardando_analise_documentos" && (
+          {caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS && (
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
@@ -946,8 +958,8 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="font-medium">Documentos Enviados pelo Cliente ({caso.documentosAnexados.length})</h3>
-                  <Badge variant={caso.status === "aguardando_analise_documentos" ? "default" : "secondary"} className="text-xs">
-                    {caso.status === "aguardando_analise_documentos" ? "Pendente Análise" : "Analisado"}
+                  <Badge variant={caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS ? "default" : "secondary"} className="text-xs">
+                    {caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS ? "Pendente Análise" : "Analisado"}
                   </Badge>
                 </div>
                 <div className="grid gap-3">
@@ -994,7 +1006,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
                           <span className="text-xs">Baixar</span>
                         </Button>
                         <Badge 
-                          variant={caso.status === "aguardando_analise_documentos" ? "default" : "outline"}
+                          variant={caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS ? "default" : "outline"}
                           className="text-xs"
                         >
                           #{index + 1}
@@ -1006,18 +1018,18 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
                 
                 {/* Resumo dos documentos */}
                 <div className={`mt-4 p-3 rounded-lg border ${
-                  caso.status === "aguardando_analise_documentos" 
+                  caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS 
                     ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
                     : "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
                 }`}>
                   <div className="flex items-center gap-2 text-sm">
                     <FileText className={`h-4 w-4 ${
-                      caso.status === "aguardando_analise_documentos" 
+                      caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS 
                         ? "text-amber-600" 
                         : "text-green-600"
                     }`} />
                     <span className={`font-medium ${
-                      caso.status === "aguardando_analise_documentos" 
+                      caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS 
                         ? "text-amber-900 dark:text-amber-100" 
                         : "text-green-900 dark:text-green-100"
                     }`}>
@@ -1025,11 +1037,11 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
                     </span>
                   </div>
                   <p className={`text-xs mt-1 ${
-                    caso.status === "aguardando_analise_documentos" 
+                    caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS 
                       ? "text-amber-700 dark:text-amber-200" 
                       : "text-green-700 dark:text-green-200"
                   }`}>
-                    {caso.status === "aguardando_analise_documentos" 
+                    {caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS 
                       ? "⏳ Aguardando sua análise. Aprove ou rejeite os documentos usando os botões acima." 
                       : "✅ Documentos analisados e processados"
                     }
@@ -1039,7 +1051,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">
-                  {caso.status === "esperando_documentos" 
+                  {caso.status === StatusProcesso.AGUARDANDO_DOCUMENTOS 
                     ? "Aguardando envio de documentos pelo cliente."
                     : "Nenhum documento foi enviado pelo cliente ainda."
                   }

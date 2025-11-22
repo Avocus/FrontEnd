@@ -1,5 +1,5 @@
 
-export function ServicosAdvogadoWeb() {
+export function ServicosAdvogado() {
     return (
         <div>
             <div className="flex flex-col items-center mt-8">

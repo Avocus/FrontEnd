@@ -1,5 +1,4 @@
 import React, { ReactNode, useState, useEffect } from 'react';
-import { NavbarWeb } from '../comum/navbarWeb';
 import { Sidebar } from '../comum/sidebar/Sidebar';
 import { useLayout } from '@/contexts/LayoutContext';
 import { ChatAvocuss } from '../comum/chatAvocuss';
@@ -25,8 +24,6 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
     setIsMounted(true);
   }, []);
 
-  // Determinamos qual componente de navbar mostrar
-  const NavbarComponent = isMobile ? Navbar : NavbarWeb;
 
   if (!isMounted) {
     return (
@@ -60,7 +57,7 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Navbar */}
           {config.showNavbar && !hideNavbar && (
-            <NavbarWeb 
+            <Navbar 
               showFullNavigation={false} 
               showLogo={config.sidebarCollapsed}
             />
@@ -84,7 +81,7 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Navbar */}
-      {config.showNavbar && !hideNavbar && <NavbarComponent showFullNavigation={true} showLogo={true} />}
+      {config.showNavbar && !hideNavbar && <Navbar showFullNavigation={true} showLogo={true} />}
 
       {/* Alert Banner */}
       {isAuthenticated && pendente && <ProfileAlertBanner />}

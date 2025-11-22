@@ -1,6 +1,5 @@
 "use client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useEffect } from "react";
 import { 
     Calendar, 
@@ -12,12 +11,10 @@ import {
     AlertTriangle,
     User,
     Shield,
-    TrendingUp,
     Activity,
     Plus,
     Download
 } from "lucide-react";
-import { useResponsive } from "@/hooks/useResponsive";
 import { useLayout } from "@/contexts/LayoutContext";
 import AuthGuard from "@/components/auth/AuthGuard";
 
@@ -32,14 +29,6 @@ export function HomeCliente() {
             showFooter: true
         });
     }, [updateConfig]);
-
-    const { isMobile } = useResponsive();
-
-    if (isMobile) {
-        return <AuthGuard>
-                <MobileView />
-               </AuthGuard>
-    }
 
     return <AuthGuard>
              <DesktopView />
@@ -284,215 +273,6 @@ function DesktopView() {
                             <p className="text-sm text-muted-foreground">Gerenciar documentos pessoais</p>
                         </CardContent>
                     </Card>
-                </section>
-            </div>
-        </div>
-    );
-}
-
-function MobileView() {
-    return (
-        <div className="min-h-screen bg-background">
-            {/* Header mobile */}
-            <div className="bg-card shadow-sm px-4 py-6 border-b">
-                <h1 className="text-xl font-bold text-foreground">Meu Portal</h1>
-                <p className="text-sm text-muted-foreground">Acompanhe seus processos</p>
-            </div>
-
-            <div className="min-h-fit-content">
-                {/* Carrossel com KPIs */}
-                <section className="p-4">
-                    <Carousel className="w-full">
-                        <CarouselContent>
-                            <CarouselItem>
-                                <Card className="bg-gradient-dashboard-blue shadow-lg min-h-36">
-                                    <CardContent className="p-5">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-dashboard-card-blue-light text-sm">Processos Ativos</p>
-                                                <div className="text-3xl font-bold text-dashboard-card-primary">5</div>
-                                                <div className="flex items-center text-dashboard-card-blue-light text-xs mt-1">
-                                                    <TrendingUp className="w-3 h-3 mr-1" />
-                                                    +1 novo esta semana
-                                                </div>
-                                            </div>
-                                            <div className="bg-white/20 dark:bg-blue-400/40 p-3 rounded-full">
-                                                <Briefcase className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                            <CarouselItem>
-                                <Card className="bg-gradient-dashboard-orange shadow-lg min-h-36">
-                                    <CardContent className="p-5">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-dashboard-card-orange-light text-sm">Próximos Compromissos</p>
-                                                <div className="text-3xl font-bold text-dashboard-card-primary">2</div>
-                                                <div className="flex items-center text-dashboard-card-orange-light text-xs mt-1">
-                                                    <Calendar className="w-3 h-3 mr-1" />
-                                                    Esta semana
-                                                </div>
-                                            </div>
-                                            <div className="bg-white/20 dark:bg-red-400/40 p-3 rounded-full">
-                                                <Clock className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                            <CarouselItem>
-                                <Card className="bg-gradient-dashboard-green shadow-lg min-h-36">
-                                    <CardContent className="p-5">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="text-dashboard-card-green-light text-sm">Status Geral</p>
-                                                <div className="flex items-center mt-2">
-                                                    <CheckCircle className="w-5 h-5 mr-1 text-dashboard-card-primary" />
-                                                    <div className="text-xl font-bold text-dashboard-card-primary">Em dia</div>
-                                                </div>
-                                                <div className="text-dashboard-card-green-light text-xs mt-1">Tudo atualizado</div>
-                                            </div>
-                                            <div className="bg-white/20 dark:bg-green-400/40 p-3 rounded-full">
-                                                <Shield className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                        </CarouselContent>
-                    </Carousel>
-                </section>
-
-                {/* Próximos Compromissos */}
-                <section className="p-4">
-                    <div className="flex items-center mb-3">
-                        <Calendar className="w-5 h-5 mr-2 text-dashboard-orange" />
-                        <h2 className="text-lg font-bold text-foreground">Próximos Compromissos</h2>
-                    </div>
-                    
-                    <Card className="mb-3 bg-dashboard-red-light border border-dashboard-red shadow-md">
-                        <CardContent className="p-4">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-dashboard-red-light p-2 rounded-full">
-                                        <AlertTriangle className="w-4 h-4 text-dashboard-red" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-foreground">Audiência Trabalhista</h3>
-                                        <p className="text-sm text-muted-foreground">Dr. Carlos Silva - 14:30</p>
-                                    </div>
-                                </div>
-                                <div className="text-dashboard-red text-sm font-bold">Amanhã</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="mb-3 bg-dashboard-blue-light border border-dashboard-blue shadow-md">
-                        <CardContent className="p-4">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-dashboard-blue-light p-2 rounded-full">
-                                        <User className="w-4 h-4 text-dashboard-blue" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-foreground">Reunião com Advogado</h3>
-                                        <p className="text-sm text-muted-foreground">Dra. Maria Santos - 10:00</p>
-                                    </div>
-                                </div>
-                                <div className="text-dashboard-blue text-sm font-bold">Em 3 dias</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </section>
-
-                {/* Meus Processos */}
-                <section className="p-4">
-                    <div className="flex items-center mb-3">
-                        <Briefcase className="w-5 h-5 mr-2 text-dashboard-blue" />
-                        <h2 className="text-lg font-bold text-foreground">Meus Processos</h2>
-                    </div>
-                    
-                    <Card className="mb-3 bg-dashboard-green-light border border-dashboard-green shadow-md">
-                        <CardContent className="p-4">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-dashboard-green-light p-2 rounded-full">
-                                        <Activity className="w-4 h-4 text-dashboard-green" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-foreground">Trabalhista #12345</h3>
-                                        <p className="text-sm text-muted-foreground">Dr. Carlos Silva</p>
-                                    </div>
-                                </div>
-                                <span className="text-dashboard-green text-sm font-medium bg-dashboard-green-light px-2 py-1 rounded">Em andamento</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="mb-3 bg-dashboard-blue-light border border-dashboard-blue shadow-md">
-                        <CardContent className="p-4">
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center space-x-3">
-                                    <div className="bg-dashboard-blue-light p-2 rounded-full">
-                                        <Clock className="w-4 h-4 text-dashboard-blue" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-foreground">Previdenciário #54321</h3>
-                                        <p className="text-sm text-muted-foreground">Dra. Maria Santos</p>
-                                    </div>
-                                </div>
-                                <span className="text-dashboard-blue text-sm font-medium bg-dashboard-blue-light px-2 py-1 rounded">Aguardando</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </section>
-
-                {/* Ações Rápidas */}
-                <section className="p-4 mb-16">
-                    <div className="flex items-center mb-3">
-                        <Plus className="w-5 h-5 mr-2 text-dashboard-purple" />
-                        <h2 className="text-lg font-bold text-foreground">Ações Rápidas</h2>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-3">
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
-                            <CardContent className="p-4 flex flex-col items-center justify-center">
-                                <div className="bg-dashboard-blue-light p-3 rounded-full mb-2">
-                                    <Plus className="w-6 h-6 text-dashboard-blue" />
-                                </div>
-                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/casos/novo"}>Novo Processo</div>
-                            </CardContent>
-                        </Card>
-                        
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0">
-                            <CardContent className="p-4 flex flex-col items-center justify-center">
-                                <div className="bg-dashboard-green-light p-3 rounded-full mb-2">
-                                    <Calendar className="w-6 h-6 text-dashboard-green" />
-                                </div>
-                                <div className="text-sm font-medium text-center text-foreground" onClick={() => window.location.href = "/agenda"}>Agendar</div>
-                            </CardContent>
-                        </Card>
-                        
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => window.location.href = "/biblioteca"}>
-                            <CardContent className="p-4 flex flex-col items-center justify-center">
-                                <div className="bg-dashboard-purple-light p-3 rounded-full mb-2">
-                                    <Book className="w-6 h-6 text-dashboard-purple" />
-                                </div>
-                                <div className="text-sm font-medium text-center text-foreground">Biblioteca</div>
-                            </CardContent>
-                        </Card>
-                        
-                        <Card className="bg-card shadow-md cursor-pointer hover:shadow-lg transition-shadow border-0" onClick={() => window.location.href = "/conta"}>
-                            <CardContent className="p-4 flex flex-col items-center justify-center">
-                                <div className="bg-dashboard-orange-light p-3 rounded-full mb-2">
-                                    <Download className="w-6 h-6 text-dashboard-orange" />
-                                </div>
-                                <div className="text-sm font-medium text-center text-foreground">Documentos</div>
-                            </CardContent>
-                        </Card>
-                    </div>
                 </section>
             </div>
         </div>

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { cn } from "../../lib/utils"
@@ -24,12 +23,14 @@ import { PasswordRequirements } from './PasswordRequirements';
 import { useToast } from '../../hooks/useToast';
 import { getFieldValidationClass } from '../../utils/formValidation';
 
+type InviteData = { isInvite: boolean; token: string } | null;
+
 export function CadastroForm({
   className,
   inviteData,
   ...props
 }: React.ComponentPropsWithoutRef<"div"> & { 
-  inviteData?: any;
+  inviteData?: InviteData;
 }) {
   const [cadastroError, setCadastroError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +50,7 @@ export function CadastroForm({
     mode: "onChange",
     defaultValues: {
       name: "",
-      email: inviteData?.email || "",
+      email: "",
       password: "",
       confirmPassword: "",
       role: inviteData ? "cliente" : undefined

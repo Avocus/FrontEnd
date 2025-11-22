@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { ListaClientes } from "@/components/clientes/ListaClientes";
 import { ModalAdicionarCliente } from "@/components/clientes/ModalAdicionarCliente";

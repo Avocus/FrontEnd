@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import * as React from "react"
@@ -11,10 +10,12 @@ import { useAuthStore } from '@/store';
 import { validarTokenConvite } from '@/services/advogado/advogadoService';
 import { useToast } from '@/hooks/useToast';
 
+type InviteData = { isInvite: boolean; token: string } | null;
+
 function CadastroContent() {
   const { updateConfig } = useLayout()
   const searchParams = useSearchParams()
-  const [inviteData, setInviteData] = useState<any>(null)
+  const [inviteData, setInviteData] = useState<InviteData>(null)
   const [inviteValidated, setInviteValidated] = useState(false)
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();

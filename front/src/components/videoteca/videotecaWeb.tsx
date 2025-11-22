@@ -14,7 +14,7 @@ interface Content {
     thumbnail: string;
 }
 
-export function VideotecaWeb () {
+export function Videoteca () {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedVideo, setSelectedVideo] = useState<Content | null>(null);
 

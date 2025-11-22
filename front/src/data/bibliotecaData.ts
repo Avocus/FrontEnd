@@ -159,5 +159,3 @@ export const conteudos: BibliotecaContent[] = [
         tempoLeitura: "11 min"
     }
 ];
-
-export type { Content };
