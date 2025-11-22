@@ -9,9 +9,6 @@ import {
   MessageCircle, 
   FileText, 
   Users, 
-  BarChart,
-  Clock,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Home
@@ -108,10 +105,6 @@ export function Sidebar({
     ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}] : [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}])
   ];
 
-  const gerencialItems: SidebarItemProps[] = [
-    { label: "Configurações", href: "/configuracoes", icon: <Settings className="h-5 w-5" /> , disabled: false },
-  ];
-
   return (
     <>
       <aside className={cn(
@@ -151,22 +144,6 @@ export function Sidebar({
             )}
             <div className={cn("space-y-1", collapsed ? "mt-4" : "")}>
               {casosItems.map((item) => (
-                <SidebarItem 
-                  key={item.label} 
-                  {...item} 
-                  active={activePath === item.href}
-                  collapsed={collapsed}
-                />
-              ))}
-            </div>
-
-            {!collapsed && (
-              <div className="mt-6">
-                <h3 className="mb-2 px-4 text-sm font-semibold text-muted-foreground">Gerencial</h3>
-              </div>
-            )}
-            <div className={cn("space-y-1", collapsed ? "mt-4" : "")}>
-              {gerencialItems.map((item) => (
                 <SidebarItem 
                   key={item.label} 
                   {...item} 

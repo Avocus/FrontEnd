@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import { useProfileStore, useAuthStore } from "@/store";
 import { ClienteProfile } from "@/types/entities/Profile";
 import { StatusProcesso } from "@/types/enums";
+import { Configs } from "@/components/perfil/configs";
 
 export function DadosUsuario() {
     const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
@@ -32,6 +33,7 @@ export function DadosUsuario() {
     });
 
     useEffect(() => {
+
         const fetchProfile = async () => {
             try {
                 const perfilData = await getProfileData();
@@ -351,6 +353,8 @@ export function DadosUsuario() {
                 return renderProcessosTab();
             case "documentos":
                 return renderDocumentosTab();
+            case "configuracoes":
+                return renderConfiguracoesTab();
             default:
                 return null;
         }
@@ -415,6 +419,11 @@ export function DadosUsuario() {
         </Card>
     );
 
+    const renderConfiguracoesTab = () => (
+        <Configs />
+
+    );
+
     // Função para renderizar as tabs
     const renderTabs = () => (
         <div className="flex border-b space-x-4">
@@ -441,6 +450,14 @@ export function DadosUsuario() {
                     : "text-muted-foreground hover:text-foreground"}`}
             >
                 Documentos
+            </button>
+            <button
+                onClick={() => setActiveTab("configuracoes")}
+                className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "configuracoes" 
+                    ? "border-b-2 border-primary text-secondary" 
+                    : "text-muted-foreground hover:text-foreground"}`}
+            >
+                Configurações
             </button>
         </div>
     );

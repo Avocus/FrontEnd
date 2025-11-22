@@ -51,11 +51,11 @@ export function Configs() {
             </div>
           </div>
 
-          {/* Sair do App */}
+          {/* Sair */}
           <div className="space-y-2">
             <Label className="text-lg">Conta</Label>
             <Button variant="secondary" className="w-full text-primary hover:bg-destructive" onClick={handleLogout}>
-              Sair do App
+              Sair
             </Button>
           </div>
         </CardContent>

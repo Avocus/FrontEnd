@@ -5,15 +5,15 @@ import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
 
 export default function Dados() {
-    const { updateConfig, isAdvogado } = useLayout();
+    const { updateConfig } = useLayout();
 
     useEffect(() => {
         updateConfig({
             showNavbar: true,
-            showSidebar: isAdvogado,
+            showSidebar: true,
             showFooter: true
         });
-    }, [updateConfig, isAdvogado]);
+    }, [updateConfig]);
 
     return (
         <DadosUsuario />

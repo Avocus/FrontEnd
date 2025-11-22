@@ -45,7 +45,6 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
 
   const profileItems = [
     { label: "Conta", href: "/conta" },
-    { label: "Configurações", href: "/configuracoes" },
     { label: "Sair", onClick: () => handleLogout() },
   ];
 
