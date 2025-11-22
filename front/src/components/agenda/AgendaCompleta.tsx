@@ -38,11 +38,13 @@ import {
 } from "lucide-react"
 import { useAgendaStore } from "@/store/useAgendaStore"
 import { TimePicker } from "@/components/ui/time-picker"
-import { Evento, EventoTipo, EventoStatus, EventoCor } from "@/types"
+import { Evento, EventoTipo, EventoStatus, EventoCor, CreateEventoPayload, UpdateEventoPayload, ValidatedUpdateEventoPayload } from "@/types"
 import { useEffect, useState } from "react"
 import { format, isToday, isTomorrow, isPast } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useNotificacoes } from "@/hooks/useNotificacoes"
+import { ModalBuscaProcesso } from "@/components/casos/ModalBuscaProcesso"
+import { ProcessoDTO } from "@/types/entities/Processo"
 import '@/styles/agenda.css'
 import { useLayout } from "@/contexts/LayoutContext"
 
@@ -66,22 +68,31 @@ function ColorPicker({ value, onChange }: { value: EventoCor, onChange: (cor: Ev
         <button
           key={cor}
           type="button"
-          className={`w-8 h-8 rounded-full border-2 ${
-            value === cor ? 'border-gray-800 scale-110' : 'border-gray-300'
-          } transition-all hover:scale-105`}
+          className={`relative w-8 h-8 rounded-full border-2 transition-all hover:scale-105 ${
+            value === cor 
+              ? 'border-gray-800 scale-110 ring-2 ring-gray-800 ring-offset-1' 
+              : 'border-gray-300 hover:border-gray-400'
+          }`}
           style={{ backgroundColor: cor }}
           onClick={() => onChange(cor)}
-        />
+          title={`Cor: ${cor}`}
+        >
+          {value === cor && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <CheckCircle2 className="h-4 w-4 text-white drop-shadow-sm" />
+            </div>
+          )}
+        </button>
       ))}
     </div>
   )
 }
 
 // Componente card de evento
-function EventoCard({ evento, onEdit, onDelete }: { 
-  evento: Evento, 
+function EventoCard({ evento, onEdit, onDelete }: {
+  evento: Evento,
   onEdit: (evento: Evento) => void,
-  onDelete: (id: string) => void 
+  onDelete: (id: number) => void
 }) {
   const dataEvento = new Date(evento.dataInicio)
   const dataFim = evento.dataFim ? new Date(evento.dataFim) : null
@@ -146,18 +157,18 @@ function EventoCard({ evento, onEdit, onDelete }: {
               )}
             </div>
             
-            {evento.localizacao && (
+            {evento.local && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-3 w-3" />
-                <span>{evento.localizacao}</span>
+                <span>{evento.local}</span>
               </div>
             )}
             
             {evento.notificarPorEmail && (
               <div className="flex items-center gap-2">
                 <Mail className="h-3 w-3" />
-                <span className={evento.emailNotificado ? "text-green-600" : "text-blue-300"}>
-                  {evento.emailNotificado ? "E-mail enviado" : "Notificar por e-mail"}
+                <span className="text-blue-600">
+                  Notificar por e-mail
                 </span>
               </div>
             )}
@@ -202,9 +213,14 @@ export function AgendaCompleta() {
   const [tipo, setTipo] = useState<EventoTipo>(EventoTipo.OUTRO)
   const [status, setStatus] = useState<EventoStatus>(EventoStatus.PENDENTE)
   const [cor, setCor] = useState<EventoCor>(EventoCor.AZUL)
-  const [localizacao, setLocalizacao] = useState("")
+  const [local, setLocal] = useState("")
   const [notificarPorEmail, setNotificarPorEmail] = useState(true)
   const [lembrarAntes, setLembrarAntes] = useState(1440) // 24 horas
+  const [clienteSelecionado, setClienteSelecionado] = useState<{id: number | string, nome: string} | null>(null)
+  const [processoSelecionado, setProcessoSelecionado] = useState<{id: number, titulo: string} | null>(null)
+  
+  // Estados para modais de busca
+  const [showProcessoModal, setShowProcessoModal] = useState(false)
   
   const {
     eventos,
@@ -236,9 +252,11 @@ export function AgendaCompleta() {
     setTipo(EventoTipo.OUTRO)
     setStatus(EventoStatus.PENDENTE)
     setCor(EventoCor.AZUL)
-    setLocalizacao("")
+    setLocal("")
     setNotificarPorEmail(true)
     setLembrarAntes(1440)
+    setClienteSelecionado(null)
+    setProcessoSelecionado(null)
     setEventoEditando(null)
   }
 
@@ -255,11 +273,22 @@ export function AgendaCompleta() {
     setSelectedEndTime(evento.dataFim ? new Date(evento.dataFim) : undefined)
     setTipo(evento.tipo)
     setStatus(evento.status || EventoStatus.PENDENTE)
-    setCor(evento.cor)
-    setLocalizacao(evento.localizacao || "")
+    setCor(evento.cor as EventoCor)
+    setLocal(evento.local || "")
     setNotificarPorEmail(evento.notificarPorEmail ?? true)
-    setLembrarAntes(evento.lembrarAntes || 1440)
+    setLembrarAntes(evento.diasLembrarAntes || 1440)
+    setClienteSelecionado(evento.cliente ? {id: evento.cliente.id, nome: evento.cliente.nome} : null)
+    setProcessoSelecionado(evento.processo ? {id: evento.processo.id, titulo: evento.processo.titulo} : null)
     setIsDialogOpen(true)
+  }
+
+  const handleProcessoSelect = (processo: ProcessoDTO) => {
+    setProcessoSelecionado({ id: processo.id, titulo: processo.titulo })
+    // Vincular automaticamente o cliente do processo
+    if (processo.cliente) {
+      setClienteSelecionado({ id: processo.cliente.id, nome: processo.cliente.nome })
+    }
+    setShowProcessoModal(false)
   }
 
   const handleSaveEvent = async () => {
@@ -277,23 +306,43 @@ export function AgendaCompleta() {
       dataFim = endDate.toISOString()
     }
 
-    const eventoData = {
+    const eventoData: CreateEventoPayload = {
       titulo,
-      descricao: descricao || undefined,
+      descricao: descricao || "",
       dataInicio: eventDate.toISOString(),
-      dataFim,
+      dataFim: dataFim || "",
       tipo,
       status,
       cor,
-      localizacao: localizacao || undefined,
-      notificarPorEmail,
-      lembrarAntes,
-      emailNotificado: false
+      local: local || "",
+      diasLembrarAntes: lembrarAntes,
+      notificarPorEmail
+    }
+
+    // Construir payload validado: se processoId existe, clienteId é obrigatório
+    let eventoDataComRelacionamentos: ValidatedUpdateEventoPayload
+
+    if (processoSelecionado?.id) {
+      // Se há processo, clienteId é obrigatório
+      eventoDataComRelacionamentos = {
+        ...eventoData,
+        clienteId: clienteSelecionado?.id ? Number(clienteSelecionado.id) : (() => {
+          throw new Error('Cliente é obrigatório quando processo está selecionado')
+        })(),
+        processoId: processoSelecionado.id
+      }
+    } else {
+      // Se não há processo, não há cliente
+      eventoDataComRelacionamentos = {
+        ...eventoData,
+        clienteId: undefined,
+        processoId: undefined
+      }
     }
 
     try {
       if (eventoEditando) {
-        await updateEvento(eventoEditando.id, eventoData)
+        await updateEvento(eventoEditando.id, eventoDataComRelacionamentos)
       } else {
         await addEvento(eventoData)
       }
@@ -304,7 +353,7 @@ export function AgendaCompleta() {
     }
   }
 
-  const handleDeleteEvent = async (id: string) => {
+  const handleDeleteEvent = async (id: number) => {
     try {
       await removeEvento(id)
     } catch (error) {
@@ -481,7 +530,7 @@ export function AgendaCompleta() {
 
       {/* Dialog para adicionar/editar evento */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {eventoEditando ? 'Editar Evento' : 'Novo Evento'}
@@ -547,6 +596,72 @@ export function AgendaCompleta() {
               <ColorPicker value={cor} onChange={setCor} />
             </div>
 
+            <div className="grid gap-2">
+              <Label>Cliente (vinculado ao processo)</Label>
+              <div className="flex gap-2">
+                <div className="flex-1 p-3 border rounded-md bg-muted/50">
+                  {clienteSelecionado ? clienteSelecionado.nome : "Selecione um processo primeiro"}
+                </div>
+                {clienteSelecionado && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setClienteSelecionado(null)
+                      setProcessoSelecionado(null)
+                    }}
+                    title="Limpar seleção"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {clienteSelecionado && (
+                <p className="text-sm text-muted-foreground">
+                  Cliente vinculado automaticamente ao processo selecionado
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Processo (opcional)</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowProcessoModal(true)}
+                  className="flex-1 justify-start"
+                >
+                  {processoSelecionado ? processoSelecionado.titulo : "Selecionar processo"}
+                </Button>
+                {processoSelecionado && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setProcessoSelecionado(null)
+                      setClienteSelecionado(null)
+                    }}
+                    title="Limpar seleção"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {!processoSelecionado && (
+                <p className="text-sm text-muted-foreground">
+                  Ao selecionar um processo, o cliente será vinculado automaticamente
+                </p>
+              )}
+              {processoSelecionado && (
+                <p className="text-sm text-muted-foreground">
+                  Processo selecionado: {processoSelecionado.titulo}
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Horário de Início *</Label>
@@ -566,8 +681,8 @@ export function AgendaCompleta() {
               <Label htmlFor="localizacao">Local</Label>
               <Input
                 id="localizacao"
-                value={localizacao}
-                onChange={(e) => setLocalizacao(e.target.value)}
+                value={local}
+                onChange={(e) => setLocal(e.target.value)}
                 placeholder="Local do evento"
               />
             </div>
@@ -618,6 +733,13 @@ export function AgendaCompleta() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de busca de processo */}
+      <ModalBuscaProcesso
+        isOpen={showProcessoModal}
+        onOpenChange={setShowProcessoModal}
+        onProcessoSelect={handleProcessoSelect}
+      />
     </div>
   )
 }

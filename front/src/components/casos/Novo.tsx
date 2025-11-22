@@ -192,6 +192,27 @@ export default function NovoCaso() {
           return
         }
         adicionarCasoAdvogado(payload as any)
+
+        const novoCaso = {
+          id: Date.now().toString(),
+          casoClienteId: Date.now().toString(), // Mesmo ID pois é criado diretamente pelo advogado
+          clienteId: clienteSelecionado.id.toString(),
+          clienteNome: clienteSelecionado.nome,
+          advogadoId: user.id || "unknown",
+          advogadoNome: user.nome || "Advogado não informado",
+          titulo: data.titulo,
+          tipoProcesso: data.tipoProcesso,
+          descricao: data.descricao,
+          situacaoAtual: data.situacaoAtual,
+          objetivos: data.objetivos,
+          urgencia: data.urgencia,
+          documentosDisponiveis: data.documentosDisponiveis,
+          dataSolicitacao: new Date().toISOString(),
+          dataAceite: new Date().toISOString(), // Aceito automaticamente quando criado pelo advogado
+          status: StatusProcesso.PENDENTE
+        }
+
+        adicionarCasoAdvogado(novoCaso)
         success("Caso criado com sucesso!")
       } else {
         adicionarCasoCliente(payload as any)

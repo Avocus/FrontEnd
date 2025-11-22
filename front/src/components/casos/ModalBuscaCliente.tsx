@@ -84,7 +84,7 @@ export function ModalBuscaCliente({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />

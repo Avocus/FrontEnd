@@ -109,8 +109,6 @@ export function Sidebar({
   ];
 
   const gerencialItems: SidebarItemProps[] = [
-    { label: "Estatísticas", href: "/estatisticas", icon: <BarChart className="h-5 w-5" />, disabled: true  },
-    { label: "Prazos", href: "/prazos", icon: <Clock className="h-5 w-5" /> , disabled: true },
     { label: "Configurações", href: "/configuracoes", icon: <Settings className="h-5 w-5" /> , disabled: false },
   ];
 
