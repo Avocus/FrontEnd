@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  turbopack: {},
   webpack: (config) => {
     config.resolve.extensionAlias = {
       '.js': ['.js', '.ts', '.tsx'],

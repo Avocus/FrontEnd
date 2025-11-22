@@ -7,14 +7,14 @@ import { useLayout } from "@/contexts/LayoutContext";
 
 export function ServicosComum() {
 
-    const { isClient } = useLayout();
+    const { isCliente } = useLayout();
 
     return (
         <div className="min-h-screen bg-background">
             <Navbar />
             
             <div>
-                {isClient ? (
+                {isCliente ? (
                     <ServicosCliente />
                 ) : (
                     <ServicosAdvogado />
