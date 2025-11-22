@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useCasoStore } from "@/store"
 import { getUrgenciaStyles } from "@/lib/urgency"
+import LoadingScreen from "../common/LoadingScreen"
 
 export default function MeusCasos() {
   const { user } = useAuthStore()
@@ -152,18 +153,7 @@ export default function MeusCasos() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="grid gap-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+        <LoadingScreen />
     )
   }
 
