@@ -9,60 +9,15 @@ import { useLayout } from "@/contexts/LayoutContext";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Grid, List, Calendar, User, AlertCircle, CheckCircle, XCircle, FileText, Send } from "lucide-react";
 import { TipoProcesso } from "@/types/enums";
 import { useAuthStore, useCasoStore } from "@/store";
 import { useToast } from "@/hooks/useToast";
 import { CasoCliente, CasoAdvogado, DocumentoAnexado, TimelineEntry } from "@/types/entities";
 import { StatusProcesso } from "@/types/enums";
-
-// Hook para carregar casos pendentes da store
-function useCasosPendentes() {
-  const { casosCliente } = useCasoStore();
-  const [loading, setLoading] = useState(true);
-
-  const carregarCasosPendentes = useCallback(() => {
-    try {
-      setLoading(false);
-    } catch (error) {
-      console.error("Erro ao carregar casos pendentes:", error);
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    carregarCasosPendentes();
-  }, [carregarCasosPendentes]);
-
-  const casosPendentes = casosCliente.filter((caso: CasoCliente) => caso.status === StatusProcesso.PENDENTE);
-
-  return { casosPendentes, loading, recarregar: carregarCasosPendentes };
-}
-
-// Hook para carregar casos do advogado da store
-function useCasosAdvogado() {
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuthStore();
-  const { casosAdvogado } = useCasoStore();
-
-  const carregarCasosAdvogado = useCallback(() => {
-    if (!user) return;
-
-    try {
-      setLoading(false);
-    } catch (error) {
-      console.error("Erro ao carregar casos do advogado:", error);
-      setLoading(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    carregarCasosAdvogado();
-  }, [carregarCasosAdvogado]);
-
-  return { casosAdvogado, loading, recarregar: carregarCasosAdvogado };
-}
+import { useCasosPendentes, useCasosAdvogado } from "@/hooks/useCasos";
+import { CasoRow } from "./CasoRow";
+import { ModalCasoPendente } from "./ModalCasoPendente";
 
 // Função para obter label do status do advogado
 const getStatusLabel = (status: CasoAdvogado["status"]) => {
@@ -124,92 +79,6 @@ const addTimelineEntry = (
 };
 
 // Modal para aceitar/declinar caso
-function ModalCasoPendente({ 
-  caso, 
-  isOpen, 
-  onClose, 
-  onAceitar, 
-  onDeclinar 
-}: { 
-  caso: CasoCliente | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onAceitar: (caso: CasoCliente) => void;
-  onDeclinar: () => void;
-}) {
-  if (!caso) return null;
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-amber-500" />
-            Novo Caso Pendente
-          </DialogTitle>
-          <DialogDescription>
-            Um novo caso foi solicitado e está aguardando um advogado.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h4 className="font-medium">Título do Caso</h4>
-              <p className="text-sm text-muted-foreground">{caso.titulo}</p>
-            </div>
-            <div>
-              <h4 className="font-medium">Cliente</h4>
-              <p className="text-sm text-muted-foreground">{caso.clienteNome}</p>
-            </div>
-            <div>
-              <h4 className="font-medium">Tipo de Processo</h4>
-              <p className="text-sm text-muted-foreground">{caso.tipoProcesso}</p>
-            </div>
-            <div>
-              <h4 className="font-medium">Urgência</h4>
-              <p className="text-sm text-muted-foreground capitalize">{caso.urgencia}</p>
-            </div>
-          </div>
-          
-          <div>
-            <h4 className="font-medium">Descrição</h4>
-            <p className="text-sm text-muted-foreground">{caso.descricao}</p>
-          </div>
-          
-          <div>
-            <h4 className="font-medium">Situação Atual</h4>
-            <p className="text-sm text-muted-foreground">{caso.situacaoAtual}</p>
-          </div>
-          
-          <div>
-            <h4 className="font-medium">Objetivos</h4>
-            <p className="text-sm text-muted-foreground">{caso.objetivos}</p>
-          </div>
-          
-          {caso.documentosDisponiveis && (
-            <div>
-              <h4 className="font-medium">Documentos Disponíveis</h4>
-              <p className="text-sm text-muted-foreground">{caso.documentosDisponiveis}</p>
-            </div>
-          )}
-        </div>
-
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onDeclinar} className="flex items-center gap-2">
-            <XCircle className="h-4 w-4" />
-            Declinar Caso
-          </Button>
-          <Button onClick={() => onAceitar(caso)} className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4" />
-            Assumir Caso
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // Versão Web para Advogados
 function CasosAdvogadoWeb() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -372,21 +241,12 @@ function CasosAdvogadoWeb() {
           </TableHeader>
           <TableBody>
             {filteredCasos.map((caso) => (
-              <TableRow key={caso.id}>
-                <TableCell>{caso.titulo}</TableCell>
-                <TableCell>{caso.clienteNome}</TableCell>
-                <TableCell>
-                  <Badge variant={getStatusBadgeVariant(caso.status)}>
-                    {getStatusLabel(caso.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell>{new Date(caso.dataSolicitacao).toLocaleDateString('pt-BR')}</TableCell>
-                <TableCell>
-                  <Button asChild variant="outline">
-                    <Link href={`/casos/${caso.id}`}>Ver Detalhes</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
+              <CasoRow
+                key={caso.id}
+                caso={caso}
+                getStatusBadgeVariant={getStatusBadgeVariant}
+                getStatusLabel={getStatusLabel}
+              />
             ))}
           </TableBody>
         </Table>
