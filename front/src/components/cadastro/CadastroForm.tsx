@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useCallback, useState, useEffect } from "react"
+import { useCallback, useState, useEffect, type FocusEvent } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { cadastroSchema, type CadastroFormData } from '../../schemas/cadastroSchema';
@@ -36,6 +36,7 @@ export function CadastroForm({
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
   const { success, error: showError } = useToast();
   const router = useRouter();
 
@@ -53,7 +54,21 @@ export function CadastroForm({
       email: "",
       password: "",
       confirmPassword: "",
-      role: inviteData ? "cliente" : undefined
+      role: inviteData ? "cliente" : undefined,
+      cpf: "",
+      oab: "",
+      dateOfBirth: "",
+      phone: "",
+      address: {
+        rua: "",
+        numero: "",
+        bairro: "",
+        cidade: "",
+        estado: "",
+        pais: "",
+        cep: "",
+        complemento: "",
+      }
     }
   });
 
@@ -98,6 +113,39 @@ export function CadastroForm({
     setValue("role", type, { shouldValidate: true });
   };
 
+  const handleCepBlur = async (rawCep?: string) => {
+    const cep = (rawCep || "").replace(/\D/g, "");
+    if (!cep || cep.length !== 8) return;
+
+    setCepLoading(true);
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      if (!res.ok) {
+        showError("Erro ao buscar CEP");
+        return;
+      }
+
+      const data = await res.json();
+      if (data.erro) {
+        showError("CEP não encontrado");
+        return;
+      }
+
+      // Preencher campos do endereço com base na resposta
+      setValue("address.rua", data.logradouro || "");
+      setValue("address.bairro", data.bairro || "");
+      setValue("address.cidade", data.localidade || "");
+      setValue("address.estado", data.uf || "");
+      setValue("address.complemento", data.complemento || "");
+      setValue("address.pais", "Brasil");
+    } catch (err) {
+      showError("Erro ao consultar CEP");
+      console.error("Erro ao consultar CEP:", err);
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
   const onSubmit = useCallback(async (data: CadastroFormData) => {
     setIsLoading(true);
     
@@ -110,7 +158,12 @@ export function CadastroForm({
       client: finalData.role === "cliente",
       username: finalData.email,
       password: finalData.password,
-      inviteToken: inviteData?.token
+      inviteToken: inviteData?.token,
+      cpf: finalData.cpf,
+      oab: finalData.oab,
+      dateOfBirth: finalData.dateOfBirth,
+      phone: finalData.phone,
+      address: finalData.address,
     };
 
     try {
@@ -155,6 +208,14 @@ export function CadastroForm({
             <div className="grid gap-6">
               {cadastroError && <span className="text-red-500 text-sm">{cadastroError}</span>}
               <div className="grid gap-6 md:grid-cols-2">
+                {/* Seleção de Tipo de Usuário - só mostrar se não for convite */}
+                {!inviteData && (
+                  <div className="md:col-span-2">
+                    <UserTypeSelector selectedRole={selectedRole} onChange={handleUserTypeChange} />
+                    {errors.role && <span className="text-red-500 text-sm">{errors.role.message}</span>}
+                  </div>
+                )}
+
                 {/* Campo Nome */}
                 <div className="grid gap-2">
                   <Label htmlFor="name">Nome</Label>
@@ -181,6 +242,91 @@ export function CadastroForm({
                   />
                   <div className="min-h-[20px]">
                     {errors.email && touchedFields.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
+                  </div>
+                </div>
+
+                {/* Campos adicionais: CPF, OAB (condicional), Data de Nascimento, Telefone */}
+                <div className="grid gap-2">
+                  <Label htmlFor="cpf">CPF</Label>
+                  <Input id="cpf" type="text" {...register("cpf")} />
+                  <div className="min-h-[20px]">
+                    {errors.cpf && <span className="text-red-500 text-sm">{errors.cpf.message}</span>}
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="dateOfBirth">Data de Nascimento</Label>
+                  <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
+                  <div className="min-h-[20px]">
+                    {errors.dateOfBirth && <span className="text-red-500 text-sm">{errors.dateOfBirth.message}</span>}
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input id="phone" type="tel" {...register("phone")} />
+                  <div className="min-h-[20px]">
+                    {errors.phone && <span className="text-red-500 text-sm">{errors.phone.message}</span>}
+                  </div>
+                </div>
+
+                {(!inviteData ? selectedRole : "cliente") === "advogado" && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="oab">OAB</Label>
+                    <Input id="oab" type="text" {...register("oab")} />
+                    <div className="min-h-[20px]">
+                      {errors.oab && <span className="text-red-500 text-sm">{errors.oab.message}</span>}
+                    </div>
+                  </div>
+                )}
+
+                {/* Endereço completo - ocupa duas colunas */}
+                <div className="md:col-span-2 grid gap-4">
+                  <Label>Endereço</Label>
+                  <div className="grid gap-2 md:grid-cols-3">
+                    <div className="grid gap-2">
+                      <Label htmlFor="address.cep">CEP {cepLoading && <span className="text-sm text-foreground/60">(Buscando...)</span>}</Label>
+                      <Input id="address.cep" type="text" {...register("address.cep", { onBlur: (e: FocusEvent<HTMLInputElement>) => handleCepBlur(e.target.value) })} />
+                      <div className="min-h-[20px]">{errors.address?.cep && <span className="text-red-500 text-sm">{errors.address?.cep.message}</span>}</div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="address.rua">Rua</Label>
+                      <Input id="address.rua" type="text" {...register("address.rua")} />
+                      <div className="min-h-[20px]">{errors.address?.rua && <span className="text-red-500 text-sm">{errors.address?.rua.message}</span>}</div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="address.numero">Número</Label>
+                      <Input id="address.numero" type="text" {...register("address.numero")} />
+                      <div className="min-h-[20px]">{errors.address?.numero && <span className="text-red-500 text-sm">{errors.address?.numero.message}</span>}</div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="address.bairro">Bairro</Label>
+                      <Input id="address.bairro" type="text" {...register("address.bairro")} />
+                      <div className="min-h-[20px]">{errors.address?.bairro && <span className="text-red-500 text-sm">{errors.address?.bairro.message}</span>}</div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="address.cidade">Cidade</Label>
+                      <Input id="address.cidade" type="text" {...register("address.cidade")} />
+                      <div className="min-h-[20px]">{errors.address?.cidade && <span className="text-red-500 text-sm">{errors.address?.cidade.message}</span>}</div>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="address.estado">Estado</Label>
+                      <Input id="address.estado" type="text" {...register("address.estado")} />
+                      <div className="min-h-[20px]">{errors.address?.estado && <span className="text-red-500 text-sm">{errors.address?.estado.message}</span>}</div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="grid gap-2">
+                      <Label htmlFor="address.complemento">Complemento</Label>
+                      <Input id="address.complemento" type="text" {...register("address.complemento")} />
+                      <div className="min-h-[20px]">{errors.address?.complemento && <span className="text-red-500 text-sm">{errors.address?.complemento.message}</span>}</div>
+                    </div>
                   </div>
                 </div>
 
@@ -229,14 +375,6 @@ export function CadastroForm({
                     <span className="text-red-500 text-sm">{errors.confirmPassword.message}</span>
                   )}
                 </div>
-
-                {/* Seleção de Tipo de Usuário - só mostrar se não for convite */}
-                {!inviteData && (
-                  <div className="md:col-span-2">
-                    <UserTypeSelector selectedRole={selectedRole} onChange={handleUserTypeChange} />
-                    {errors.role && <span className="text-red-500 text-sm">{errors.role.message}</span>}
-                  </div>
-                )}
 
                 {/* Botões */}
                 <div className="md:col-span-2">
