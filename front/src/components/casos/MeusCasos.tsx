@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store"
-import { TipoProcesso } from "@/types/enums"
+import { useLayout } from "@/contexts/LayoutContext"
+import { TipoProcesso, StatusProcesso } from "@/types/enums"
 import { 
   Briefcase, 
   Plus, 
@@ -28,31 +29,36 @@ import { CasoCliente } from "@/types/entities"
 
 export default function MeusCasos() {
   const { user } = useAuthStore()
+  const { isAdvogado } = useLayout()
   const router = useRouter()
   
   // Usar a store Zustand em vez de estado local
-  const { casosCliente, carregarCasosCliente } = useCasoStore()
+  const { casosCliente, casosAdvogado, carregarCasosCliente, carregarCasosAdvogado } = useCasoStore()
   const [isLoading, setIsLoading] = useState(true)
 
   const carregarCasos = useCallback(async () => {
     if (!user) return
 
     try {
-      // Carregar casos usando a store
-      await carregarCasosCliente()
+      // Carregar casos baseado no tipo de usuário
+      if (isAdvogado) {
+        await carregarCasosAdvogado()
+      } else {
+        await carregarCasosCliente()
+      }
       setIsLoading(false)
     } catch (error) {
       console.error("Erro ao carregar casos:", error)
       setIsLoading(false)
     }
-  }, [user, carregarCasosCliente])
+  }, [user, isAdvogado, carregarCasosCliente, carregarCasosAdvogado])
 
   useEffect(() => {
     carregarCasos()
   }, [carregarCasos])
 
-  // Filtrar casos do cliente logado da store
-  const casos = casosCliente; // Temporariamente sem filtro
+  // Filtrar casos baseado no tipo de usuário
+  const casos = isAdvogado ? casosAdvogado : casosCliente;
 
   const getTipoProcessoLabel = (tipo: TipoProcesso) => {
     const labels: Record<TipoProcesso, string> = {
@@ -68,47 +74,38 @@ export default function MeusCasos() {
     return labels[tipo] || tipo
   }
 
-  const getStatusColor = (status: CasoCliente["status"]) => {
-    const colors = {
-      pendente: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      em_analise: "bg-blue-100 text-blue-800 border-blue-200",
-      aceito: "bg-green-100 text-green-800 border-green-200",
-      rejeitado: "bg-red-100 text-red-800 border-red-200",
-      aguardando_documentos: "bg-orange-100 text-orange-800 border-orange-200",
-      documentos_enviados: "bg-purple-100 text-purple-800 border-purple-200",
-      aguardando_analise_documentos: "bg-indigo-100 text-indigo-800 border-indigo-200",
-      em_andamento: "bg-cyan-100 text-cyan-800 border-cyan-200",
-      protocolado: "bg-emerald-100 text-emerald-800 border-emerald-200"
+  const getStatusColor = (status: StatusProcesso) => {
+    const colors: Record<StatusProcesso, string> = {
+      [StatusProcesso.RASCUNHO]: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      [StatusProcesso.EM_ANDAMENTO]: "bg-blue-100 text-blue-800 border-blue-200",
+      [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "bg-orange-100 text-orange-800 border-orange-200",
+      [StatusProcesso.EM_JULGAMENTO]: "bg-purple-100 text-purple-800 border-purple-200",
+      [StatusProcesso.CONCLUIDO]: "bg-green-100 text-green-800 border-green-200",
+      [StatusProcesso.ARQUIVADO]: "bg-red-100 text-red-800 border-red-200"
     }
     return colors[status] || "bg-gray-100 text-gray-800 border-gray-200"
   }
 
-  const getStatusIcon = (status: CasoCliente["status"]) => {
-    const icons = {
-      pendente: <Clock className="h-3 w-3" />,
-      em_analise: <Eye className="h-3 w-3" />,
-      aceito: <CheckCircle2 className="h-3 w-3" />,
-      rejeitado: <AlertCircle className="h-3 w-3" />,
-      aguardando_documentos: <FileText className="h-3 w-3" />,
-      documentos_enviados: <Send className="h-3 w-3" />,
-      aguardando_analise_documentos: <Search className="h-3 w-3" />,
-      em_andamento: <Play className="h-3 w-3" />,
-      protocolado: <FileCheck className="h-3 w-3" />
+  const getStatusIcon = (status: StatusProcesso) => {
+    const icons: Record<StatusProcesso, JSX.Element> = {
+      [StatusProcesso.RASCUNHO]: <Clock className="h-3 w-3" />,
+      [StatusProcesso.EM_ANDAMENTO]: <Play className="h-3 w-3" />,
+      [StatusProcesso.AGUARDANDO_DOCUMENTOS]: <FileText className="h-3 w-3" />,
+      [StatusProcesso.EM_JULGAMENTO]: <Search className="h-3 w-3" />,
+      [StatusProcesso.CONCLUIDO]: <CheckCircle2 className="h-3 w-3" />,
+      [StatusProcesso.ARQUIVADO]: <AlertCircle className="h-3 w-3" />
     }
     return icons[status] || <HelpCircle className="h-3 w-3" />
   }
 
-  const getStatusLabel = (status: CasoCliente["status"]) => {
-    const labels = {
-      pendente: "Pendente",
-      em_analise: "Em Análise",
-      aceito: "Aceito",
-      rejeitado: "Rejeitado",
-      aguardando_documentos: "Aguardando Documentos",
-      documentos_enviados: "Documentos Enviados",
-      aguardando_analise_documentos: "Aguardando Análise",
-      em_andamento: "Em Andamento",
-      protocolado: "Protocolado"
+  const getStatusLabel = (status: StatusProcesso) => {
+    const labels: Record<StatusProcesso, string> = {
+      [StatusProcesso.RASCUNHO]: "Rascunho",
+      [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
+      [StatusProcesso.AGUARDANDO_DOCUMENTOS]: "Aguardando Documentos",
+      [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
+      [StatusProcesso.CONCLUIDO]: "Concluído",
+      [StatusProcesso.ARQUIVADO]: "Arquivado"
     }
     return labels[status] || status
   }
@@ -264,21 +261,21 @@ export default function MeusCasos() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-yellow-600">
-                    {casos.filter(c => c.status === 'pendente').length}
+                    {casos.filter(c => c.status === StatusProcesso.RASCUNHO).length}
                   </div>
-                  <div className="text-sm text-muted-foreground">Pendentes</div>
+                  <div className="text-sm text-muted-foreground">Rascunhos</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-primary">
-                    {casos.filter(c => c.status === 'em_analise').length}
+                    {casos.filter(c => c.status === StatusProcesso.EM_ANDAMENTO).length}
                   </div>
-                  <div className="text-sm text-muted-foreground">Em Análise</div>
+                  <div className="text-sm text-muted-foreground">Em Andamento</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {casos.filter(c => c.status === 'aceito').length}
+                    {casos.filter(c => c.status === StatusProcesso.CONCLUIDO).length}
                   </div>
-                  <div className="text-sm text-muted-foreground">Aceitos</div>
+                  <div className="text-sm text-muted-foreground">Concluídos</div>
                 </div>
               </div>
             </CardContent>

@@ -9,10 +9,7 @@ import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User, S
 import Image from "next/image";
 import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react";
 import Link from "next/link";
-import { PerfilCliente } from "@/types/entities/Cliente";
-import { ClienteProfile } from "@/types/entities/Profile";
-import { getToken } from "@/utils/authUtils";
-import { useProfileStore, useAuthStore } from "@/store";
+import { getProfileData, updateProfileData } from '@/services/user/profileService';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
@@ -35,27 +32,7 @@ export function DadosUsuario() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const token = getToken();
-                
-                if (!token) {
-                  throw new Error('Usuário não autenticado');
-                }
-                
-                const response = await fetch('/api/profile/dados-gerais', {
-                  method: 'GET',
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                  },
-                });
-                
-                if (!response.ok) {
-                  const errorData = await response.json().catch(() => ({}));
-                  throw new Error(errorData.error || 'Erro ao carregar dados do perfil');
-                }
-                
-                const responseData = await response.json();
-                const perfilData: PerfilCliente = responseData.data;
+                const perfilData = await getProfileData();
                 
                 const clienteProfile: ClienteProfile = {
                     id: user?.id || '',
@@ -84,34 +61,20 @@ export function DadosUsuario() {
 
     const onSubmit = async (data: ProfileFormData) => {
         try {
-            const token = getToken();
-            if (!token) throw new Error('Usuário não autenticado');
-
-            const response = await fetch('/api/profile/dados-gerais', {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao atualizar perfil');
-            }
+            const updatedProfileData = await updateProfileData(data);
 
             const updatedProfile: ClienteProfile = {
                 id: user?.id || '',
                 userId: user?.id || '',
-                nome: data.nome,
-                email: data.email,
-                telefone: data.telefone,
-                cpf: data.cpf,
-                dataNascimento: data.dataNascimento,
-                endereco: data.endereco,
-                cidade: data.cidade,
-                estado: data.estado,
-                foto: data.fotoPerfil,
+                nome: updatedProfileData.nome,
+                email: updatedProfileData.email,
+                telefone: updatedProfileData.telefone,
+                cpf: updatedProfileData.cpf,
+                dataNascimento: updatedProfileData.dataNascimento,
+                endereco: updatedProfileData.endereco,
+                cidade: updatedProfileData.cidade,
+                estado: updatedProfileData.estado,
+                foto: updatedProfileData.fotoPerfil,
             };
             
             updateProfileStore(updatedProfile);

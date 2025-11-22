@@ -32,7 +32,9 @@ export const setToken = (token: string): void => {
   }
   
   try {
-    document.cookie = `token=${encodeURIComponent(token)}; Secure; SameSite=Strict; Path=/; Max-Age=86400`;
+    const isProduction = process.env.NODE_ENV === 'production';
+    const secureFlag = isProduction ? '; Secure' : '';
+    document.cookie = `token=${encodeURIComponent(token)}${secureFlag}; SameSite=Strict; Path=/; Max-Age=86400`;
   } catch (error) {
     console.error("Erro ao definir token nos cookies:", error);
   }
@@ -47,7 +49,9 @@ export const removeToken = (): void => {
   }
   
   try {
-    document.cookie = "token=; Secure; SameSite=Strict; Path=/; Max-Age=0";
+    const isProduction = process.env.NODE_ENV === 'production';
+    const secureFlag = isProduction ? '; Secure' : '';
+    document.cookie = `token=${secureFlag}; SameSite=Strict; Path=/; Max-Age=0`;
   } catch (error) {
     console.error("Erro ao remover token dos cookies:", error);
   }

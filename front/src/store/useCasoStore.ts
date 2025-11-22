@@ -2,20 +2,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { CasoCliente, CasoAdvogado } from '@/types/entities';
 import { listarProcessos } from '@/services/processo/processoService';
-import { StatusCaso, StatusProcesso } from '@/types/enums';
-
-// Função utilitária para mapear StatusProcesso para StatusCaso
-const mapearStatusProcessoParaCaso = (statusProcesso: StatusProcesso): StatusCaso => {
-  const mapeamento: Record<StatusProcesso, StatusCaso> = {
-    [StatusProcesso.RASCUNHO]: StatusCaso.PENDENTE,
-    [StatusProcesso.EM_ANDAMENTO]: StatusCaso.EM_ANDAMENTO,
-    [StatusProcesso.AGUARDANDO_DOCUMENTOS]: StatusCaso.AGUARDANDO_DOCUMENTOS,
-    [StatusProcesso.EM_JULGAMENTO]: StatusCaso.EM_ANDAMENTO,
-    [StatusProcesso.CONCLUIDO]: StatusCaso.PROTOCOLADO,
-    [StatusProcesso.ARQUIVADO]: StatusCaso.REJEITADO
-  };
-  return mapeamento[statusProcesso] || StatusCaso.PENDENTE;
-};
+import { StatusProcesso } from '@/types/enums';
 
 interface CasoState {
   // Estado
@@ -70,15 +57,15 @@ export const useCasoStore = create<CasoState>()(
               urgencia: 'media' as const, // Valor padrão
               documentosDisponiveis: undefined,
               dataSolicitacao: processo.dataAbertura,
-              status: mapearStatusProcessoParaCaso(processo.status),
+              status: processo.status,
               advogadoId: processo.advogado?.id?.toString(),
               advogadoNome: processo.advogado?.nome || '',
               documentosAnexados: [],
               timeline: processo.linhaDoTempo?.map(update => ({
                 id: `timeline-${update.id}`,
                 data: update.dataAtualizacao,
-                statusAnterior: update.statusAnterior ? mapearStatusProcessoParaCaso(update.statusAnterior) : undefined,
-                novoStatus: mapearStatusProcessoParaCaso(update.novoStatus),
+                statusAnterior: update.statusAnterior || undefined,
+                novoStatus: update.novoStatus,
                 descricao: update.descricao,
                 autor: 'sistema' as const, // Valor padrão
                 observacoes: undefined
@@ -112,9 +99,45 @@ export const useCasoStore = create<CasoState>()(
         },
 
         // Ações para casos do advogado
-        carregarCasosAdvogado: () => {
-          // Agora só usa a store - sem fallback para localStorage
-          set({ casosAdvogado: [] });
+        carregarCasosAdvogado: async () => {
+          try {
+            const processos = await listarProcessos();
+            // Filtrar apenas processos que têm advogado atribuído
+            const processosComAdvogado = processos.filter(processo => processo.advogado);
+            // Mapear ProcessoDTO para CasoAdvogado
+            const casosAdvogado: CasoAdvogado[] = processosComAdvogado.map(processo => ({
+              id: processo.id.toString(),
+              casoClienteId: processo.id.toString(), // Mesmo ID por enquanto
+              advogadoId: processo.advogado!.id.toString(),
+              advogadoNome: processo.advogado!.nome,
+              clienteId: processo.cliente.id.toString(),
+              clienteNome: processo.cliente.nome,
+              titulo: processo.titulo,
+              tipoProcesso: processo.tipoProcesso,
+              descricao: processo.descricao,
+              situacaoAtual: '', // Campo não existe no DTO
+              objetivos: '', // Campo não existe no DTO
+              urgencia: 'media' as const, // Valor padrão
+              documentosDisponiveis: undefined,
+              dataSolicitacao: processo.dataAbertura,
+              dataAceite: processo.dataAbertura, // Usar dataAbertura como fallback
+              status: processo.status,
+              documentosAnexados: [],
+              timeline: processo.linhaDoTempo?.map(update => ({
+                id: `timeline-${update.id}`,
+                data: update.dataAtualizacao,
+                statusAnterior: update.statusAnterior || undefined,
+                novoStatus: update.novoStatus,
+                descricao: update.descricao,
+                autor: 'sistema' as const, // Valor padrão
+                observacoes: undefined
+              })) || []
+            }));
+            set({ casosAdvogado });
+          } catch (error) {
+            console.error('Erro ao carregar casos do advogado:', error);
+            set({ casosAdvogado: [] });
+          }
         },
 
         adicionarCasoAdvogado: (caso: CasoAdvogado) => {

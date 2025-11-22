@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { User, Credentials, AuthState } from '@/types';
 import { getToken, setToken, removeToken } from '@/utils/authUtils';
+import { loginUsuario } from '@/services/user/loginService';
 
 const authChannel = typeof window !== 'undefined' ? new BroadcastChannel('auth') : null;
 
@@ -21,22 +22,10 @@ export const useAuthStore = create<AuthState>()(
         login: async (credentials: Credentials) => {
           set({ isLoading: true, error: null });
           try {
-            const response = await fetch('/api/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password,
-                method: 'server'
-              }),
+            const data = await loginUsuario({
+              email: credentials.email,
+              password: credentials.password,
             });
-            
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Falha na autenticação');
-            }
-            
-            const data = await response.json();
 
             const token: string = data.jwt;
 

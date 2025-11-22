@@ -20,4 +20,15 @@ export const getProfileData = async (): Promise<PerfilCliente> => {
     console.error('Erro ao obter dados do perfil:', error);
     throw new Error('Não foi possível carregar os dados do perfil');
   }
+};
+
+export const updateProfileData = async (data: Partial<PerfilCliente>): Promise<PerfilCliente> => {
+  try {
+    const response = await api.put('/user/dados-gerais', data);
+    const responseData = response.data as { data: PerfilCliente };
+    return responseData.data;
+  } catch (error) {
+    console.error('Erro ao atualizar dados do perfil:', error);
+    throw new Error('Não foi possível atualizar os dados do perfil');
+  }
 }; 

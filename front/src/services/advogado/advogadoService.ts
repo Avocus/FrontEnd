@@ -13,7 +13,6 @@ export const getAdvogadoProfile = async (): Promise<any> => {
 };
 
 export const getMeusClientes = async (): Promise<ClienteLista[]> => {
-  // TODO - impedir de bater diretamente no backend
   try {
     const response = await api.get('/advogado/meus-clientes');
     const responseData = response.data as { data?: ClienteLista[] };
