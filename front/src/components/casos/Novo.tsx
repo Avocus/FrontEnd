@@ -18,6 +18,7 @@ import { TipoProcesso, StatusProcesso } from "@/types/enums"
 import { ClienteLista } from "@/types/entities/Cliente"
 import { ArrowLeft, FileText, CheckCircle2, User, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getUrgenciaLabel, getUrgenciaStyles } from "@/lib/urgency"
 import Link from "next/link"
 import { ModalBuscaCliente } from "./ModalBuscaCliente"
 import { ModalBuscaAdvogado } from "./ModalBuscaAdvogado"
@@ -51,7 +52,7 @@ type NovoCasoFormData = z.infer<typeof novoCasoSchema>
 export default function NovoCaso() {
   const { user } = useAuthStore()
   const { isAdvogado } = useLayout()
-  const { success, error: showError } = useToast()
+  const { success, error: showError, urgencia: showUrgencia, status: showStatus } = useToast()
   const router = useRouter()
   const { adicionarCasoCliente, adicionarCasoAdvogado } = useCasoStore()
   const [isLoading, setIsLoading] = useState(false)
@@ -108,22 +109,17 @@ export default function NovoCaso() {
     return labels[tipo] || tipo
   }
 
-  const getUrgenciaLabel = (urgencia: "baixa" | "media" | "alta") => {
-    const labels = {
-      baixa: "Baixa",
-      media: "Média", 
-      alta: "Alta"
-    }
-    return labels[urgencia]
-  }
+  // usadas para apresentar rótulos e classes consistentes de urgência
+  // agora centralizadas em src/lib/urgency.ts
 
-  const getUrgenciaColor = (urgencia: "baixa" | "media" | "alta") => {
-    const colors = {
-      baixa: "text-green-600 bg-green-50 border-green-200",
-      media: "text-yellow-600 bg-yellow-50 border-yellow-200",
-      alta: "text-red-600 bg-red-50 border-red-200"
-    }
-    return colors[urgencia]
+  const formatDate = (iso?: string) => {
+    if (!iso) return ""
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return iso
+    const day = String(d.getDate()).padStart(2, "0")
+    const month = String(d.getMonth() + 1).padStart(2, "0")
+    const year = d.getFullYear()
+    return `${day}/${month}/${year}`
   }
 
   // Monta o payload completo do caso com base nos valores do formulário e seleções
@@ -146,7 +142,7 @@ export default function NovoCaso() {
         urgencia: values.urgencia,
         documentosDisponiveis: values.documentosDisponiveis,
         dataSolicitacao: timestamp,
-        status: StatusProcesso.PENDENTE,
+        status: StatusProcesso.RASCUNHO,
       }
     }
 
@@ -165,7 +161,7 @@ export default function NovoCaso() {
       urgencia: values.urgencia,
       documentosDisponiveis: values.documentosDisponiveis,
       dataSolicitacao: timestamp,
-      status: StatusProcesso.PENDENTE,
+      status: StatusProcesso.RASCUNHO,
     }
   }, [isAdvogado, clienteSelecionado, advogadoSelecionado, user])
 
@@ -209,14 +205,20 @@ export default function NovoCaso() {
           documentosDisponiveis: data.documentosDisponiveis,
           dataSolicitacao: new Date().toISOString(),
           dataAceite: new Date().toISOString(), // Aceito automaticamente quando criado pelo advogado
-          status: StatusProcesso.PENDENTE
+          status: StatusProcesso.RASCUNHO
         }
 
         adicionarCasoAdvogado(novoCaso)
         success("Caso criado com sucesso!")
+        if (typeof showStatus === "function") {
+          showStatus(String(payload.status).toLowerCase(), "Caso criado com sucesso!")
+        }
       } else {
         adicionarCasoCliente(payload as any)
         success("Solicitação de caso enviada com sucesso!")
+        if (typeof showStatus === "function") {
+          showStatus(String(payload.status).toLowerCase(), "Solicitação de caso enviada com sucesso!")
+        }
       }
 
       reset()
@@ -234,7 +236,7 @@ export default function NovoCaso() {
     } finally {
       setIsLoading(false)
     }
-  }, [user, success, showError, reset, router, adicionarCasoCliente, adicionarCasoAdvogado, clienteSelecionado, isAdvogado, createCasoPayload])
+  }, [user, success, showError, reset, router, adicionarCasoCliente, adicionarCasoAdvogado, clienteSelecionado, isAdvogado, createCasoPayload, showStatus])
 
   const handleClienteSelect = (cliente: ClienteLista) => {
     setClienteSelecionado(cliente)
@@ -308,59 +310,59 @@ export default function NovoCaso() {
                 <CardContent className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700">Cliente</Label>
-                      <p className="mt-1 text-gray-900">{payload.clienteNome}</p>
+                      <Label className="text-sm font-semibold text-foreground">Cliente</Label>
+                        <p className="mt-1 text-muted-foreground">{payload.clienteNome}</p>
                     </div>
 
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700">Advogado</Label>
-                      <p className="mt-1 text-gray-900">{payload.advogadoNome || "Não informado"}</p>
+                      <Label className="text-sm font-semibold text-foreground">Advogado</Label>
+                        <p className="mt-1 text-muted-foreground">{payload.advogadoNome || "Não informado"}</p>
                     </div>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-semibold text-gray-700">Tipo de Processo</Label>
-                    <p className="mt-1 text-gray-900">{getTipoProcessoLabel(payload.tipoProcesso as TipoProcesso)}</p>
+                    <Label className="text-sm font-semibold text-foreground">Tipo de Processo</Label>
+                    <p className="mt-1 text-muted-foreground">{getTipoProcessoLabel(payload.tipoProcesso as TipoProcesso)}</p>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-semibold text-gray-700">Título</Label>
-                    <p className="mt-1 text-gray-900 font-medium">{payload.titulo}</p>
+                    <Label className="text-sm font-semibold text-foreground">Título</Label>
+                    <p className="mt-1 text-muted-foreground font-medium">{payload.titulo}</p>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-semibold text-gray-700">Descrição</Label>
-                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.descricao}</p>
+                    <Label className="text-sm font-semibold text-foreground">Descrição</Label>
+                    <p className="mt-1 text-muted-foreground whitespace-pre-wrap">{payload.descricao}</p>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-semibold text-gray-700">Situação Atual</Label>
-                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.situacaoAtual}</p>
+                    <Label className="text-sm font-semibold text-foreground">Situação Atual</Label>
+                    <p className="mt-1 text-muted-foreground whitespace-pre-wrap">{payload.situacaoAtual}</p>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-semibold text-gray-700">Objetivos</Label>
-                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.objetivos}</p>
+                    <Label className="text-sm font-semibold text-foreground">Objetivos</Label>
+                    <p className="mt-1 text-muted-foreground whitespace-pre-wrap">{payload.objetivos}</p>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700">Nível de Urgência</Label>
-                      <div className={cn("mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block", getUrgenciaColor(payload.urgencia))}>
+                      <Label className="text-sm font-semibold text-foreground">Nível de Urgência</Label>
+                      <div className={cn("mt-2 px-3 py-1 rounded-full text-sm font-medium w-fit", getUrgenciaStyles(payload.urgencia).pill)}>
                         {getUrgenciaLabel(payload.urgencia)}
                       </div>
                     </div>
 
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700">Data da Solicitação</Label>
-                      <p className="mt-1 text-gray-900">{payload.dataSolicitacao}</p>
+                    <Label className="text-sm font-semibold text-foreground">Data da Solicitação</Label>
+                      <p className="mt-1 text-muted-foreground">{formatDate(payload.dataSolicitacao)}</p>
                     </div>
                   </div>
 
                   {payload.documentosDisponiveis && (
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700">Documentos Disponíveis</Label>
-                      <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.documentosDisponiveis}</p>
+                      <Label className="text-sm font-semibold text-foreground">Documentos Disponíveis</Label>
+                        <p className="mt-1 text-muted-foreground whitespace-pre-wrap">{payload.documentosDisponiveis}</p>
                     </div>
                   )}
                 </CardContent>
@@ -378,7 +380,7 @@ export default function NovoCaso() {
                 <Button
                   onClick={() => onSubmit(formData)}
                   disabled={isLoading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1"
                 >
                   {isLoading ? "Enviando..." : "Solicitar Abertura de Caso"}
                 </Button>
@@ -785,7 +787,7 @@ export default function NovoCaso() {
 
                 <div>
                   <Label className="text-sm font-medium">Status</Label>
-                  <Badge variant="outline">Pendente</Badge>
+                  <Badge variant="outline">{StatusProcesso.RASCUNHO}</Badge>
                 </div>
               </CardContent>
             </Card>

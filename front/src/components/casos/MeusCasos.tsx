@@ -25,7 +25,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCasoStore } from "@/store"
-import { CasoCliente } from "@/types/entities"
+import { getUrgenciaStyles } from "@/lib/urgency"
 
 export default function MeusCasos() {
   const { user } = useAuthStore()
@@ -115,14 +115,7 @@ export default function MeusCasos() {
     return labels[status] || status
   }
 
-  const getUrgenciaColor = (urgencia: CasoCliente["urgencia"]) => {
-    const colors = {
-      baixa: "text-green-600 dark:text-green-400",
-      media: "text-yellow-600 dark:text-yellow-400",
-      alta: "text-red-600 dark:text-red-400"
-    }
-    return colors[urgencia]
-  }
+  // agora usamos os estilos centralizados de urgência
 
   const formatarData = (dataISO: string) => {
     return new Date(dataISO).toLocaleDateString('pt-BR', {
@@ -285,7 +278,7 @@ export default function MeusCasos() {
                               <Calendar className="h-4 w-4" />
                               {formatarData(caso.dataSolicitacao)}
                             </div>
-                            <div className={cn("flex items-center gap-1 font-medium", getUrgenciaColor(caso.urgencia))}>
+                            <div className={cn("flex items-center gap-1 font-medium", getUrgenciaStyles(caso.urgencia).text)}>
                               <AlertCircle className="h-4 w-4" />
                               Urgência {caso.urgencia}
                             </div>
@@ -344,7 +337,7 @@ export default function MeusCasos() {
                           {isAdvogado ? caso.clienteNome : getTipoProcessoLabel(caso.tipoProcesso)}
                         </div>
                         <div className="flex items-center justify-between">
-                          <div className={cn("text-xs font-medium", getUrgenciaColor(caso.urgencia))}>
+                          <div className={cn("text-xs font-medium", getUrgenciaStyles(caso.urgencia).text)}>
                             {caso.urgencia}
                           </div>
                           <div className="text-xs text-muted-foreground">

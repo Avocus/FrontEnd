@@ -1,26 +1,26 @@
 export enum StatusProcesso {
-  RASCUNHO = 'RASCUNHO',
-  PENDENTE = 'PENDENTE',
-  EM_ANALISE = 'EM_ANALISE',
-  ACEITO = 'ACEITO',
-  REJEITADO = 'REJEITADO',
-  AGUARDANDO_DADOS = 'AGUARDANDO_DADOS',
-  DADOS_ENVIADOS = 'DADOS_ENVIADOS',
-  AGUARDANDO_ANALISE_DADOS = 'AGUARDANDO_ANALISE_DADOS',
-  EM_ANDAMENTO = 'EM_ANDAMENTO',
-  PROTOCOLADO = 'PROTOCOLADO',
-  EM_JULGAMENTO = 'EM_JULGAMENTO',
-  CONCLUIDO = 'CONCLUIDO',
-  ARQUIVADO = 'ARQUIVADO'
+  RASCUNHO = 'Rascunho',
+  PENDENTE = 'Pendente',
+  EM_ANALISE = 'Em Análise',
+  ACEITO = 'Aceito',
+  REJEITADO = 'Rejeitado',
+  AGUARDANDO_DADOS = 'Aguardando Dados',
+  DADOS_ENVIADOS = 'Dados Enviados',
+  AGUARDANDO_ANALISE_DADOS = 'Aguardando Análise de Dados',
+  EM_ANDAMENTO = 'Em Andamento',
+  PROTOCOLADO = 'Protocolado',
+  EM_JULGAMENTO = 'Em Julgamento',
+  CONCLUIDO = 'Concluído',
+  ARQUIVADO = 'Arquivado'
 }
 
 export enum TipoProcesso {
-  CIVIL = 'CIVIL',
-  PENAL = 'PENAL',
-  TRABALHISTA = 'TRABALHISTA',
-  ADMINISTRATIVO = 'ADMINISTRATIVO',
-  CONSUMIDOR = 'CONSUMIDOR',
-  FAMILIAR = 'FAMILIAR',
-  PREVIDENCIARIO = 'PREVIDENCIARIO',
+  CIVIL = 'Civil',
+  PENAL = 'Penal',
+  TRABALHISTA = 'Trabalhista',
+  ADMINISTRATIVO = 'Administrativo',
+  CONSUMIDOR = 'Direito do Consumidor',
+  FAMILIAR = 'Direito de Família',
+  PREVIDENCIARIO = 'Previdenciário',
   OUTROS = 'OUTROS'
 }
