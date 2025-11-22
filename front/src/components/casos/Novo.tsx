@@ -14,8 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore, useCasoStore } from "@/store"
 import { useToast } from "@/hooks/useToast"
+import { analiseIAService } from "@/services/analiseIAService"
 import { TipoProcesso, StatusProcesso } from "@/types/enums"
 import { ClienteLista } from "@/types/entities/Cliente"
+import { CasoCliente, CasoAdvogado } from '@/types/entities'
 import { ArrowLeft, FileText, CheckCircle2, User, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getUrgenciaLabel, getUrgenciaStyles } from "@/lib/urgency"
@@ -52,7 +54,7 @@ type NovoCasoFormData = z.infer<typeof novoCasoSchema>
 export default function NovoCaso() {
   const { user } = useAuthStore()
   const { isAdvogado } = useLayout()
-  const { success, error: showError, urgencia: showUrgencia, status: showStatus } = useToast()
+  const { success, error: showError, status: showStatus } = useToast()
   const router = useRouter()
   const { adicionarCasoCliente, adicionarCasoAdvogado } = useCasoStore()
   const [isLoading, setIsLoading] = useState(false)
@@ -60,7 +62,15 @@ export default function NovoCaso() {
   const [showClienteModal, setShowClienteModal] = useState(false)
   const [showAdvogadoModal, setShowAdvogadoModal] = useState(false)
   const [clienteSelecionado, setClienteSelecionado] = useState<ClienteLista | null>(null)
-  const [advogadoSelecionado, setAdvogadoSelecionado] = useState<any | null>(null)
+  type ModalAdvogado = {
+    id: string;
+    nome: string;
+    email: string;
+    especialidades?: string[];
+    experiencia?: string;
+  }
+
+  const [advogadoSelecionado, setAdvogadoSelecionado] = useState<ModalAdvogado | null>(null)
 
   const {
     register,
@@ -187,7 +197,7 @@ export default function NovoCaso() {
           showError("Selecione um cliente para o caso")
           return
         }
-        adicionarCasoAdvogado(payload as any)
+  adicionarCasoAdvogado(payload as unknown as CasoAdvogado)
 
         const novoCaso = {
           id: Date.now().toString(),
@@ -214,10 +224,40 @@ export default function NovoCaso() {
           showStatus(String(payload.status).toLowerCase(), "Caso criado com sucesso!")
         }
       } else {
-        adicionarCasoCliente(payload as any)
-        success("Solicitação de caso enviada com sucesso!")
-        if (typeof showStatus === "function") {
-          showStatus(String(payload.status).toLowerCase(), "Solicitação de caso enviada com sucesso!")
+        // Para clientes, primeiro rodar análise IA para validar/corrigir/resumir
+        try {
+          const aiResult = await analiseIAService({
+            clienteId: Number(user?.client) || 0,
+            titulo: data.titulo,
+            descricao: data.descricao,
+          })
+
+          if (!aiResult.success) {
+            // IA decidiu que não é caso jurídico ou informação insuficiente
+            showError(aiResult.message || "Não foi possível abrir o caso: informação insuficiente.")
+            return
+          }
+
+          // Substitui campos do payload com versão normalizada pela IA quando disponível
+          if (aiResult.caso) {
+            // mapa simples entre string retornada pela IA e o enum TipoProcesso
+            const aiTipo = (aiResult.caso.tipoProcesso || "CIVIL").toString()
+            const mappedTipo = (TipoProcesso as unknown as Record<string, TipoProcesso>)[aiTipo] || payload.tipoProcesso
+
+            payload.titulo = aiResult.caso.titulo || payload.titulo
+            payload.descricao = aiResult.caso.descricao || payload.descricao
+            payload.tipoProcesso = mappedTipo
+          }
+
+          adicionarCasoCliente(payload as unknown as CasoCliente)
+          success("Solicitação de caso enviada com sucesso!")
+          if (typeof showStatus === "function") {
+            showStatus(String(payload.status).toLowerCase(), "Solicitação de caso enviada com sucesso!")
+          }
+        } catch (err) {
+          console.error("Erro ao analisar com IA:", err)
+          showError("Erro ao analisar sua solicitação. Tente novamente mais tarde.")
+          return
         }
       }
 
@@ -243,7 +283,7 @@ export default function NovoCaso() {
     setShowClienteModal(false)
   }
 
-  const handleAdvogadoSelect = (advogado: any) => {
+  const handleAdvogadoSelect = (advogado: ModalAdvogado) => {
     setAdvogadoSelecionado(advogado)
     setShowAdvogadoModal(false)
   }

@@ -200,7 +200,6 @@ export default function MeusCasos() {
             </div>
             <Button 
               onClick={handleNovoCaso}
-              className="bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="h-4 w-4 mr-2" />
               Novo Caso
@@ -250,8 +249,7 @@ export default function MeusCasos() {
                   </p>
                   {!searchTerm && (
                     <Button 
-                      onClick={handleNovoCaso}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      onClick={handleNovoCaso}                  
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Solicitar Primeiro Caso
