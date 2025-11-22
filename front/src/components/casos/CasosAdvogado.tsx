@@ -1,22 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { useLayout } from "@/contexts/LayoutContext";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, List, Calendar, User, AlertCircle, CheckCircle, XCircle, FileText, Send } from "lucide-react";
-import { TipoProcesso } from "@/types/enums";
-import { useAuthStore, useCasoStore } from "@/store";
+import { useCasosPendentes } from "@/hooks/useCasos";
 import { useToast } from "@/hooks/useToast";
-import { CasoCliente, CasoAdvogado, DocumentoAnexado, TimelineEntry } from "@/types/entities";
+import { useAuthStore, useCasoStore } from "@/store";
+import { CasoAdvogado, CasoCliente, TimelineEntry } from "@/types/entities";
 import { StatusProcesso } from "@/types/enums";
-import { useCasosPendentes, useCasosAdvogado } from "@/hooks/useCasos";
-import { CasoRow } from "./CasoRow";
+import { FileText, Send } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ModalCasoPendente } from "./ModalCasoPendente";
 
 // Função para obter label do status do advogado
@@ -39,7 +34,6 @@ const getStatusLabel = (status: CasoAdvogado["status"]) => {
   return labels[status] || status;
 };
 
-// Função para obter cor do badge baseado no status
 const getStatusBadgeVariant = (status: CasoAdvogado["status"]) => {
   const variants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
     [StatusProcesso.RASCUNHO]: "outline",
@@ -78,19 +72,15 @@ const addTimelineEntry = (
   };
 };
 
-// Modal para aceitar/declinar caso
-// Versão Web para Advogados
+
 function CasosAdvogadoWeb() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
-  const { casosAdvogado, loading, recarregar } = useCasosAdvogado();
-  const { casosPendentes, recarregar: recarregarPendentes } = useCasosPendentes();
   const [casoModalAtual, setCasoModalAtual] = useState<CasoCliente | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
   const [modalFoiFechada, setModalFoiFechada] = useState(false);
   const { user } = useAuthStore();
   const { success, error } = useToast();
   const { atualizarCasoCliente, adicionarCasoAdvogado } = useCasoStore();
+  const { casosPendentes, recarregar: recarregarPendentes } = useCasosPendentes();
 
   // Verificar casos pendentes ao carregar (apenas na primeira vez)
   useEffect(() => {
@@ -99,12 +89,12 @@ function CasosAdvogadoWeb() {
       setModalAberto(true);
     }
   }, [casosPendentes, modalAberto, modalFoiFechada]);
-
-  const filteredCasos = casosAdvogado.filter(
-    (caso) =>
-      caso.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      caso.clienteNome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    if (casosPendentes.length > 0 && !modalAberto && !modalFoiFechada) {
+      setCasoModalAtual(casosPendentes[0]);
+      setModalAberto(true);
+    }
+  }, [casosPendentes, modalAberto, modalFoiFechada]);
 
   const aceitarCaso = (caso: CasoCliente) => {
     if (!user) return;
@@ -151,7 +141,6 @@ function CasosAdvogadoWeb() {
       success("Caso aceito com sucesso!");
       setModalAberto(false);
       setCasoModalAtual(null);
-      recarregar();
       recarregarPendentes();
     } catch (err) {
       console.error("Erro ao aceitar caso:", err);
@@ -171,86 +160,16 @@ function CasosAdvogadoWeb() {
     setModalFoiFechada(true); // Marcar que a modal foi fechada pelo usuário
   };
 
+  // Este componente agora só gerencia casos pendentes, a listagem é feita em MeusCasos
   return (
     <div className="p-8 bg-background text-foreground">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Meus Casos</h1>
-        <div className="flex gap-3">
-          {/* Toggle de visualização */}
-          <div className="flex border rounded-lg">
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="rounded-r-none"
-            >
-              <List className="h-4 w-4 mr-2" />
-              Lista
-            </Button>
-            <Button
-              variant={viewMode === "kanban" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("kanban")}
-              className="rounded-l-none"
-            >
-              <Grid className="h-4 w-4 mr-2" />
-              Kanban
-            </Button>
-          </div>
-          <Link href="/casos/novo">
-            <Button className="bg-tertiary hover:bg-chart-1 text-primary-foreground">
-              Novo Processo
-            </Button>
-          </Link>
-        </div>
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">
+          Gerenciamento de casos pendentes é feito automaticamente.
+          <br />
+          Use a página "Meus Casos" para visualizar todos os seus casos.
+        </p>
       </div>
-
-      {/* Filtro de busca */}
-      <div className="mb-6">
-        <Input
-          placeholder="Buscar por título do caso ou nome do cliente..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full max-w-md"
-        />
-      </div>
-
-      {loading ? (
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-full mb-4"></div>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      ) : filteredCasos.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">Nenhum caso encontrado.</p>
-        </div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Data de Solicitação</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredCasos.map((caso) => (
-              <CasoRow
-                key={caso.id}
-                caso={caso}
-                getStatusBadgeVariant={getStatusBadgeVariant}
-                getStatusLabel={getStatusLabel}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      )}
 
       <ModalCasoPendente
         caso={casoModalAtual}
@@ -267,9 +186,7 @@ export function CasosAdvogado() {
   return <CasosAdvogadoWeb />;
 }
 
-// Componente para detalhes de um caso específico (pode ser reutilizado em ambas versões)
 export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
-  const { isMobile } = useLayout();
   const [caso, setCaso] = useState<CasoAdvogado | null>(null);
   const [loading, setLoading] = useState(true);
   const { success, error } = useToast();
@@ -499,10 +416,10 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
   }
 
   return (
-    <div className={`bg-background text-foreground ${isMobile ? 'p-4' : 'p-8'}`}>
+    <div className={`bg-background text-foreground p-8`}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>{caso.titulo}</h1>
+          <h1 className={`text-3xl font-bold`}>{caso.titulo}</h1>
           <p className="text-muted-foreground">Cliente: {caso.clienteNome}</p>
           <p className="text-muted-foreground">Advogado: {caso.advogadoNome}</p>
         </div>
@@ -512,7 +429,7 @@ export function DetalheCasoAdvogado({ casoId }: { casoId: string }) {
       </div>
 
       {/* Botões de ação */}
-      <div className={`mb-6 ${isMobile ? 'flex flex-col gap-2' : 'flex gap-4 flex-wrap'}`}>
+      <div className={`mb-6 flex gap-4 flex-wrap`}>
         <Button
           onClick={solicitarDocumentos}
           disabled={caso.status === StatusProcesso.AGUARDANDO_DOCUMENTOS || caso.status === StatusProcesso.PROTOCOLADO || caso.status === StatusProcesso.AGUARDANDO_ANALISE_DOCUMENTOS}

@@ -11,11 +11,17 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { useAuthStore, useCasoStore } from "@/store"
 import { useToast } from "@/hooks/useToast"
 import { TipoProcesso, StatusProcesso } from "@/types/enums"
-import { ArrowLeft, FileText, AlertCircle, CheckCircle2 } from "lucide-react"
+import { ClienteLista } from "@/types/entities/Cliente"
+import { ArrowLeft, FileText, CheckCircle2, User, Loader2, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
+import { ModalBuscaCliente } from "./ModalBuscaCliente"
+import { ModalBuscaAdvogado } from "./ModalBuscaAdvogado"
+import { useLayout } from "@/contexts/LayoutContext"
 
 // Schema de validação para o formulário
 const novoCasoSchema = z.object({
@@ -59,11 +65,16 @@ interface CasoCliente {
 
 export default function NovoCaso() {
   const { user } = useAuthStore()
+  const { isAdvogado } = useLayout()
   const { success, error: showError } = useToast()
   const router = useRouter()
-  const { adicionarCasoCliente } = useCasoStore()
+  const { adicionarCasoCliente, adicionarCasoAdvogado } = useCasoStore()
   const [isLoading, setIsLoading] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [showClienteModal, setShowClienteModal] = useState(false)
+  const [showAdvogadoModal, setShowAdvogadoModal] = useState(false)
+  const [clienteSelecionado, setClienteSelecionado] = useState<ClienteLista | null>(null)
+  const [advogadoSelecionado, setAdvogadoSelecionado] = useState<any | null>(null)
 
   const {
     register,
@@ -140,31 +151,60 @@ export default function NovoCaso() {
     setIsLoading(true)
 
     try {
-      const novoCaso: CasoCliente = {
-        id: Date.now().toString(),
-        clienteId: user.client?.toString() || "unknown",
-        clienteNome: user.nome || "Nome não informado",
-        titulo: data.titulo,
-        tipoProcesso: data.tipoProcesso,
-        descricao: data.descricao,
-        situacaoAtual: data.situacaoAtual,
-        objetivos: data.objetivos,
-        urgencia: data.urgencia,
-        documentosDisponiveis: data.documentosDisponiveis,
-        dataSolicitacao: new Date().toISOString(),
-        status: StatusProcesso.PENDENTE
+      if (isAdvogado) {
+        // Para advogados: criar caso associado ao cliente selecionado
+        if (!clienteSelecionado) {
+          showError("Selecione um cliente para o caso")
+          return
+        }
+
+        const novoCaso = {
+          id: Date.now().toString(),
+          clienteId: clienteSelecionado.id.toString(),
+          clienteNome: clienteSelecionado.nome,
+          advogadoId: user.id || "unknown",
+          advogadoNome: user.nome || "Advogado não informado",
+          titulo: data.titulo,
+          tipoProcesso: data.tipoProcesso,
+          descricao: data.descricao,
+          situacaoAtual: data.situacaoAtual,
+          objetivos: data.objetivos,
+          urgencia: data.urgencia,
+          documentosDisponiveis: data.documentosDisponiveis,
+          dataSolicitacao: new Date().toISOString(),
+          status: StatusProcesso.PENDENTE
+        }
+
+        adicionarCasoAdvogado(novoCaso)
+        success("Caso criado com sucesso!")
+      } else {
+        // Para clientes: criar solicitação de caso
+        const novoCaso: CasoCliente = {
+          id: Date.now().toString(),
+          clienteId: user.client?.toString() || "unknown",
+          clienteNome: user.nome || "Nome não informado",
+          titulo: data.titulo,
+          tipoProcesso: data.tipoProcesso,
+          descricao: data.descricao,
+          situacaoAtual: data.situacaoAtual,
+          objetivos: data.objetivos,
+          urgencia: data.urgencia,
+          documentosDisponiveis: data.documentosDisponiveis,
+          dataSolicitacao: new Date().toISOString(),
+          status: StatusProcesso.PENDENTE
+        }
+
+        adicionarCasoCliente(novoCaso)
+        success("Solicitação de caso enviada com sucesso!")
       }
 
-      // Adicionar caso usando a store
-      adicionarCasoCliente(novoCaso)
-
-      success("Solicitação de caso enviada com sucesso!")
       reset()
       setShowPreview(false)
+      setClienteSelecionado(null)
       
       // Redirecionar após um breve delay
       setTimeout(() => {
-        router.push("/#")
+        router.push("/casos")
       }, 2000)
 
     } catch (error) {
@@ -173,10 +213,24 @@ export default function NovoCaso() {
     } finally {
       setIsLoading(false)
     }
-  }, [user, success, showError, reset, router, adicionarCasoCliente])
+  }, [user, success, showError, reset, router, adicionarCasoCliente, adicionarCasoAdvogado, clienteSelecionado, isAdvogado])
+
+  const handleClienteSelect = (cliente: ClienteLista) => {
+    setClienteSelecionado(cliente)
+    setShowClienteModal(false)
+  }
+
+  const handleAdvogadoSelect = (advogado: any) => {
+    setAdvogadoSelecionado(advogado)
+    setShowAdvogadoModal(false)
+  }
 
   const handlePreview = () => {
     if (isValid) {
+      if (isAdvogado && !clienteSelecionado) {
+        showError("Selecione um cliente antes de revisar")
+        return
+      }
       setShowPreview(true)
     }
   }
@@ -291,43 +345,137 @@ export default function NovoCaso() {
   }
 
   return (
-    <div className="min-h-screen  p-4">
-      <div className="max-w-4xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="bg-primary text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FileText className="h-6 w-6" />
-                <CardTitle className="text-xl">Nova Solicitação de Caso Jurídico</CardTitle>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="text-white hover:bg-white/20"
-                onClick={() => router.back()}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto">
+        {/* Header */}
+        <Link href="/casos" className="mb-6 inline-block">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+        </Link>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">Nova Solicitação de Caso</h1>
+              <p className="text-muted-foreground">Preencha os detalhes do seu caso jurídico</p>
             </div>
-          </CardHeader>
-          
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {/* Informações do Cliente */}
-              <div className="bg-secondary rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  Informações do Cliente
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Cliente: <span className="font-medium">{user?.nome}</span>
-                </p>
-              </div>
+          </div>
+          <Badge variant="secondary" className="px-3 py-1">
+            <FileText className="h-3 w-3 mr-1" />
+            Solicitação
+          </Badge>
+        </div>
 
-              {/* Campos do Formulário */}
-              <div className="grid gap-6">
-                {/* Título e Tipo de Processo */}
-                <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Formulário Principal */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações do Cliente</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isAdvogado ? (
+                  // Para advogados: seletor de cliente
+                  <div className="space-y-4">
+                    {clienteSelecionado ? (
+                      <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{clienteSelecionado.nome}</div>
+                            <div className="text-sm text-muted-foreground">{clienteSelecionado.email}</div>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowClienteModal(true)}
+                        >
+                          <Search className="h-4 w-4 mr-2" />
+                          Trocar
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground mb-4">Selecione o cliente para este caso</p>
+                        <Button onClick={() => setShowClienteModal(true)}>
+                          <Search className="h-4 w-4 mr-2" />
+                          Buscar Cliente
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // Para clientes: mostrar informações próprias + opção de selecionar advogado
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 border rounded-lg bg-muted/50">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium">{user?.nome}</div>
+                        <div className="text-sm text-muted-foreground">Cliente solicitante</div>
+                      </div>
+                    </div>
+
+                    {/* Seletor de advogado opcional */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Advogado (Opcional)</Label>
+                      {advogadoSelecionado ? (
+                        <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <User className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm">{advogadoSelecionado.nome}</div>
+                              <div className="text-xs text-muted-foreground">{advogadoSelecionado.email}</div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowAdvogadoModal(true)}
+                            >
+                              <Search className="h-3 w-3 mr-1" />
+                              Trocar
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setAdvogadoSelecionado(null)}
+                            >
+                              Remover
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowAdvogadoModal(true)}
+                          className="w-full"
+                        >
+                          <Search className="h-4 w-4 mr-2" />
+                          Selecionar Advogado (Opcional)
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Detalhes do Caso</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="titulo">Título do Caso *</Label>
                     <Input
@@ -364,7 +512,6 @@ export default function NovoCaso() {
                   </div>
                 </div>
 
-                {/* Descrição */}
                 <div className="space-y-2">
                   <Label htmlFor="descricao">Descrição Detalhada do Caso *</Label>
                   <Textarea
@@ -381,7 +528,6 @@ export default function NovoCaso() {
                   )}
                 </div>
 
-                {/* Situação Atual */}
                 <div className="space-y-2">
                   <Label htmlFor="situacaoAtual">Situação Atual *</Label>
                   <Textarea
@@ -398,7 +544,6 @@ export default function NovoCaso() {
                   )}
                 </div>
 
-                {/* Objetivos */}
                 <div className="space-y-2">
                   <Label htmlFor="objetivos">Objetivos e Resultado Esperado *</Label>
                   <Textarea
@@ -415,77 +560,225 @@ export default function NovoCaso() {
                   )}
                 </div>
 
-                {/* Urgência */}
-                <div className="space-y-2">
-                  <Label htmlFor="urgencia">Nível de Urgência *</Label>
-                  <Select
-                    value={watchedValues.urgencia}
-                    onValueChange={(value) => setValue("urgencia", value as "baixa" | "media" | "alta", { shouldValidate: true })}
-                  >
-                    <SelectTrigger className={getFieldValidationClass("urgencia")}>
-                      <SelectValue placeholder="Selecione o nível de urgência" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="baixa">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                          Baixa - Não há pressa
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="urgencia">Nível de Urgência *</Label>
+                    <Select
+                      value={watchedValues.urgencia}
+                      onValueChange={(value) => setValue("urgencia", value as "baixa" | "media" | "alta", { shouldValidate: true })}
+                    >
+                      <SelectTrigger className={getFieldValidationClass("urgencia")}>
+                        <SelectValue placeholder="Selecione o nível de urgência" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="baixa">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                            Baixa - Não há pressa
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="media">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                            Média - Algumas semanas
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="alta">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                            Alta - Urgente
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.urgencia && (
+                      <p className="text-red-500 text-sm">{errors.urgencia.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="documentosDisponiveis">Documentos Disponíveis (Opcional)</Label>
+                    <Textarea
+                      id="documentosDisponiveis"
+                      placeholder="Liste os documentos que você possui relacionados ao caso..."
+                      className="min-h-[80px]"
+                      {...register("documentosDisponiveis")}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar com Resumo e Próximos Passos */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Resumo da Solicitação</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium">Cliente</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {isAdvogado 
+                      ? (clienteSelecionado?.nome || "Não selecionado")
+                      : (user?.nome || "Não informado")
+                    }
+                  </p>
+                </div>
+
+                {isAdvogado && (
+                  <div>
+                    <Label className="text-sm font-medium">Advogado Responsável</Label>
+                    <p className="text-sm text-muted-foreground">
+                      {user?.nome || "Não informado"}
+                    </p>
+                  </div>
+                )}
+
+                {!isAdvogado && advogadoSelecionado && (
+                  <div>
+                    <Label className="text-sm font-medium">Advogado Solicitado</Label>
+                    <p className="text-sm text-muted-foreground">
+                      {advogadoSelecionado.nome}
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <Label className="text-sm font-medium">Tipo do Processo</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {watchedValues.tipoProcesso ? getTipoProcessoLabel(watchedValues.tipoProcesso) : "Não selecionado"}
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Título</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {watchedValues.titulo || "Não informado"}
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Urgência</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {watchedValues.urgencia ? getUrgenciaLabel(watchedValues.urgencia) : "Não selecionada"}
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium">Status</Label>
+                  <Badge variant="outline">Pendente</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Como Funciona</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  {isAdvogado ? (
+                    // Para advogados
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium">Seleção do Cliente</p>
+                          <p className="text-muted-foreground">Escolha o cliente para este caso</p>
                         </div>
-                      </SelectItem>
-                      <SelectItem value="media">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                          Média - Algumas semanas
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Criação do Processo</p>
+                          <p className="text-muted-foreground">O caso será criado e associado ao cliente</p>
                         </div>
-                      </SelectItem>
-                      <SelectItem value="alta">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                          Alta - Urgente
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Acompanhamento</p>
+                          <p className="text-muted-foreground">Você poderá acompanhar o progresso do caso</p>
                         </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.urgencia && (
-                    <p className="text-red-500 text-sm">{errors.urgencia.message}</p>
+                      </div>
+                    </>
+                  ) : (
+                    // Para clientes
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium">Seleção de Advogado (Opcional)</p>
+                          <p className="text-muted-foreground">Escolha um advogado específico ou deixe em aberto</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Análise da Solicitação</p>
+                          <p className="text-muted-foreground">Um advogado analisará seu caso</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Contato Inicial</p>
+                          <p className="text-muted-foreground">Entraremos em contato para mais detalhes</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Avaliação</p>
+                          <p className="text-muted-foreground">Análise completa e proposta de atuação</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-2 h-2 bg-muted rounded-full mt-2"></div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Abertura do Processo</p>
+                          <p className="text-muted-foreground">Caso aprovado, daremos início aos trabalhos</p>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Documentos Disponíveis */}
-                <div className="space-y-2">
-                  <Label htmlFor="documentosDisponiveis">Documentos Disponíveis (Opcional)</Label>
-                  <Textarea
-                    id="documentosDisponiveis"
-                    placeholder="Liste os documentos que você possui relacionados ao caso (contratos, e-mails, fotos, etc.)"
-                    className="min-h-[80px]"
-                    {...register("documentosDisponiveis")}
-                  />
-                </div>
-              </div>
-
-              {/* Botões */}
-              <div className="flex gap-4 pt-6 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.back()}
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handlePreview}
-                  disabled={!isValid}
-                  className="flex-1 bg-secondary hover:bg-blue-700 "
-                >
-                  Revisar Solicitação
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+            <div className="flex gap-3">
+              <Button
+                onClick={handlePreview}
+                disabled={!isValid}
+                className="flex-1"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Revisar Solicitação
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Modal de busca de cliente (apenas para advogados) */}
+      {isAdvogado && (
+        <ModalBuscaCliente
+          isOpen={showClienteModal}
+          onOpenChange={setShowClienteModal}
+          onClienteSelect={handleClienteSelect}
+        />
+      )}
+
+      {/* Modal de busca de advogado (para clientes) */}
+      {!isAdvogado && (
+        <ModalBuscaAdvogado
+          isOpen={showAdvogadoModal}
+          onOpenChange={setShowAdvogadoModal}
+          onAdvogadoSelect={handleAdvogadoSelect}
+        />
+      )}
     </div>
   )
 }

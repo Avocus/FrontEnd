@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
 import React, { useEffect, Suspense } from "react";
@@ -9,7 +8,7 @@ import ErrorBoundary from "@/components/common/ErrorBoundary";
 const MeusCasos = React.lazy(() => import("@/components/casos/MeusCasos"));
 
 export default function CasosPage() {
-    const { updateConfig, isAdvogado } = useLayout();
+    const { updateConfig } = useLayout();
 
     useEffect(() => {
         updateConfig({

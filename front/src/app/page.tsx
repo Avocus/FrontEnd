@@ -362,19 +362,19 @@ const testimonials = [
     name: "Dr. Ana Silva",
     role: "Advogada Trabalhista",
     quote: "A plataforma revolucionou minha produtividade. Consigo gerenciar todos os casos em um só lugar e ainda captar novos clientes qualificados.",
-    avatar: "/avatar-advogada.jpg"
+    avatar: "/avatar-advogada.webp"
   },
   {
     name: "Carlos Mendes",
     role: "Cliente",
     quote: "Finalmente encontrei um advogado que realmente entende do meu caso. A plataforma tornou tudo tão simples e transparente!",
-    avatar: "/avatar-cliente.jpg"
+    avatar: "/avatar-cliente.webp"
   },
   {
     name: "Dra. Mariana Oliveira",
     role: "Advogada de Família",
     quote: "As ferramentas de gestão de tempo e documentos me poupam horas de trabalho burocrático. Recomendo para todos os colegas!",
-    avatar: "/avatar-advogada2.jpg"
+    avatar: "/avatar-advogada2.webp"
   }
 ];
 

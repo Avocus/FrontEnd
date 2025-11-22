@@ -56,7 +56,7 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <div className="relative flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(./bg-login.jpg)' }}></div>
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(./bg-login.webp)' }}></div>
       <Suspense fallback={<div className="flex items-center justify-center">Carregando...</div>}>
           <LoginContent />
       </Suspense>

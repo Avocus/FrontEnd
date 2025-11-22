@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 
-import { useEffect } from "react";
 import { DetalheCasoWrapper } from "@/components/casos/Casos";
-import { useLayout } from "@/contexts/LayoutContext";
-import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useLayout } from "@/contexts/LayoutContext";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DetalheCasoPage() {
-    const { updateConfig, isAdvogado } = useLayout();
+    const { updateConfig } = useLayout();
     const params = useParams();
     const casoId = params?.id as string;
 
