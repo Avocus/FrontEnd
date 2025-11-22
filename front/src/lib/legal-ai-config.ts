@@ -6,30 +6,46 @@ export interface LegalCase {
 }
 
 export const legalPromptSystem = `
-Você é a Avocuss, uma assistente virtual especializada em Direito Brasileiro. Seja CONCISA e DIRETA.
+Você é a Avocuss, assistente virtual especializada em Direito Brasileiro. Seja CONCISA, PRÁTICA e DIRETA.
+
+IMPORTANTE SOBRE FLUXO:
+- A aplicação realiza uma checagem heurística prévia (keywords) apenas como referência. Mesmo que essa checagem suspeite que o texto NÃO seja jurídico, NÃO BLOQUEIE a análise: sempre processe a entrada completa através do modelo Gemini e use o histórico fornecido.
+- Use a base de conhecimento (lista de palavras-chave, trechos legais e exemplos) apenas como contexto/background — é APOIO ao raciocínio, não uma lista de exclusão.
+
+SEGURANÇA E RECUSA (regras obrigatórias):
+- Se a consulta estiver FORA DO DOMÍNIO JURÍDICO (i.e., não envolve leis, procedimentos, provas, responsabilidade, direitos, deveres, penalidades ou prática jurídica brasileira), responda EXCLUSIVAMENTE com a mensagem de recusa padronizada abaixo e nada mais.
+- Se a consulta pede instruções para cometer crime, ferir alguém, burlar a lei ou realizar dano (ex: "como matar", "como fraudar", "como evitar a polícia"), NÃO forneça instruções ou métodos. Nesse caso, recuse a instrução e, se apropriado, descreva apenas as POSSÍVEIS CONSEQUÊNCIAS LEGAIS (penas, artigos relevantes, medidas legais aplicáveis) e encoraje comportamento legal, contato com autoridades competentes e/ou buscar assistência profissional.
+- Em caso de risco à integridade física ou ameaça imediata, sugira procurar autoridades locais e serviços de emergência; não forneça conselhos operacionais.
+
+- Mensagem padronizada de recusa (quando aplicável):
+  "Desculpe — não posso responder perguntas que não estejam relacionadas ao direito brasileiro. Posso ajudar com dúvidas sobre legislação, procedimentos judiciais, provas, contratos e orientações jurídicas práticas."
+
+COMO DECIDIR:
+- Sempre avalie o texto e o histórico. Se houver ambiguidade, peça esclarecimento em vez de recusar imediatamente. Se for jurídico, responda com orientação prática e referências.
 
 FORMATO DE RESPOSTA (MÁXIMO 150 PALAVRAS):
-1. Resposta direta em 1-2 frases
-2. Artigo de lei aplicável (apenas número e resumo)
-3. Próximo passo prático em 1 frase
-4. Disclaimer obrigatório
-
-EXEMPLO DE RESPOSTA:
-"Sim, você pode processar por danos morais. Art. 186 CC - ato ilícito gera dever de indenizar. Procure um advogado com as provas dos danos. *Esta orientação não substitui consulta jurídica.*"
+1. Resposta direta e prática em 1-2 frases.
+2. Um ou dois artigos/trechos legais relevantes (referência curta) quando houver.
+3. Próximo passo prático em 1 frase (ex: buscar advogado, registrar B.O., reunir provas).
+4. Disclaimer obrigatório: "Esta orientação não substitui consulta jurídica." 
 
 ÁREAS DE ATUAÇÃO:
 - Direito Civil, Penal, Trabalhista, Tributário, Consumidor, Família, Constitucional, Administrativo
 
 DIRETRIZES:
-- Seja objetiva e prática
+- Seja objetiva e prática na resposta
 - Use linguagem simples
-- Cite apenas 1-2 artigos principais
+- Cite apenas 1-2 artigos principais quando pertinente
 - Sempre termine com disclaimer
+- Respeite as regras de segurança e recusa
 - NÃO responda perguntas fora do contexto jurídico
+- Sempre verifique o contexto e histórico antes de recusar
+- Analise a linguagem cuidadosamente para identificar nuances jurídicas
+- Analise a linguagem cuidadosamente para identificar se a pessoa está buscando cometer um ato ilegal
+- Analise a pergunta para determinar se é uma dúvida que pode vir a ser um crime ou ato ilegal, sempre que perceber que for deve responder com a mensagem de recusa padronizada acima.
 `;
 
 export const legalKnowledgeBase = {
-  // Códigos e Leis principais
   codigoCivil: {
     responsabilidadeCivil: {
       artigo186: "Art. 186. Aquele que, por ação ou omissão voluntária, negligência ou imprudência, violar direito e causar dano a outrem, ainda que exclusivamente moral, comete ato ilícito.",
@@ -118,14 +134,19 @@ export const legalKeywords = [
 
 // Função para verificar se a pergunta é relacionada ao contexto jurídico
 export function isLegalContext(message: string): boolean {
-  const lowerMessage = message.toLowerCase();
-  
-  // Verifica se contém pelo menos uma palavra-chave jurídica
-  const hasLegalKeyword = legalKeywords.some(keyword => 
-    lowerMessage.includes(keyword.toLowerCase())
-  );
-  
-  // Verifica padrões comuns de perguntas jurídicas (mais flexível)
+  const normalize = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove diacritics
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ') // remove punctuation
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const normalized = normalize(message);
+  const tokens = normalized.split(' ').filter(Boolean);
+
+  // quick regex checks (kept and normalized to be more flexible)
   const legalPatterns = [
     /posso.*processar/i,
     /posso.*ser.*preso/i,
@@ -134,43 +155,99 @@ export function isLegalContext(message: string): boolean {
     /o.*que.*fazer/i,
     /como.*proceder/i,
     /qual.*lei/i,
-    /artigo.*código/i,
-    /jurisprudência/i,
+    /artigo.*c[oó]digo/i,
+    /jurisprudencia/i,
     /tribunal/i,
     /posso.*reclamar/i,
     /devo.*pagar/i,
     /obrigado.*pagar/i,
     /preciso.*advogado/i,
-    /pode.*dar.*cadeia/i,
-    /pode.*dar.*prisão/i,
+    /pode.*dar.*presa?o/i,
     /vou.*preso/i,
-    /posso.*ir.*preso/i,
-    /atrasar.*pensão/i,
-    /não.*pagar.*pensão/i,
-    /deixar.*de.*pagar/i,
-    /acontece.*se.*não.*pagar/i,
-    /consequência.*de.*não/i,
-    /multa.*por/i,
-    /punição.*por/i
+    /se\s+eu\s+matar/i,
+    /se\s+.*matar/i,
+    /vou\s+ser\s+preso/i,
+    /vou.*ser.*preso/i
   ];
-  
-  const hasLegalPattern = legalPatterns.some(pattern => pattern.test(lowerMessage));
-  
-  // Verifica se é uma pergunta sobre consequências legais (muito comum)
-  const consequencePatterns = [
-    /o.*que.*acontece.*se/i,
-    /posso.*ser/i,
-    /vou.*ter.*que/i,
-    /sou.*obrigado/i,
-    /tenho.*obrigação/i,
-    /é.*obrigatório/i,
-    /preciso/i
+  // Testa os padrões contra a versão normalizada (remove pontuação/acentos)
+  if (legalPatterns.some(p => p.test(normalized))) return true;
+
+  // important legal verb and consequence token sets
+  const legalVerbs = [
+    'processar','processo','denunciar','acusar','matei','matar','roubei','roubar','furtei','furtar',
+    'agredi','agredir','ameaçar','difamar','contestar','apelar','executar','cobrar','pagar','devo','dever',
+    'obrigado','preciso','reclamar','suspender','anular','impetrar','impetrar','recorrer','recuso'
   ];
-  
-  const hasConsequencePattern = consequencePatterns.some(pattern => pattern.test(lowerMessage)) &&
-    (hasLegalKeyword || legalPatterns.some(pattern => pattern.test(lowerMessage)));
-  
-  return hasLegalKeyword || hasLegalPattern || hasConsequencePattern;
+  const consequenceNouns = [
+    'pena','prisao','prisão','multa','indenizacao','indenizar','condenacao','condenação',
+    'danos','danos morais','responsabilidade','reparacao','reparar','perda','sançao','sancao', 'pena de morte', 'cadeia'
+  ];
+
+  // flatten known keywords sets for fuzzy checking
+  const additionalKeywords = [
+    ...legalKeywords.map(k => k.toLowerCase()),
+    ...Object.values(caseTypeIdentifiers).flat()
+  ].map(k => normalize(k));
+
+  // Levenshtein distance for simple fuzzy matches (works on single tokens)
+  function levenshtein(a: string, b: string): number {
+    if (a === b) return 0;
+    const m = a.length, n = b.length;
+    if (m === 0) return n;
+    if (n === 0) return m;
+    const v0 = new Array(n + 1).fill(0).map((_, i) => i);
+    const v1 = new Array(n + 1).fill(0);
+    for (let i = 0; i < m; i++) {
+      v1[0] = i + 1;
+      for (let j = 0; j < n; j++) {
+        const cost = a[i] === b[j] ? 0 : 1;
+        v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
+      }
+      for (let j = 0; j <= n; j++) v0[j] = v1[j];
+    }
+    return v1[n];
+  }
+
+  function fuzzyTokenMatch(token: string, candidate: string): boolean {
+    if (token === candidate) return true;
+    const d = levenshtein(token, candidate);
+    // allow small typos: tolerate distance 1 for short words, 2 for longer ones
+    return (candidate.length <= 4 && d <= 1) || (candidate.length > 4 && d <= 2);
+  }
+
+  // Check exact substring matches on normalized text first (fast, reliable)
+  if (additionalKeywords.some(k => k && normalized.includes(k))) return true;
+
+  // Fuzzy match against tokens (covers misspellings like "pessoal" -> "pessoa")
+  const tokenMatchesAnyKeyword = tokens.some(t =>
+    additionalKeywords.some(k => {
+      // check each word of multi-word keywords separately
+      if (k.includes(' ')) {
+        return k.split(' ').every(part => tokens.some(tok => fuzzyTokenMatch(tok, part)));
+      }
+      return fuzzyTokenMatch(t, k);
+    })
+  );
+  if (tokenMatchesAnyKeyword) return true;
+
+  // Check for verb + consequence co-occurrence (covers "matei ... qual a pena?")
+  const hasVerb = tokens.some(t => legalVerbs.some(v => fuzzyTokenMatch(t, normalize(v))));
+  const hasConsequence = tokens.some(t => consequenceNouns.some(c => fuzzyTokenMatch(t, normalize(c))));
+  if (hasVerb && hasConsequence) return true;
+
+  // Also check combinations of any legal verb + any legal keyword (e.g., "matei pessoa")
+  const hasAnyLegalKeywordToken = tokens.some(t =>
+    additionalKeywords.some(k => fuzzyTokenMatch(t, k))
+  );
+  if (hasVerb && hasAnyLegalKeywordToken) return true;
+
+  // Fallback: small n-gram scan for important words even if split ("danos morais" -> tokens "danos" +"morais")
+  for (let i = 0; i < tokens.length; i++) {
+    const bigram = (tokens[i] + ' ' + (tokens[i + 1] || '')).trim();
+    if (additionalKeywords.some(k => k === bigram)) return true;
+  }
+
+  return false;
 }
 
 export const caseTypeIdentifiers = {
@@ -193,10 +270,15 @@ export function identifyCaseType(message: string): LegalCase['type'] {
     }
   }
   
-  return 'civil'; // default
+  return 'civil';
 }
 
-export function generateLegalPrompt(caseType: LegalCase['type'], userMessage: string): string {
+export interface GeneratePromptOptions {
+  preCheckSuspectedNonLegal?: boolean; // true se a checagem heurística suspeita NÃO jurídico
+  historySummary?: string; // resumo curto do histórico, se disponível
+}
+
+export function generateLegalPrompt(caseType: LegalCase['type'], userMessage: string, options?: GeneratePromptOptions): string {
   const specificGuidance = {
     civil: "Resposta direta sobre responsabilidade civil ou contratos. Cite CC quando aplicável.",
     penal: "Resposta objetiva sobre tipificação criminal. Cite CP quando aplicável.",
@@ -207,11 +289,21 @@ export function generateLegalPrompt(caseType: LegalCase['type'], userMessage: st
     administrativo: "Resposta prática sobre atos administrativos. Cite leis específicas.",
     consumidor: "Resposta clara sobre direitos do consumidor. Cite CDC quando aplicável."
   };
-  
+  const preCheckNote = options?.preCheckSuspectedNonLegal
+    ? "OBS: A checagem heurística prévia indicou que parte do texto pode NÃO ser claramente jurídico. NÃO interrompa a análise por causa disso; investigue contexto e histórico." 
+    : "";
+
+  const sampleKeywords = legalKeywords.slice(0, 24).join(', ');
+
   return `${legalPromptSystem}
 
 CASO: ${caseType.toUpperCase()}
 ORIENTAÇÃO ESPECÍFICA: ${specificGuidance[caseType]}
+
+CONTEXTO/BACKGROUND (use como conhecimento de apoio, não como regra rígida): ${sampleKeywords}
+${preCheckNote}
+
+HISTÓRICO RESUMIDO: ${options?.historySummary ?? "(nenhum)"}
 
 CONSULTA: "${userMessage}"
 

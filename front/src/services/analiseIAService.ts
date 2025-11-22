@@ -15,6 +15,7 @@ export type AnaliseResult = {
     titulo: string;
     descricao: string;
     status: string; // RASCUNHO
+    documentosSolicitados?: string[];
   };
 };
 
@@ -50,6 +51,9 @@ export async function analiseIAService(payload: Record<string, unknown>): Promis
 
   const combinedText = `${rawTitle} \n ${rawDescription}`.trim();
 
+  // chave da Gemini (usada quando precisamos pedir recomendações de documentos)
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY_GEMINI;
+
   // Primeiro: verificação heurística local
   if (!combinedText) {
     return {
@@ -62,13 +66,14 @@ export async function analiseIAService(payload: Record<string, unknown>): Promis
   const heuristicIsLegal = isLegalContext(combinedText);
 
   // Função utilitária para construir o JSON final e salvar
-  const buildAndSave = (tipoProcesso: string, titulo: string, descricao: string) => {
+  const buildAndSave = (tipoProcesso: string, titulo: string, descricao: string, documentos: string[] = []) => {
     const finalCase = {
       clienteId,
       tipoProcesso: mapCaseTypeToApi(tipoProcesso.toLowerCase()),
       titulo: titulo || rawTitle || descricao.substring(0, 60),
       descricao: descricao || rawDescription || rawTitle,
       status: "RASCUNHO",
+      documentosSolicitados: documentos,
     };
 
     try {
@@ -89,7 +94,18 @@ export async function analiseIAService(payload: Record<string, unknown>): Promis
     const cleanedTitle = rawTitle.trim() || combinedText.substring(0, 60);
     const cleanedDescription = rawDescription.trim() || combinedText;
 
-    const finalCase = buildAndSave(inferredType, cleanedTitle, cleanedDescription);
+    // Tenta obter recomendações de documentos (se a chave da API estiver disponível)
+    let documentos: string[] = [];
+    try {
+      if (apiKey) {
+        const res = await analiseDocumentos(combinedText);
+        if (res && res.success && Array.isArray(res.documentos)) documentos = res.documentos;
+      }
+    } catch (e) {
+      console.warn("Falha ao obter recomendações de documentos:", e);
+    }
+
+    const finalCase = buildAndSave(inferredType, cleanedTitle, cleanedDescription, documentos);
 
     return {
       success: true,
@@ -99,8 +115,6 @@ export async function analiseIAService(payload: Record<string, unknown>): Promis
   }
 
   // Se não for óbvio, tenta usar Gemini (se disponível) para decisão + correção/resumo
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY_GEMINI;
-
   if (!apiKey) {
     // Sem chave, retorna negativa clara ao usuário
     return {
@@ -190,7 +204,16 @@ Responda apenas com JSON válido.`;
     const titulo = String(parsedObj.titulo || rawTitle || combinedText.substring(0, 60));
     const descricao = String(parsedObj.descricao || rawDescription || combinedText);
 
-    const finalCase = buildAndSave(tipoProcesso, titulo, descricao);
+    // Após a análise principal, pede também a lista de documentos/evidências
+    let documentos: string[] = [];
+    try {
+      const docRes = await analiseDocumentos(combinedText);
+      if (docRes && docRes.success && Array.isArray(docRes.documentos)) documentos = docRes.documentos;
+    } catch (e) {
+      console.warn("Falha ao analisar documentos:", e);
+    }
+
+    const finalCase = buildAndSave(tipoProcesso, titulo, descricao, documentos);
 
     return {
       success: true,
@@ -205,6 +228,71 @@ Responda apenas com JSON válido.`;
     };
   }
 }
+
+  /**
+   * Analisa um texto/descrição de caso e retorna uma lista recomendada de documentos
+   * e evidências que devem ser solicitadas ao cliente. A saída é um objeto com
+   * `documentos` (array de strings) quando sucesso.
+   */
+  export async function analiseDocumentos(text: string): Promise<{ success: boolean; documentos?: string[]; message?: string; raw?: unknown }> {
+    const apiKeyLocal = process.env.NEXT_PUBLIC_API_KEY_GEMINI;
+    if (!apiKeyLocal) {
+      return { success: false, message: "Chave de IA (Gemini) não configurada." };
+    }
+
+    try {
+      const genAI = new GoogleGenerativeAI(apiKeyLocal);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+      const prompt = `Você é um assistente jurídico que lista todas as evidências e documentos relevantes para um caso descrito em texto (português - Brasil).
+  Retorne estritamente um JSON com a chave "documentos" contendo um array de strings curtas e normalizadas.
+  Inclua tanto documentos formais (ex: certidões, contratos, laudos) quanto possíveis evidências eletrônicas e informais (ex: conversas de WhatsApp, e-mails, notas, áudios, vídeos, fotos, postagens, recibos, screenshots).
+  Se pertinente, acrescente documentos específicos por tipo de caso (ex: certidão de casamento/união estável para divórcio, boletim de ocorrência para violência, holerites para trabalhista).
+
+  Entrada (contexto do caso):
+  """
+  ${text}
+  """
+
+  Responda apenas com JSON válido, exemplo: {"documentos": ["certidao_casamento","conversas_whatsapp","emails"]}`;
+
+      const chat = model.startChat({ generationConfig: { temperature: 0.12, maxOutputTokens: 400 } });
+      const result = await chat.sendMessage(prompt);
+      const textResp = result.response.text();
+
+      const jsonMatch = textResp.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) return { success: false, message: "Resposta da IA não continha JSON." };
+
+      let parsed: unknown = null;
+      try {
+        parsed = JSON.parse(jsonMatch[0]);
+      } catch (err) {
+        console.warn("analiseDocumentos: parse original falhou:", err);
+        const cleaned = jsonMatch[0]
+          .replace(/[“”]/g, '"')
+          .replace(/[‘’]/g, "'")
+          .replace(/,\s*\}/g, "}")
+          .replace(/,\s*\]/g, "]");
+        try {
+          parsed = JSON.parse(cleaned);
+        } catch (e2) {
+          console.warn("analiseDocumentos: falha ao parsear JSON da IA", e2);
+        }
+      }
+
+      if (!parsed || typeof parsed !== "object") return { success: false, message: "Resposta da IA inválida.", raw: parsed };
+
+      const parsedObj = parsed as Record<string, unknown>;
+      const documentosRaw = parsedObj.documentos;
+      if (!documentosRaw) return { success: false, message: "IA não retornou campo 'documentos'", raw: parsed };
+
+      const documentos: string[] = Array.isArray(documentosRaw) ? documentosRaw.map(String) : [String(documentosRaw)];
+      return { success: true, documentos, raw: parsed };
+    } catch (error) {
+      console.error("Erro em analiseDocumentos:", error);
+      return { success: false, message: "Erro ao comunicar com a IA." };
+    }
+  }
 
 // Exporta também um helper para ler o rascunho salvo
 export function getRascunhoSalvo() {
