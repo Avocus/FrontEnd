@@ -1,6 +1,21 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { CasoCliente, CasoAdvogado } from '@/types/entities';
+import { listarProcessos } from '@/services/processo/processoService';
+import { StatusCaso, StatusProcesso } from '@/types/enums';
+
+// Função utilitária para mapear StatusProcesso para StatusCaso
+const mapearStatusProcessoParaCaso = (statusProcesso: StatusProcesso): StatusCaso => {
+  const mapeamento: Record<StatusProcesso, StatusCaso> = {
+    [StatusProcesso.RASCUNHO]: StatusCaso.PENDENTE,
+    [StatusProcesso.EM_ANDAMENTO]: StatusCaso.EM_ANDAMENTO,
+    [StatusProcesso.AGUARDANDO_DOCUMENTOS]: StatusCaso.AGUARDANDO_DOCUMENTOS,
+    [StatusProcesso.EM_JULGAMENTO]: StatusCaso.EM_ANDAMENTO,
+    [StatusProcesso.CONCLUIDO]: StatusCaso.PROTOCOLADO,
+    [StatusProcesso.ARQUIVADO]: StatusCaso.REJEITADO
+  };
+  return mapeamento[statusProcesso] || StatusCaso.PENDENTE;
+};
 
 interface CasoState {
   // Estado
@@ -39,9 +54,41 @@ export const useCasoStore = create<CasoState>()(
         casosNotificados: new Set(),
 
         // Ações para casos do cliente
-        carregarCasosCliente: () => {
-          // Agora só usa a store - sem fallback para localStorage
-          set({ casosCliente: [] });
+        carregarCasosCliente: async () => {
+          try {
+            const processos = await listarProcessos();
+            // Mapear ProcessoDTO para CasoCliente
+            const casosCliente: CasoCliente[] = processos.map(processo => ({
+              id: processo.id.toString(),
+              clienteId: processo.cliente.id.toString(),
+              clienteNome: processo.cliente.nome,
+              titulo: processo.titulo,
+              tipoProcesso: processo.tipoProcesso,
+              descricao: processo.descricao,
+              situacaoAtual: '', // Campo não existe no DTO
+              objetivos: '', // Campo não existe no DTO
+              urgencia: 'media' as const, // Valor padrão
+              documentosDisponiveis: undefined,
+              dataSolicitacao: processo.dataAbertura,
+              status: mapearStatusProcessoParaCaso(processo.status),
+              advogadoId: processo.advogado?.id?.toString(),
+              advogadoNome: processo.advogado?.nome || '',
+              documentosAnexados: [],
+              timeline: processo.linhaDoTempo?.map(update => ({
+                id: `timeline-${update.id}`,
+                data: update.dataAtualizacao,
+                statusAnterior: update.statusAnterior ? mapearStatusProcessoParaCaso(update.statusAnterior) : undefined,
+                novoStatus: mapearStatusProcessoParaCaso(update.novoStatus),
+                descricao: update.descricao,
+                autor: 'sistema' as const, // Valor padrão
+                observacoes: undefined
+              })) || []
+            }));
+            set({ casosCliente });
+          } catch (error) {
+            console.error('Erro ao carregar casos do cliente:', error);
+            set({ casosCliente: [] });
+          }
         },
 
         adicionarCasoCliente: (caso: CasoCliente) => {

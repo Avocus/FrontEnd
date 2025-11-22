@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { useCallback, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { auth, sendPasswordResetEmail } from "../../../firebaseConfig";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { useAuthStore, useProfileStore } from "@/store";
@@ -88,7 +87,8 @@ export function LoginForm({
 
   const handleForgotPassword = useCallback(async (data: ResetPasswordData) => {
     try {
-      await sendPasswordResetEmail(auth, data.resetEmail);
+      // TODO: Implementar recuperação de senha
+      // await sendPasswordResetEmail(auth, data.resetEmail);
       setResetEmailSent(true);
       setError(null); // Limpar erros anteriores
     } catch (error) {

@@ -15,6 +15,7 @@ import { TipoProcesso } from "@/types/enums";
 import { useAuthStore, useCasoStore } from "@/store";
 import { useToast } from "@/hooks/useToast";
 import { CasoCliente, CasoAdvogado, DocumentoAnexado, TimelineEntry } from "@/types/entities";
+import { StatusCaso, StatusCasoAdvogado } from "@/types/enums";
 
 // Hook para carregar casos pendentes da store
 function useCasosPendentes() {

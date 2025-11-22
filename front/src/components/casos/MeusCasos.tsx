@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store"
-import { useToast } from "@/hooks/useToast"
 import { TipoProcesso } from "@/types/enums"
 import { 
   Briefcase, 
@@ -29,19 +28,18 @@ import { CasoCliente } from "@/types/entities"
 
 export default function MeusCasos() {
   const { user } = useAuthStore()
-  const { info } = useToast()
   const router = useRouter()
   
   // Usar a store Zustand em vez de estado local
   const { casosCliente, carregarCasosCliente } = useCasoStore()
   const [isLoading, setIsLoading] = useState(true)
 
-  const carregarCasos = useCallback(() => {
+  const carregarCasos = useCallback(async () => {
     if (!user) return
 
     try {
       // Carregar casos usando a store
-      carregarCasosCliente()
+      await carregarCasosCliente()
       setIsLoading(false)
     } catch (error) {
       console.error("Erro ao carregar casos:", error)
@@ -54,9 +52,7 @@ export default function MeusCasos() {
   }, [carregarCasos])
 
   // Filtrar casos do cliente logado da store
-  const casos = casosCliente.filter(
-    (caso) => caso.clienteId === user?.client?.toString()
-  )
+  const casos = casosCliente; // Temporariamente sem filtro
 
   const getTipoProcessoLabel = (tipo: TipoProcesso) => {
     const labels: Record<TipoProcesso, string> = {
@@ -139,7 +135,7 @@ export default function MeusCasos() {
   }
 
   const handleVerDetalhes = (casoId: string) => {
-    info(`Visualizando detalhes do caso ${casoId}`)
+    router.push(`/casos/${casoId}`);
   }
 
   if (isLoading) {

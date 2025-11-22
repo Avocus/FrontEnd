@@ -84,8 +84,11 @@ function useCasosPendentes() {
 
   useEffect(() => {
     // Carregar dados da store e inicializar
-    carregarCasosCliente();
-    setIsInitialized(true);
+    const carregarDados = async () => {
+      await carregarCasosCliente();
+      setIsInitialized(true);
+    };
+    carregarDados();
   }, [carregarCasosCliente]);
 
   useEffect(() => {

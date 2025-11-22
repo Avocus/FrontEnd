@@ -1,17 +1,6 @@
-interface Content {
-    id: number;
-    titulo: string;
-    categoria: string;
-    imagem: string;
-    subTitulo: string;
-    resumo: string;
-    conteudo: string;
-    palavrasChave: string[];
-    dataPublicacao: string;
-    tempoLeitura: string;
-}
+import { BibliotecaContent } from '@/types/common';
 
-export const categorias = [
+export const categorias: string[] = [
     "Todos",
     "Direito Civil",
     "Direito Penal",
@@ -24,7 +13,7 @@ export const categorias = [
     "Direito Previdenciário"
 ];
 
-export const conteudos: Content[] = [
+export const conteudos: BibliotecaContent[] = [
     {
         id: 1,
         titulo: "Direitos do Consumidor: Como Se Proteger de Práticas Abusivas",

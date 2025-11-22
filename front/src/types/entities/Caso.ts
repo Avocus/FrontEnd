@@ -2,7 +2,7 @@
  * Interfaces relacionadas a casos jurídicos
  */
 
-import { TipoProcesso } from '@/types/enums';
+import { TipoProcesso, StatusCaso, StatusCasoAdvogado } from '@/types/enums';
 
 /**
  * Interface para documentos anexados a um caso
@@ -44,7 +44,7 @@ export interface CasoCliente {
   urgencia: "baixa" | "media" | "alta";
   documentosDisponiveis?: string;
   dataSolicitacao: string;
-  status: "pendente" | "em_analise" | "aceito" | "rejeitado" | "aguardando_documentos" | "documentos_enviados" | "aguardando_analise_documentos" | "em_andamento" | "protocolado";
+  status: StatusCaso;
   advogadoId?: string;
   advogadoNome?: string;
   documentosAnexados?: DocumentoAnexado[];
@@ -71,7 +71,7 @@ export interface CasoAdvogado {
   documentosDisponiveis?: string;
   dataSolicitacao: string;
   dataAceite: string;
-  status: "aceito" | "em_andamento" | "concluido" | "arquivado" | "esperando_documentos" | "aguardando_analise_documentos" | "protocolado";
+  status: StatusCasoAdvogado;
   documentosAnexados?: DocumentoAnexado[];
   timeline?: TimelineEntry[];
   motivoRejeicao?: string;

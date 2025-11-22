@@ -1,19 +1,17 @@
 "use client";
 
 import { useLayout } from "@/contexts/LayoutContext";
-import { CasosAdvogado, DetalheCasoAdvogado } from "./CasosAdvogado";
-import { CasosCliente, DetalheCasoCliente } from "./CasosCliente";
+import { CasosAdvogado } from "./CasosAdvogado";
+import { DetalheCaso } from "./DetalheCaso";
 import Link from "next/link";
 
 export function Casos() {
   const { isAdvogado } = useLayout();
   
-  return isAdvogado ? <CasosAdvogado /> : <CasosCliente />;
+  return isAdvogado ? <CasosAdvogado /> : <div>MeusCasos será usado na rota /casos</div>;
 }
 
-export function DetalheCaso({ casoId }: { casoId: string | string[] | undefined }) {
-  const { isAdvogado } = useLayout();
-  
+export function DetalheCasoWrapper({ casoId }: { casoId: string | string[] | undefined }) {
   if (!casoId || Array.isArray(casoId)) {
     return (
       <div className="p-6 text-center">
@@ -24,7 +22,5 @@ export function DetalheCaso({ casoId }: { casoId: string | string[] | undefined 
     );
   }
   
-  return isAdvogado ? 
-    <DetalheCasoAdvogado casoId={casoId} /> : 
-    <DetalheCasoCliente casoId={casoId} />;
+  return <DetalheCaso casoId={casoId} />;
 } 
