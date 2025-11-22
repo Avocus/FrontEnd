@@ -16,7 +16,7 @@ import { useAuthStore, useCasoStore } from "@/store"
 import { useToast } from "@/hooks/useToast"
 import { TipoProcesso, StatusProcesso } from "@/types/enums"
 import { ClienteLista } from "@/types/entities/Cliente"
-import { ArrowLeft, FileText, CheckCircle2, User, Loader2, Search } from "lucide-react"
+import { ArrowLeft, FileText, CheckCircle2, User, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { ModalBuscaCliente } from "./ModalBuscaCliente"
@@ -48,21 +48,6 @@ const novoCasoSchema = z.object({
 
 type NovoCasoFormData = z.infer<typeof novoCasoSchema>
 
-interface CasoCliente {
-  id: string
-  clienteId: string
-  clienteNome: string
-  titulo: string
-  tipoProcesso: TipoProcesso
-  descricao: string
-  situacaoAtual: string
-  objetivos: string
-  urgencia: "baixa" | "media" | "alta"
-  documentosDisponiveis?: string
-  dataSolicitacao: string
-  status: StatusProcesso
-}
-
 export default function NovoCaso() {
   const { user } = useAuthStore()
   const { isAdvogado } = useLayout()
@@ -78,7 +63,6 @@ export default function NovoCaso() {
 
   const {
     register,
-    handleSubmit,
     formState: { errors, isValid, touchedFields },
     setValue,
     watch,
@@ -142,6 +126,49 @@ export default function NovoCaso() {
     return colors[urgencia]
   }
 
+  // Monta o payload completo do caso com base nos valores do formulário e seleções
+  const createCasoPayload = useCallback((values: NovoCasoFormData) => {
+    const timestamp = new Date().toISOString()
+    const id = Date.now().toString()
+
+    if (isAdvogado) {
+      return {
+        id,
+        clienteId: clienteSelecionado?.id?.toString() || "unknown",
+        clienteNome: clienteSelecionado?.nome || "Não informado",
+        advogadoId: user?.id || "unknown",
+        advogadoNome: user?.nome || "Advogado não informado",
+        titulo: values.titulo,
+        tipoProcesso: values.tipoProcesso,
+        descricao: values.descricao,
+        situacaoAtual: values.situacaoAtual,
+        objetivos: values.objetivos,
+        urgencia: values.urgencia,
+        documentosDisponiveis: values.documentosDisponiveis,
+        dataSolicitacao: timestamp,
+        status: StatusProcesso.PENDENTE,
+      }
+    }
+
+    // Para clientes
+    return {
+      id,
+      clienteId: user?.client?.toString() || "unknown",
+      clienteNome: user?.nome || "Nome não informado",
+      advogadoId: advogadoSelecionado?.id || null,
+      advogadoNome: advogadoSelecionado?.nome || null,
+      titulo: values.titulo,
+      tipoProcesso: values.tipoProcesso,
+      descricao: values.descricao,
+      situacaoAtual: values.situacaoAtual,
+      objetivos: values.objetivos,
+      urgencia: values.urgencia,
+      documentosDisponiveis: values.documentosDisponiveis,
+      dataSolicitacao: timestamp,
+      status: StatusProcesso.PENDENTE,
+    }
+  }, [isAdvogado, clienteSelecionado, advogadoSelecionado, user])
+
   const onSubmit = useCallback(async (data: NovoCasoFormData) => {
     if (!user) {
       showError("Usuário não autenticado")
@@ -151,57 +178,30 @@ export default function NovoCaso() {
     setIsLoading(true)
 
     try {
+      // Criar payload unificado e salvar no localStorage antes de persistir
+      const payload = createCasoPayload(data)
+      try {
+        localStorage.setItem("novoCasoPayload", JSON.stringify(payload))
+      } catch (err) {
+        console.error("Erro ao salvar payload no localStorage:", err)
+      }
+
       if (isAdvogado) {
-        // Para advogados: criar caso associado ao cliente selecionado
         if (!clienteSelecionado) {
           showError("Selecione um cliente para o caso")
           return
         }
-
-        const novoCaso = {
-          id: Date.now().toString(),
-          clienteId: clienteSelecionado.id.toString(),
-          clienteNome: clienteSelecionado.nome,
-          advogadoId: user.id || "unknown",
-          advogadoNome: user.nome || "Advogado não informado",
-          titulo: data.titulo,
-          tipoProcesso: data.tipoProcesso,
-          descricao: data.descricao,
-          situacaoAtual: data.situacaoAtual,
-          objetivos: data.objetivos,
-          urgencia: data.urgencia,
-          documentosDisponiveis: data.documentosDisponiveis,
-          dataSolicitacao: new Date().toISOString(),
-          status: StatusProcesso.PENDENTE
-        }
-
-        adicionarCasoAdvogado(novoCaso)
+        adicionarCasoAdvogado(payload as any)
         success("Caso criado com sucesso!")
       } else {
-        // Para clientes: criar solicitação de caso
-        const novoCaso: CasoCliente = {
-          id: Date.now().toString(),
-          clienteId: user.client?.toString() || "unknown",
-          clienteNome: user.nome || "Nome não informado",
-          titulo: data.titulo,
-          tipoProcesso: data.tipoProcesso,
-          descricao: data.descricao,
-          situacaoAtual: data.situacaoAtual,
-          objetivos: data.objetivos,
-          urgencia: data.urgencia,
-          documentosDisponiveis: data.documentosDisponiveis,
-          dataSolicitacao: new Date().toISOString(),
-          status: StatusProcesso.PENDENTE
-        }
-
-        adicionarCasoCliente(novoCaso)
+        adicionarCasoCliente(payload as any)
         success("Solicitação de caso enviada com sucesso!")
       }
 
       reset()
       setShowPreview(false)
       setClienteSelecionado(null)
-      
+
       // Redirecionar após um breve delay
       setTimeout(() => {
         router.push("/casos")
@@ -213,7 +213,7 @@ export default function NovoCaso() {
     } finally {
       setIsLoading(false)
     }
-  }, [user, success, showError, reset, router, adicionarCasoCliente, adicionarCasoAdvogado, clienteSelecionado, isAdvogado])
+  }, [user, success, showError, reset, router, adicionarCasoCliente, adicionarCasoAdvogado, clienteSelecionado, isAdvogado, createCasoPayload])
 
   const handleClienteSelect = (cliente: ClienteLista) => {
     setClienteSelecionado(cliente)
@@ -231,6 +231,17 @@ export default function NovoCaso() {
         showError("Selecione um cliente antes de revisar")
         return
       }
+
+      const values = getValues()
+      const payload = createCasoPayload(values)
+      try {
+        // salvar uma pré-visualização no localStorage (temporariamente)
+        localStorage.setItem("novoCasoPreview", JSON.stringify(payload))
+      } catch (err) {
+        // se falhar, apenas logamos e seguimos para a pré-visualização
+        console.error("Erro ao salvar preview no localStorage:", err)
+      }
+
       setShowPreview(true)
     }
   }
@@ -241,86 +252,100 @@ export default function NovoCaso() {
 
   if (showPreview) {
     const formData = getValues()
-    
+    const payload = createCasoPayload(formData)
+
+    // tela de resumo (visual mais alinhado com a tela de novo caso)
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <div className="max-w-4xl mx-auto">
-          <Card className="shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-6 w-6" />
-                  <CardTitle className="text-xl">Revisão da Solicitação</CardTitle>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="text-white hover:bg-white/20"
-                  onClick={handleBackToForm}
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto">
+          <Link href="/casos" className="mb-6 inline-block">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </Link>
+
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-3xl font-bold">Revisão da Solicitação</h1>
+                <p className="text-muted-foreground">Revise todas as informações antes de enviar</p>
               </div>
-            </CardHeader>
-            
-            <CardContent className="p-6 space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-800 text-sm font-medium">
-                  ⚠️ Revise cuidadosamente as informações antes de enviar sua solicitação
-                </p>
-              </div>
+            </div>
+            <Badge variant="secondary" className="px-3 py-1">
+              <FileText className="h-3 w-3 mr-1" />
+              Revisão
+            </Badge>
+          </div>
 
-              <div className="grid gap-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-700">Cliente</Label>
-                    <p className="mt-1 text-gray-900">{user?.nome}</p>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-700">Tipo de Processo</Label>
-                    <p className="mt-1 text-gray-900">{getTipoProcessoLabel(formData.tipoProcesso)}</p>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Informações</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-700">Cliente</Label>
+                      <p className="mt-1 text-gray-900">{payload.clienteNome}</p>
+                    </div>
 
-                <div>
-                  <Label className="text-sm font-semibold text-gray-700">Título do Caso</Label>
-                  <p className="mt-1 text-gray-900 font-medium">{formData.titulo}</p>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-semibold text-gray-700">Descrição do Caso</Label>
-                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.descricao}</p>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-semibold text-gray-700">Situação Atual</Label>
-                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.situacaoAtual}</p>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-semibold text-gray-700">Objetivos</Label>
-                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.objetivos}</p>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-700">Nível de Urgência</Label>
-                    <div className={cn("mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block", getUrgenciaColor(formData.urgencia))}>
-                      {getUrgenciaLabel(formData.urgencia)}
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-700">Advogado</Label>
+                      <p className="mt-1 text-gray-900">{payload.advogadoNome || "Não informado"}</p>
                     </div>
                   </div>
-                </div>
 
-                {formData.documentosDisponiveis && (
                   <div>
-                    <Label className="text-sm font-semibold text-gray-700">Documentos Disponíveis</Label>
-                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{formData.documentosDisponiveis}</p>
+                    <Label className="text-sm font-semibold text-gray-700">Tipo de Processo</Label>
+                    <p className="mt-1 text-gray-900">{getTipoProcessoLabel(payload.tipoProcesso as TipoProcesso)}</p>
                   </div>
-                )}
-              </div>
 
-              <div className="flex gap-4 pt-4 border-t">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Título</Label>
+                    <p className="mt-1 text-gray-900 font-medium">{payload.titulo}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Descrição</Label>
+                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.descricao}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Situação Atual</Label>
+                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.situacaoAtual}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700">Objetivos</Label>
+                    <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.objetivos}</p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-700">Nível de Urgência</Label>
+                      <div className={cn("mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block", getUrgenciaColor(payload.urgencia))}>
+                        {getUrgenciaLabel(payload.urgencia)}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-700">Data da Solicitação</Label>
+                      <p className="mt-1 text-gray-900">{payload.dataSolicitacao}</p>
+                    </div>
+                  </div>
+
+                  {payload.documentosDisponiveis && (
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-700">Documentos Disponíveis</Label>
+                      <p className="mt-1 text-gray-900 whitespace-pre-wrap">{payload.documentosDisponiveis}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div className="flex gap-4 pt-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -337,13 +362,84 @@ export default function NovoCaso() {
                   {isLoading ? "Enviando..." : "Solicitar Abertura de Caso"}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Resumo</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Cliente</Label>
+                    <p className="text-sm text-muted-foreground">{payload.clienteNome}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Advogado</Label>
+                    <p className="text-sm text-muted-foreground">{payload.advogadoNome || "Nenhum"}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Tipo do Processo</Label>
+                    <p className="text-sm text-muted-foreground">{payload.tipoProcesso ? getTipoProcessoLabel(payload.tipoProcesso as TipoProcesso) : "Não selecionado"}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Título</Label>
+                    <p className="text-sm text-muted-foreground">{payload.titulo || "Não informado"}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Urgência</Label>
+                    <p className="text-sm text-muted-foreground">{payload.urgencia ? getUrgenciaLabel(payload.urgencia) : "Não selecionada"}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">Status</Label>
+                    <Badge variant="outline">{payload.status}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Como Funciona</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    {isAdvogado ? (
+                      <>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                          <div>
+                            <p className="font-medium">Seleção do Cliente</p>
+                            <p className="text-muted-foreground">Escolha o cliente para este caso</p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                          <div>
+                            <p className="font-medium">Seleção de Advogado (Opcional)</p>
+                            <p className="text-muted-foreground">Escolha um advogado específico ou deixe em aberto</p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
+  // tela de novo caso
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto">
