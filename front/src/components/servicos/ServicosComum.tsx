@@ -3,9 +3,11 @@
 import { Navbar } from "../comum/navbar";
 import { ServicosAdvogado } from "./advogado/servicosAdvogado";
 import { ServicosCliente } from "./cliente/servicosCliente";
+import { useLayout } from "@/contexts/LayoutContext";
 
 export function ServicosComum() {
-    const isClient = true; // Aqui você pode usar a lógica correta para determinar se é cliente ou advogado
+
+    const { isClient } = useLayout();
 
     return (
         <div className="min-h-screen bg-background">

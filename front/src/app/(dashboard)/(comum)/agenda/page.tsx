@@ -19,10 +19,10 @@ export default function AgendaPage() {
   useEffect(() => {
     updateConfig({
       showNavbar: true,
-      showSidebar: isAdvogado,
+      showSidebar: true,
       showFooter: true
     });
-  }, [isAdvogado, updateConfig]);
+  }, [updateConfig]);
 
   return (
     <AuthGuard>
