@@ -52,6 +52,8 @@ export function Videoteca () {
                                 src={video.thumbnail}
                                 alt={video.titulo}
                                 className="w-full h-48 object-cover rounded-lg"
+                                width={320}
+                                height={80}
                             />
                         </CardContent>
                     </Card>
