@@ -40,7 +40,7 @@ export function useNotificacoes() {
    */
   const enviarNotificacaoManualHook = useCallback(async (eventoId: string, email: string) => {
     const { eventos } = useAgendaStore.getState();
-    const evento = eventos.find(e => e.id === eventoId);
+    const evento = eventos.find(e => e.id === Number(eventoId));
     
     if (!evento) {
       throw new Error('Evento não encontrado');

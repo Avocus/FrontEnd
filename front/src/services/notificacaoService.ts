@@ -23,12 +23,12 @@ const getEventosParaNotificar = (eventos: Evento[]): Evento[] => {
   const agora = new Date();
 
   return eventos.filter(evento => {
-    if (!evento.notificarPorEmail || evento.emailNotificado) {
+    if (!evento.notificarPorEmail) {
       return false;
     }
 
     const dataEvento = new Date(evento.dataInicio);
-    const minutosAntes = evento.lembrarAntes || 1440; // 24 horas por padrão
+    const minutosAntes = evento.diasLembrarAntes * 24 * 60; // converter dias para minutos
     const dataNotificacao = new Date(dataEvento);
     dataNotificacao.setMinutes(dataNotificacao.getMinutes() - minutosAntes);
 
@@ -50,7 +50,7 @@ const enviarNotificacao = async (evento: Evento): Promise<void> => {
         titulo: evento.titulo,
         dataEvento: evento.dataInicio,
         descricao: evento.descricao,
-        localizacao: evento.localizacao,
+        localizacao: evento.local,
       }),
     });
 

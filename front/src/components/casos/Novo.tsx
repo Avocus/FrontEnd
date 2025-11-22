@@ -160,6 +160,7 @@ export default function NovoCaso() {
 
         const novoCaso = {
           id: Date.now().toString(),
+          casoClienteId: Date.now().toString(), // Mesmo ID pois é criado diretamente pelo advogado
           clienteId: clienteSelecionado.id.toString(),
           clienteNome: clienteSelecionado.nome,
           advogadoId: user.id || "unknown",
@@ -172,6 +173,7 @@ export default function NovoCaso() {
           urgencia: data.urgencia,
           documentosDisponiveis: data.documentosDisponiveis,
           dataSolicitacao: new Date().toISOString(),
+          dataAceite: new Date().toISOString(), // Aceito automaticamente quando criado pelo advogado
           status: StatusProcesso.PENDENTE
         }
 
