@@ -594,7 +594,6 @@ export function AgendaCompleta() {
                   <SelectContent>
                     <SelectItem value={EventoStatus.PENDENTE}>Pendente</SelectItem>
                     <SelectItem value={EventoStatus.CONFIRMADO}>Confirmado</SelectItem>
-                    <SelectItem value={EventoStatus.CONCLUIDO}>Concluído</SelectItem>
                     <SelectItem value={EventoStatus.CANCELADO}>Cancelado</SelectItem>
                   </SelectContent>
                 </Select>

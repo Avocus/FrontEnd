@@ -97,7 +97,6 @@ export enum EventoTipo {
 export enum EventoStatus {
   PENDENTE = 'PENDENTE',
   CONFIRMADO = 'CONFIRMADO',
-  CONCLUIDO = 'CONCLUIDO',
   CANCELADO = 'CANCELADO'
 }
 
