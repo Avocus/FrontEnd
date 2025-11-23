@@ -234,7 +234,7 @@ function DesktopView() {
 
                 {/* Ações Rápidas */}
                 <section className="grid grid-cols-4 gap-6">
-                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/casos/novo"}>
+                    <Card className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md" onClick={() => window.location.href = "/processos/novo"}>
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             <div className="bg-dashboard-blue-light p-4 rounded-full mb-4">
                                 <Plus className="w-8 h-8 text-dashboard-blue" />

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store"
 import { useLayout } from "@/contexts/LayoutContext"
 import { TipoProcesso, StatusProcesso } from "@/types/enums"
+
 import { 
   Briefcase, 
   Plus, 
@@ -24,46 +25,46 @@ import {
   Grid
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useCasoStore } from "@/store"
+import { useProcessoStore } from "@/store"
 import { getUrgenciaStyles } from "@/lib/urgency"
 import LoadingScreen from "../common/LoadingScreen"
 
-export default function MeusCasos() {
+export default function MeusProcessos() {
   const { user } = useAuthStore()
   const { isAdvogado } = useLayout()
   const router = useRouter()
   
   // Usar a store Zustand em vez de estado local
-  const { casosCliente, casosAdvogado, carregarCasosCliente, carregarCasosAdvogado } = useCasoStore()
+  const { processosCliente, processosAdvogado, carregarProcessosCliente, carregarProcessosAdvogado } = useProcessoStore()
   const [isLoading, setIsLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list")
   const [searchTerm, setSearchTerm] = useState("")
 
-  const carregarCasos = useCallback(async () => {
+  const carregarProcessos = useCallback(async () => {
     if (!user) return
 
     try {
       if (isAdvogado) {
-        await carregarCasosAdvogado()
+        await carregarProcessosAdvogado()
       } else {
-        await carregarCasosCliente()
+        await carregarProcessosCliente()
       }
       setIsLoading(false)
     } catch (error) {
-      console.error("Erro ao carregar casos:", error)
+      console.error("Erro ao carregar processos:", error)
       setIsLoading(false)
     }
-  }, [user, isAdvogado, carregarCasosCliente, carregarCasosAdvogado])
+  }, [user, isAdvogado, carregarProcessosCliente, carregarProcessosAdvogado])
 
   useEffect(() => {
-    carregarCasos()
-  }, [carregarCasos])
+    carregarProcessos()
+  }, [carregarProcessos])
 
-  // Filtrar casos baseado no tipo de usuário e termo de busca
-  const casos = isAdvogado ? casosAdvogado : casosCliente
-  const filteredCasos = casos.filter(caso =>
-    caso.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (isAdvogado ? caso.clienteNome?.toLowerCase().includes(searchTerm.toLowerCase()) : true)
+  // Filtrar processos baseado no tipo de usuário e termo de busca
+  const processos = isAdvogado ? processosAdvogado : processosCliente
+  const filteredProcessos = processos.filter(processo =>
+    processo.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (isAdvogado ? processo.cliente.nome?.toLowerCase().includes(searchTerm.toLowerCase()) : true)
   )
 
   const getTipoProcessoLabel = (tipo: TipoProcesso) => {
@@ -126,12 +127,12 @@ export default function MeusCasos() {
     })
   }
 
-  const handleNovoCaso = () => {
-    router.push('/casos/novo')
+  const handleNovoProcesso = () => {
+    router.push('/processos/novo')
   }
 
-  const handleVerDetalhes = (casoId: string) => {
-    router.push(`/casos/${casoId}`);
+  const handleVerDetalhes = (processoId: string) => {
+    router.push(`/processos/${processoId}`);
   }
 
   // Funções para Kanban
@@ -147,7 +148,7 @@ export default function MeusCasos() {
 
     return columns.map(col => ({
       ...col,
-      casos: filteredCasos.filter(caso => caso.status === col.status)
+      processos: filteredProcessos.filter(processo => processo.status === col.status)
     }))
   }
 
@@ -164,7 +165,7 @@ export default function MeusCasos() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Briefcase className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Meus Casos</h1>
+            <h1 className="text-2xl font-bold text-foreground">Meus Processos</h1>
           </div>
           <div className="flex gap-3">
             {/* Toggle de visualização */}
@@ -189,10 +190,10 @@ export default function MeusCasos() {
               </Button>
             </div>
             <Button 
-              onClick={handleNovoCaso}
+              onClick={handleNovoProcesso}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Novo Caso
+              Novo Processo
             </Button>
           </div>
         </div>
@@ -203,7 +204,7 @@ export default function MeusCasos() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder={isAdvogado ? "Buscar por título do caso ou nome do cliente..." : "Buscar por título do caso..."}
+              placeholder={isAdvogado ? "Buscar por título do processo ou nome do cliente..." : "Buscar por título do processo..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
@@ -227,73 +228,73 @@ export default function MeusCasos() {
         ) : viewMode === "list" ? (
           /* Visão Lista */
           <>
-            {filteredCasos.length === 0 ? (
+            {filteredProcessos.length === 0 ? (
               <Card className="shadow-lg">
                 <CardContent className="p-12 text-center">
                   <Briefcase className="h-16 w-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                    Nenhum caso encontrado
+                    Nenhum processo encontrado
                   </h3>
                   <p className="text-muted-foreground mb-6">
-                    {searchTerm ? "Nenhum caso corresponde à sua busca." : "Você ainda não solicitou nenhum caso jurídico. Comece agora mesmo!"}
+                    {searchTerm ? "Nenhum processo corresponde à sua busca." : "Você ainda não solicitou nenhum processo jurídico. Comece agora mesmo!"}
                   </p>
                   {!searchTerm && (
                     <Button 
-                      onClick={handleNovoCaso}                  
+                      onClick={handleNovoProcesso}                  
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Solicitar Primeiro Caso
+                      Solicitar Primeiro Processo
                     </Button>
                   )}
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
-                {filteredCasos.map((caso) => (
-                  <Card key={caso.id} className="shadow-lg hover:shadow-xl transition-shadow">
+                {filteredProcessos.map((processo) => (
+                  <Card key={processo.id} className="shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <CardTitle className="text-lg font-semibold mb-2">
-                            {caso.titulo}
+                            {processo.titulo}
                           </CardTitle>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <FileText className="h-4 w-4" />
-                              {getTipoProcessoLabel(caso.tipoProcesso)}
+                              {getTipoProcessoLabel(processo.tipoProcesso)}
                             </div>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
-                              {formatarData(caso.dataSolicitacao)}
+                              {formatarData(processo.dataSolicitacao)}
                             </div>
-                            <div className={cn("flex items-center gap-1 font-medium", getUrgenciaStyles(caso.urgencia).text)}>
+                            <div className={cn("flex items-center gap-1 font-medium", getUrgenciaStyles(processo.urgencia).text)}>
                               <AlertCircle className="h-4 w-4" />
-                              Urgência {caso.urgencia}
+                              Urgência {processo.urgencia}
                             </div>
                           </div>
                         </div>
                         <Badge 
-                          className={cn("flex items-center gap-1", getStatusColor(caso.status))}
+                          className={cn("flex items-center gap-1", getStatusColor(processo.status))}
                         >
-                          {getStatusIcon(caso.status)}
-                          {getStatusLabel(caso.status)}
+                          {getStatusIcon(processo.status)}
+                          {getStatusLabel(processo.status)}
                         </Badge>
                       </div>
                     </CardHeader>
                     
                     <CardContent className="pt-0">
                       <p className="text-muted-foreground mb-4 line-clamp-2">
-                        {caso.descricao}
+                        {processo.descricao}
                       </p>
                       
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">
-                          Caso #{caso.id.slice(-6)}
+                          Processo #{processo.id.slice(-6)}
                         </div>
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleVerDetalhes(caso.id)}
+                          onClick={() => handleVerDetalhes(processo.id)}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Ver Detalhes
@@ -313,31 +314,31 @@ export default function MeusCasos() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-sm">{column.title}</h3>
                   <Badge variant="secondary" className="text-xs">
-                    {column.casos.length}
+                    {column.processos.length}
                   </Badge>
                 </div>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {column.casos.map((caso) => (
-                    <Card key={caso.id} className="shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleVerDetalhes(caso.id)}>
+                  {column.processos.map((processo) => (
+                    <Card key={processo.id} className="shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleVerDetalhes(processo.id)}>
                       <CardContent className="p-3">
-                        <h4 className="font-medium text-sm mb-2 line-clamp-2">{caso.titulo}</h4>
+                        <h4 className="font-medium text-sm mb-2 line-clamp-2">{processo.titulo}</h4>
                         <div className="text-xs text-muted-foreground mb-2">
-                          {isAdvogado ? caso.clienteNome : getTipoProcessoLabel(caso.tipoProcesso)}
+                          {isAdvogado ? processo.cliente.nome : getTipoProcessoLabel(processo.tipoProcesso)}
                         </div>
                         <div className="flex items-center justify-between">
-                          <div className={cn("text-xs font-medium", getUrgenciaStyles(caso.urgencia).text)}>
-                            {caso.urgencia}
+                          <div className={cn("text-xs font-medium", getUrgenciaStyles(processo.urgencia).text)}>
+                            {processo.urgencia}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {formatarData(caso.dataSolicitacao)}
+                            {formatarData(processo.dataSolicitacao)}
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
-                  {column.casos.length === 0 && (
+                  {column.processos.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground text-sm">
-                      Nenhum caso
+                      Nenhum processo
                     </div>
                   )}
                 </div>
@@ -347,31 +348,31 @@ export default function MeusCasos() {
         )}
 
         {/* Footer com estatísticas - só mostrar na visão lista */}
-        {viewMode === "list" && filteredCasos.length > 0 && (
+        {viewMode === "list" && filteredProcessos.length > 0 && (
           <Card className="mt-6 shadow-lg">
             <CardContent className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div>
                   <div className="text-2xl font-bold text-primary">
-                    {filteredCasos.length}
+                    {filteredProcessos.length}
                   </div>
-                  <div className="text-sm text-muted-foreground">Total de Casos</div>
+                  <div className="text-sm text-muted-foreground">Total de Processos</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-yellow-600">
-                    {filteredCasos.filter(c => c.status === StatusProcesso.RASCUNHO).length}
+                    {filteredProcessos.filter(c => c.status === StatusProcesso.RASCUNHO).length}
                   </div>
                   <div className="text-sm text-muted-foreground">Rascunhos</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-primary">
-                    {filteredCasos.filter(c => c.status === StatusProcesso.EM_ANDAMENTO).length}
+                    {filteredProcessos.filter(c => c.status === StatusProcesso.EM_ANDAMENTO).length}
                   </div>
                   <div className="text-sm text-muted-foreground">Em Andamento</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {filteredCasos.filter(c => c.status === StatusProcesso.CONCLUIDO).length}
+                    {filteredProcessos.filter(c => c.status === StatusProcesso.CONCLUIDO).length}
                   </div>
                   <div className="text-sm text-muted-foreground">Concluídos</div>
                 </div>

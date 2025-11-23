@@ -1,17 +1,17 @@
-import { CasoCliente, CasoAdvogado } from "@/types/entities";
+import { ProcessoCliente, ProcessoAdvogado } from "@/types/entities";
 
 interface EventosComponentProps {
-  caso: CasoCliente | CasoAdvogado;
+  processo: ProcessoCliente | ProcessoAdvogado;
 }
 
-export function EventosComponent({ caso }: EventosComponentProps) {
+export function EventosComponent({ processo }: EventosComponentProps) {
   return (
     <div className="border rounded-lg p-4">
       <h2 className="text-xl font-semibold mb-4">Eventos do Processo</h2>
       <div className="space-y-4">
-        {caso.eventos && caso.eventos.length > 0 ? (
+        {processo.eventos && processo.eventos.length > 0 ? (
           <div className="grid gap-4">
-            {caso.eventos.map((evento) => (
+            {processo.eventos.map((evento) => (
               <div key={evento.id} className="border rounded-lg p-4 bg-card">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">

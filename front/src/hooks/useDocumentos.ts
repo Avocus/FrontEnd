@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { CasoCliente, CasoAdvogado, DocumentoAnexado } from "@/types/entities";
+import { ProcessoCliente, ProcessoAdvogado, DocumentoAnexado } from "@/types/entities";
 import { StatusProcesso } from "@/types/enums";
-import { useCasoStore } from "@/store";
+import { useProcessoStore } from "@/store";
 import { useToast } from "@/hooks/useToast";
-import { fileToBase64, addTimelineEntry } from "@/utils/casoUtils";
+import { fileToBase64, addTimelineEntry } from "@/utils/processoUtils";
 
 interface UseDocumentosProps {
-  casoId: string;
-  caso: CasoCliente | CasoAdvogado | null;
+  processoId: string;
+  processo: ProcessoCliente | ProcessoAdvogado | null;
   isAdvogado: boolean;
 }
 
-export function useDocumentos({ casoId, caso, isAdvogado }: UseDocumentosProps) {
-  const { atualizarCasoCliente, atualizarCasoAdvogado } = useCasoStore();
+export function useDocumentos({ processoId, processo, isAdvogado }: UseDocumentosProps) {
+  const { atualizarProcessoCliente, atualizarProcessoAdvogado } = useProcessoStore();
   const { success: showSuccess, error: showError } = useToast();
 
   const [documentosParaEnvio, setDocumentosParaEnvio] = useState<File[]>([]);
@@ -39,21 +39,21 @@ export function useDocumentos({ casoId, caso, isAdvogado }: UseDocumentosProps) 
   const removerDocumentoEnviado = async (documentoId: string) => {
     try {
       if (isAdvogado) {
-        // Para advogados, atualizar casoAdvogado
-        const casoAtual = caso as CasoAdvogado;
-        if (!casoAtual) return;
+        // Para advogados, atualizar processoAdvogado
+        const processoAtual = processo as ProcessoAdvogado;
+        if (!processoAtual) return;
 
-        const documentosAtualizados = (casoAtual.documentosAnexados || []).filter(doc => doc.id !== documentoId);
-        atualizarCasoAdvogado(casoId, {
+        const documentosAtualizados = (processoAtual.documentosAnexados || []).filter(doc => doc.id !== documentoId);
+        atualizarProcessoAdvogado(processoId, {
           documentosAnexados: documentosAtualizados
         });
       } else {
-        // Para clientes, atualizar casoCliente
-        const casoAtual = caso as CasoCliente;
-        if (!casoAtual) return;
+        // Para clientes, atualizar processoCliente
+        const processoAtual = processo as ProcessoCliente;
+        if (!processoAtual) return;
 
-        const documentosAtualizados = (casoAtual.documentosAnexados || []).filter(doc => doc.id !== documentoId);
-        atualizarCasoCliente(casoId, {
+        const documentosAtualizados = (processoAtual.documentosAnexados || []).filter(doc => doc.id !== documentoId);
+        atualizarProcessoCliente(processoId, {
           documentosAnexados: documentosAtualizados
         });
       }
@@ -72,8 +72,8 @@ export function useDocumentos({ casoId, caso, isAdvogado }: UseDocumentosProps) 
       return;
     }
 
-    if (!caso) {
-      showError("Caso não encontrado");
+    if (!processo) {
+      showError("Processo não encontrado");
       return;
     }
 
@@ -96,31 +96,31 @@ export function useDocumentos({ casoId, caso, isAdvogado }: UseDocumentosProps) 
       );
 
       if (isAdvogado) {
-        // Para advogados, atualizar casoAdvogado
-        atualizarCasoAdvogado(casoId, {
-          documentosAnexados: [...(caso.documentosAnexados || []), ...documentosConvertidos]
+        // Para advogados, atualizar processoAdvogado
+        atualizarProcessoAdvogado(processoId, {
+          documentosAnexados: [...(processo.documentosAnexados || []), ...documentosConvertidos]
         });
       } else {
-        // Para clientes, atualizar casoCliente
+        // Para clientes, atualizar processoCliente
         const timelineEntry = addTimelineEntry(
-          caso.status,
+          processo.status,
           StatusProcesso.EM_ANDAMENTO,
           `Cliente enviou ${documentosParaEnvio.length} documento(s) para análise`,
           "cliente",
           `Documentos: ${documentosParaEnvio.map(f => f.name).join(", ")}`
         );
 
-        atualizarCasoCliente(casoId, {
+        atualizarProcessoCliente(processoId, {
           status: StatusProcesso.EM_ANDAMENTO,
-          documentosAnexados: [...(caso.documentosAnexados || []), ...documentosConvertidos],
-          timeline: [...(caso.timeline || []), timelineEntry]
+          documentosAnexados: [...(processo.documentosAnexados || []), ...documentosConvertidos],
+          timeline: [...(processo.timeline || []), timelineEntry]
         });
 
-        // Também atualizar o caso no store dos advogados (se existir)
+        // Também atualizar o processo no store dos advogados (se existir)
         // Como não temos acesso direto ao store dos advogados aqui, vamos usar um evento
-        window.dispatchEvent(new CustomEvent("casoClienteUpdated", {
+        window.dispatchEvent(new CustomEvent("processoClienteUpdated", {
           detail: {
-            casoId,
+            processoId,
             updates: {
               status: "aguardando_analise_documentos",
               documentosAnexados: documentosConvertidos,

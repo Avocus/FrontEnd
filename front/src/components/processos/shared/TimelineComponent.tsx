@@ -1,5 +1,5 @@
 import { TimelineEntry } from "@/types/entities";
-import { getStatusLabel } from "@/utils/casoUtils";
+import { getStatusLabel } from "@/utils/processoUtils";
 
 interface TimelineComponentProps {
   timeline: TimelineEntry[];
@@ -66,10 +66,10 @@ export function TimelineComponent({ timeline, isAdvogado = false }: TimelineComp
               </div>
               <div className="pb-8">
                 <p className="text-sm text-muted-foreground">
-                  Caso solicitado
+                  Processo solicitado
                 </p>
-                <p className="font-medium">Caso solicitado</p>
-                <p className="text-sm text-muted-foreground">Solicitação de caso enviada com sucesso</p>
+                <p className="font-medium">Processo solicitado</p>
+                <p className="text-sm text-muted-foreground">Solicitação de processo enviada com sucesso</p>
               </div>
             </div>
           </div>

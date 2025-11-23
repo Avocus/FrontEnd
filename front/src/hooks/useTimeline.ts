@@ -1,4 +1,4 @@
-import { addTimelineEntry } from "@/utils/casoUtils";
+import { addTimelineEntry } from "@/utils/processoUtils";
 
 export function useTimeline() {
   return {

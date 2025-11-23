@@ -5,9 +5,9 @@ import { useLayout } from "@/contexts/LayoutContext";
 import { Loader2 } from "lucide-react";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 
-const MeusCasos = React.lazy(() => import("@/components/casos/MeusCasos"));
+const MeusProcessos = React.lazy(() => import("@/components/processos/MeusProcessos"));
 
-export default function CasosPage() {
+export default function ProcessosPage() {
     const { updateConfig } = useLayout();
 
     useEffect(() => {
@@ -23,10 +23,10 @@ export default function CasosPage() {
             <Suspense fallback={
                 <div className="flex justify-center items-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin" />
-                    <span className="ml-2">Carregando casos...</span>
+                    <span className="ml-2">Carregando processos...</span>
                 </div>
             }>
-                <MeusCasos />
+                <MeusProcessos />
             </Suspense>
         </ErrorBoundary>
     );

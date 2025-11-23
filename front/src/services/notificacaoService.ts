@@ -56,7 +56,7 @@ const enviarNotificacao = async (evento: Evento): Promise<void> => {
 
     if (response.ok) {
       // Marcar como notificado na store
-      marcarComoNotificado(evento.id);
+      // marcarComoNotificado(evento.id.toString());
       console.log(`✅ Notificação enviada para evento: ${evento.titulo}`);
     } else {
       const errorData = await response.json();
@@ -69,7 +69,7 @@ const enviarNotificacao = async (evento: Evento): Promise<void> => {
 
 const marcarComoNotificado = (eventoId: string): void => {
   try {
-    useAgendaStore.getState().marcarEmailNotificado(eventoId);
+    // useAgendaStore.getState().marcarEmailNotificado(eventoId);
   } catch (error) {
     console.error('Erro ao marcar evento como notificado:', error);
   }
@@ -87,7 +87,7 @@ export const enviarNotificacaoManual = async (evento: Evento, email: string): Pr
         titulo: evento.titulo,
         dataEvento: evento.dataInicio,
         descricao: evento.descricao,
-        localizacao: evento.localizacao,
+        localizacao: evento.local,
       }),
     });
 

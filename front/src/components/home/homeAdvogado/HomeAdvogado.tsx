@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useNotificationStore, useCasoStore } from "@/store";
+import { useNotificationStore, useProcessoStore } from "@/store";
 import { NotificacaoTipo, StatusProcesso } from "@/types";
+import { ProcessoCliente } from "@/types/entities";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
@@ -19,27 +20,11 @@ import {
     Activity,
 } from "lucide-react";
 
-interface CasoCliente {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  titulo: string;
-  tipoProcesso: string;
-  descricao: string;
-  situacaoAtual: string;
-  objetivos: string;
-  urgencia: "baixa" | "media" | "alta";
-  documentosDisponiveis?: string;
-  dataSolicitacao: string;
-  status: StatusProcesso;
-  advogadoNome?: string;
-}
-
-function useCasosPendentes() {
-  const [casosPendentes, setCasosPendentes] = useState<CasoCliente[]>([]);
+function useProcessosPendentes() {
+  const [processosPendentes, setProcessosPendentes] = useState<ProcessoCliente[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const { addNotification } = useNotificationStore();
-  const { casosCliente, casosNotificados, marcarCasoComoNotificado, carregarCasosCliente } = useCasoStore();
+  const { processosCliente, processosNotificados, marcarProcessoComoNotificado, carregarProcessosCliente } = useProcessoStore();
 
 
   const verificarCasosPendentes = useCallback(() => {
@@ -47,51 +32,51 @@ function useCasosPendentes() {
 
     try {
       // Usar dados da store em vez de localStorage
-      const pendentes = casosCliente.filter((caso) => caso.status === StatusProcesso.PENDENTE);
+      const pendentes = processosCliente.filter((caso) => caso.status === StatusProcesso.PENDENTE);
 
-      // Verificar se há casos novos que ainda não foram notificados
-      const casosNovos = pendentes.filter((caso) => !casosNotificados.has(caso.id));
+      // Verificar se há processos novos que ainda não foram notificados
+      const processosNovos = pendentes.filter((caso) => !processosNotificados.has(caso.id));
 
-      if (casosNovos.length > 0) {
+      if (processosNovos.length > 0) {
         const notificacao = {
-          titulo: "Novos casos disponíveis",
-          mensagem: `Você tem ${casosNovos.length} novo${casosNovos.length > 1 ? 's' : ''} caso${casosNovos.length > 1 ? 's' : ''} pendente${casosNovos.length > 1 ? 's' : ''} para análise`,
+          titulo: "Novos processos disponíveis",
+          mensagem: `Você tem ${processosNovos.length} novo${processosNovos.length > 1 ? 's' : ''} caso${processosNovos.length > 1 ? 's' : ''} pendente${processosNovos.length > 1 ? 's' : ''} para análise`,
           tipo: NotificacaoTipo.INFO,
-          link: "/casos"
+          link: "/processos"
         };
 
         // Adicionar notificação
         addNotification(notificacao);
 
-        // Marcar os casos novos como notificados usando a store
-        casosNovos.forEach(caso => marcarCasoComoNotificado(caso.id));
+        // Marcar os processos novos como notificados usando a store
+        processosNovos.forEach(processo => marcarProcessoComoNotificado(processo.id));
       }
 
-      setCasosPendentes(pendentes);
+      setProcessosPendentes(pendentes);
     } catch (error) {
-      console.error("Erro ao verificar casos pendentes:", error);
-      setCasosPendentes([]);
+      console.error("Erro ao verificar processos pendentes:", error);
+      setProcessosPendentes([]);
     }
-  }, [casosCliente, casosNotificados, marcarCasoComoNotificado, addNotification, isInitialized]);
+  }, [processosCliente, processosNotificados, marcarProcessoComoNotificado, addNotification, isInitialized]);
 
   useEffect(() => {
     // Carregar dados da store e inicializar
     const carregarDados = async () => {
-      await carregarCasosCliente();
+      await carregarProcessosCliente();
       setIsInitialized(true);
     };
     carregarDados();
-  }, [carregarCasosCliente]);
+  }, [carregarProcessosCliente]);
 
   useEffect(() => {
     verificarCasosPendentes();
   }, [verificarCasosPendentes]);
 
-  return { casosPendentes, totalPendentes: casosPendentes.length };
+  return { processosPendentes, totalPendentes: processosPendentes.length };
 }
 
 export function HomeAdvogado() {
-    const { totalPendentes } = useCasosPendentes();
+    const { totalPendentes } = useProcessosPendentes();
 
     return <DesktopView totalPendentes={totalPendentes} />;
 }
@@ -113,11 +98,11 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                             <Activity className="w-4 h-4 inline mr-1" />
                             Sistema Ativo
                         </div>
-                        {/* Indicador de casos pendentes */}
+                        {/* Indicador de processos pendentes */}
                         {totalPendentes > 0 && (
                             <div 
                                 className="bg-dashboard-card-orange text-dashboard-orange px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => router.push("/casos")}
+                                onClick={() => router.push("/processos")}
                             >
                                 <AlertTriangle className="w-4 h-4 inline mr-1" />
                                 {totalPendentes} caso{totalPendentes > 1 ? 's' : ''} pendente{totalPendentes > 1 ? 's' : ''}
@@ -137,7 +122,7 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                                 ? 'bg-gradient-dashboard-orange' 
                                 : 'bg-gradient-dashboard-blue'
                         }`}
-                        onClick={() => router.push("/casos")}
+                        onClick={() => router.push("/processos")}
                     >
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
@@ -322,7 +307,7 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                         className={`cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md relative ${
                             totalPendentes > 0 ? 'ring-2 ring-dashboard-orange' : ''
                         }`} 
-                        onClick={() => router.push("/casos")}
+                        onClick={() => router.push("/processos")}
                     >
                         <CardContent className="p-6 flex flex-col items-center text-center">
                             {totalPendentes > 0 && (
@@ -345,7 +330,7 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                             <p className="text-sm text-muted-foreground">
                                 {totalPendentes > 0 
                                     ? `${totalPendentes} pendente${totalPendentes > 1 ? 's' : ''}` 
-                                    : 'Gerenciar casos'
+                                    : 'Gerenciar processos'
                                 }
                             </p>
                         </CardContent>

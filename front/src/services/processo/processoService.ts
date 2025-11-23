@@ -3,9 +3,14 @@ import { ProcessoDTO } from '@/types/entities/Processo';
 
 export interface CriarProcessoRequest {
   clienteId: string;
+  advogadoId?: string;
   tipoProcesso: string;
   titulo: string;
   descricao: string;
+  situacaoAtual: string;
+  objetivos: string;
+  urgencia: string;
+  documentosDisponiveis?: string;
   status: string;
 }
 

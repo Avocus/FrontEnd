@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { getStatusBadgeVariant } from "@/utils/casoUtils";
+import { getStatusBadgeVariant } from "@/utils/processoUtils";
 
 interface StatusBadgeProps {
   status: string;

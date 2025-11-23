@@ -1,0 +1,127 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft, FileText } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
+import NovoProcessoForm from "./NovoProcessoForm"
+import NovoProcessoPreview from "./NovoProcessoPreview"
+import { useNovoProcesso, NovoProcessoFormData } from "@/hooks/useNovoProcesso"
+import { useLayout } from "@/contexts/LayoutContext"
+import { useAuthStore } from "@/store"
+import { StatusProcesso } from "@/types/enums"
+
+export default function NovoProcesso() {
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewData, setPreviewData] = useState<NovoProcessoFormData | null>(null)
+  const [previewPayload, setPreviewPayload] = useState<any>(null)
+  const { isAdvogado } = useLayout()
+  const { user } = useAuthStore()
+
+  const {
+    isLoading,
+    clienteSelecionado,
+    setClienteSelecionado,
+    advogadoSelecionado,
+    setAdvogadoSelecionado,
+    showClienteModal,
+    setShowClienteModal,
+    showAdvogadoModal,
+    setShowAdvogadoModal,
+    onSubmit,
+  } = useNovoProcesso()
+
+  const handlePreview = (data: NovoProcessoFormData) => {
+    // Criar payload para preview
+    const payload = {
+      clienteNome: isAdvogado 
+        ? (clienteSelecionado?.nome || "Não selecionado")
+        : (user?.nome || "Não informado"),
+      advogadoNome: isAdvogado 
+        ? (user?.nome || "Advogado não informado")
+        : (advogadoSelecionado?.nome || "Não informado"),
+      titulo: data.titulo,
+      tipoProcesso: data.tipoProcesso,
+      descricao: data.descricao,
+      situacaoAtual: data.situacaoAtual,
+      objetivos: data.objetivos,
+      urgencia: data.urgencia,
+      documentosDisponiveis: data.documentosDisponiveis,
+      dataSolicitacao: new Date().toISOString(),
+      status: StatusProcesso.RASCUNHO,
+    }
+    
+    setPreviewData(data)
+    setPreviewPayload(payload)
+    try {
+      localStorage.setItem("novoProcessoPreview", JSON.stringify(payload))
+    } catch (err) {
+      console.error("Erro ao salvar preview no localStorage:", err)
+    }
+    setShowPreview(true)
+  }
+
+  const handleBackToForm = () => {
+    setShowPreview(false)
+    setPreviewData(null)
+    setPreviewPayload(null)
+  }
+
+  const handleSubmitFromPreview = () => {
+    if (previewData) {
+      onSubmit(previewData)
+    }
+  }
+
+  if (showPreview && previewData && previewPayload) {
+    return (
+      <NovoProcessoPreview
+        formData={previewData}
+        payload={previewPayload}
+        isAdvogado={isAdvogado}
+        onBackToForm={handleBackToForm}
+        onSubmit={handleSubmitFromPreview}
+        isLoading={isLoading}
+      />
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto">
+        {/* Header */}
+        <Link href="/processos" className="mb-6 inline-block">
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+        </Link>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">Nova Solicitação de Processo</h1>
+              <p className="text-muted-foreground">Preencha os detalhes do seu processo jurídico</p>
+            </div>
+          </div>
+          <Badge variant="secondary" className="px-3 py-1">
+            <FileText className="h-3 w-3 mr-1" />
+            Solicitação
+          </Badge>
+        </div>
+
+        <NovoProcessoForm
+          onPreview={handlePreview}
+          clienteSelecionado={clienteSelecionado}
+          setClienteSelecionado={setClienteSelecionado}
+          advogadoSelecionado={advogadoSelecionado}
+          setAdvogadoSelecionado={setAdvogadoSelecionado}
+          showClienteModal={showClienteModal}
+          setShowClienteModal={setShowClienteModal}
+          showAdvogadoModal={showAdvogadoModal}
+          setShowAdvogadoModal={setShowAdvogadoModal}
+        />
+      </div>
+    </div>
+  )
+}

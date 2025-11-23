@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { CasoCliente, CasoAdvogado, DocumentoAnexado } from "@/types/entities";
+import { ProcessoCliente, ProcessoAdvogado, DocumentoAnexado } from "@/types/entities";
 import { StatusProcesso } from "@/types/enums";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Upload, X, FileText, Send } from "lucide-react";
 import { useDocumentos } from "@/hooks/useDocumentos";
-import { podeModificarDocumentos, podeGerenciarDocumentos } from "@/utils/casoUtils";
+import { podeModificarDocumentos, podeGerenciarDocumentos } from "@/utils/processoUtils";
 
 interface DocumentosComponentProps {
-  caso: CasoCliente | CasoAdvogado;
-  casoId: string;
+  processo: ProcessoCliente | ProcessoAdvogado;
+  processoId: string;
   isAdvogado: boolean;
 }
 
-export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComponentProps) {
+export function DocumentosComponent({ processo, processoId, isAdvogado }: DocumentosComponentProps) {
   const [modalAberto, setModalAberto] = useState(false);
 
   const {
@@ -25,12 +25,12 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
     removerDocumentoEnviado,
     enviarTodosDocumentos,
     setDocumentosParaEnvio
-  } = useDocumentos({ casoId, caso, isAdvogado });
+  } = useDocumentos({ processoId, processo, isAdvogado });
 
   return (
     <div className="space-y-4">
       {/* Aviso quando documentos estão em análise - apenas para clientes */}
-      {!isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO && (
+      {!isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO && (
         <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 bg-amber-100 dark:bg-amber-900 rounded-full flex items-center justify-center">
@@ -47,7 +47,7 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
       )}
 
       {/* Aviso quando documentos estão em análise - para advogados */}
-      {isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS && (
+      {isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS && (
         <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
@@ -66,15 +66,15 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
       <div className="border rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Documentos do Processo</h2>
-          {podeGerenciarDocumentos(caso.status, isAdvogado) && (
+          {podeGerenciarDocumentos(processo.status, isAdvogado) && (
             <Button
               onClick={() => setModalAberto(true)}
               className="flex items-center gap-2"
-              disabled={!isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO}
-              variant={!isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO ? "outline" : "default"}
+              disabled={!isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO}
+              variant={!isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO ? "outline" : "default"}
             >
               <Upload className="h-4 w-4" />
-              {!isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO
+              {!isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO
                 ? "Documentos em Análise"
                 : "Enviar Documentos"
               }
@@ -83,32 +83,32 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
         </div>
 
         {/* Documentos solicitados - apenas para clientes */}
-        {!isAdvogado && (caso as CasoCliente).documentosDisponiveis && (
+        {!isAdvogado && (processo as ProcessoCliente).documentosDisponiveis && (
           <div className="mb-4">
             <h3 className="font-medium mb-2">Documentos Solicitados:</h3>
             <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm">{(caso as CasoCliente).documentosDisponiveis}</p>
+              <p className="text-sm">{(processo as ProcessoCliente).documentosDisponiveis}</p>
             </div>
           </div>
         )}
 
         {/* Documentos enviados */}
-        {caso.documentosAnexados && caso.documentosAnexados.length > 0 && (
+        {processo.documentosAnexados && processo.documentosAnexados.length > 0 && (
           <div className="mb-4">
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-medium">
-                {isAdvogado ? "Documentos Enviados pelo Cliente" : "Documentos Enviados"} ({caso.documentosAnexados.length})
+                {isAdvogado ? "Documentos Enviados pelo Cliente" : "Documentos Enviados"} ({processo.documentosAnexados.length})
               </h3>
               <Badge variant={
-                isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS ? "default" :
-                !isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO ? "secondary" : "secondary"
+                isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS ? "default" :
+                !isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO ? "secondary" : "secondary"
               } className="text-xs">
-                {!isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO ? "Em análise" :
-                 isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS ? "Pendente Análise" : "Processado"}
+                {!isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO ? "Em análise" :
+                 isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS ? "Pendente Análise" : "Processado"}
               </Badge>
             </div>
             <div className="grid gap-3">
-              {caso.documentosAnexados.map((doc, index) => (
+              {processo.documentosAnexados.map((doc, index) => (
                 <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0">
@@ -150,7 +150,7 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
                     >
                       <span className="text-xs">Baixar</span>
                     </Button>
-                    {podeModificarDocumentos(caso.status, isAdvogado) && (
+                    {podeModificarDocumentos(processo.status, isAdvogado) && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -165,13 +165,13 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
                         <X className="h-3 w-3" />
                       </Button>
                     )}
-                    {!podeModificarDocumentos(caso.status, isAdvogado) && !isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO && (
+                    {!podeModificarDocumentos(processo.status, isAdvogado) && !isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO && (
                       <Badge variant="secondary" className="text-xs">
                         Em análise
                       </Badge>
                     )}
                     <Badge
-                      variant={!isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO ? "default" : "outline"}
+                      variant={!isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO ? "default" : "outline"}
                       className="text-xs"
                     >
                       #{index + 1}
@@ -183,40 +183,40 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
 
             {/* Resumo dos documentos */}
             <div className={`mt-4 p-3 rounded-lg border ${
-              !isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO
+              !isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO
                 ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
-                : isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
+                : isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
                 ? "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800"
                 : "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
             }`}>
               <div className="flex items-center gap-2 text-sm">
                 <FileText className={`h-4 w-4 ${
-                  !isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO
+                  !isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO
                     ? "text-amber-600"
-                    : isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
+                    : isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
                     ? "text-blue-600"
                     : "text-green-600"
                 }`} />
                 <span className={`font-medium ${
-                  !isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO
+                  !isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO
                     ? "text-amber-900 dark:text-amber-100"
-                    : isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
+                    : isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
                     ? "text-blue-900 dark:text-blue-100"
                     : "text-green-900 dark:text-green-100"
                 }`}>
-                  Total: {caso.documentosAnexados.length} documento(s) {isAdvogado ? "recebido(s)" : "enviado(s)"}
+                  Total: {processo.documentosAnexados.length} documento(s) {isAdvogado ? "recebido(s)" : "enviado(s)"}
                 </span>
               </div>
               <p className={`text-xs mt-1 ${
-                !isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO
+                !isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO
                   ? "text-amber-700 dark:text-amber-200"
-                  : isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
+                  : isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
                   ? "text-blue-700 dark:text-blue-200"
                   : "text-green-700 dark:text-green-200"
               }`}>
-                {!isAdvogado && caso.status === StatusProcesso.EM_ANDAMENTO
+                {!isAdvogado && processo.status === StatusProcesso.EM_ANDAMENTO
                   ? "📋 Documentos em análise pelo advogado responsável. Modificações bloqueadas temporariamente."
-                  : isAdvogado && (caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
+                  : isAdvogado && (processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_ANALISE_DADOS
                   ? "⏳ Aguardando sua análise. Aprove ou rejeite os documentos usando os botões acima."
                   : "✅ Documentos analisados e processados"
                 }
@@ -225,13 +225,13 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
           </div>
         )}
 
-        {(!caso.documentosAnexados || caso.documentosAnexados.length === 0) && (
+        {(!processo.documentosAnexados || processo.documentosAnexados.length === 0) && (
           <p className="text-muted-foreground text-center py-8">
             {isAdvogado
-              ? ((caso as CasoAdvogado).status === StatusProcesso.AGUARDANDO_DADOS
+              ? ((processo as ProcessoAdvogado).status === StatusProcesso.AGUARDANDO_DADOS
                   ? "Aguardando envio de documentos pelo cliente."
                   : "Nenhum documento foi enviado pelo cliente ainda.")
-              : "Nenhum documento informado para este caso."
+              : "Nenhum documento informado para este processo."
             }
           </p>
         )}
@@ -243,23 +243,23 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
           <DialogHeader>
             <DialogTitle>
               {isAdvogado ? "Gerenciar Documentos" :
-                caso.status === StatusProcesso.EM_ANDAMENTO
+                processo.status === StatusProcesso.EM_ANDAMENTO
                 ? "Documentos em Análise"
                 : "Enviar Documentos"
               }
             </DialogTitle>
             <DialogDescription>
-              {isAdvogado ? "Gerencie os documentos deste caso." :
-                caso.status === StatusProcesso.EM_ANDAMENTO
+              {isAdvogado ? "Gerencie os documentos deste processo." :
+                processo.status === StatusProcesso.EM_ANDAMENTO
                 ? "Os documentos enviados estão sendo analisados pelo advogado. Você não pode modificar documentos neste momento."
-                : "Selecione os documentos que deseja enviar para este caso. Todos os documentos serão anexados ao processo."
+                : "Selecione os documentos que deseja enviar para este processo. Todos os documentos serão anexados ao processo."
               }
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             {/* Input para seleção de arquivos */}
-            {podeModificarDocumentos(caso.status, isAdvogado) ? (
+            {podeModificarDocumentos(processo.status, isAdvogado) ? (
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                 <input
                   type="file"
@@ -320,10 +320,10 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
             )}
 
             {/* Documentos solicitados (referência) - apenas para clientes */}
-            {!isAdvogado && (caso as CasoCliente).documentosDisponiveis && (
+            {!isAdvogado && (processo as ProcessoCliente).documentosDisponiveis && (
               <div className="p-3 bg-muted rounded-lg">
                 <h4 className="font-medium text-sm mb-1">Documentos Solicitados:</h4>
-                <p className="text-xs text-muted-foreground">{(caso as CasoCliente).documentosDisponiveis}</p>
+                <p className="text-xs text-muted-foreground">{(processo as ProcessoCliente).documentosDisponiveis}</p>
               </div>
             )}
           </div>
@@ -337,9 +337,9 @@ export function DocumentosComponent({ caso, casoId, isAdvogado }: DocumentosComp
               }}
             >
               {isAdvogado ? "Fechar" :
-                caso.status === StatusProcesso.EM_ANDAMENTO ? "Fechar" : "Cancelar"}
+                processo.status === StatusProcesso.EM_ANDAMENTO ? "Fechar" : "Cancelar"}
             </Button>
-            {podeModificarDocumentos(caso.status, isAdvogado) && (
+            {podeModificarDocumentos(processo.status, isAdvogado) && (
               <Button
                 onClick={enviarTodosDocumentos}
                 disabled={documentosParaEnvio.length === 0 || enviandoDocumentos}

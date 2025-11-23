@@ -43,7 +43,7 @@ import { useEffect, useState } from "react"
 import { format, isToday, isTomorrow, isPast } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { useNotificacoes } from "@/hooks/useNotificacoes"
-import { ModalBuscaProcesso } from "@/components/casos/ModalBuscaProcesso"
+import { ModalBuscaProcesso } from "@/components/processos/ModalBuscaProcesso"
 import { ProcessoDTO } from "@/types/entities/Processo"
 import '@/styles/agenda.css'
 import { useLayout } from "@/contexts/LayoutContext"

@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/useToast";
-import { useCasoStore } from "@/store";
-import { CasoAdvogado } from "@/types/entities";
+import { useProcessoStore } from "@/store";
+import { ProcessoAdvogado } from "@/types/entities";
 import { StatusProcesso } from "@/types/enums";
 import { FileText, Send } from "lucide-react";
 import Link from "next/link";
 
 // Hooks customizados
-import { useCasoDetalhes } from "@/hooks/useCasoDetalhes";
+import { useProcessoDetalhes } from "@/hooks/useProcessoDetalhes";
 import { useTimeline } from "@/hooks/useTimeline";
 
 // Componentes compartilhados
@@ -22,56 +22,56 @@ import { TimelineComponent } from "./shared/TimelineComponent";
 import { EventosComponent } from "./shared/EventosComponent";
 
 // Utilitários
-import { getStatusLabel, getStatusBadgeVariant } from "@/utils/casoUtils";
+import { getStatusLabel, getStatusBadgeVariant } from "@/utils/processoUtils";
 
-interface DetalheCasoAdvogadoProps {
-  casoId: string;
+interface DetalheProcessoAdvogadoProps {
+  processoId: string;
 }
 
-export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
+export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoProps) {
   const { success, error } = useToast();
-  const { atualizarCasoCliente, atualizarCasoAdvogado } = useCasoStore();
+  const { atualizarProcessoCliente, atualizarProcessoAdvogado } = useProcessoStore();
 
-  // Usar hook customizado para carregar detalhes do caso
-  const { caso, loading } = useCasoDetalhes({ casoId, isAdvogado: true });
+  // Usar hook customizado para carregar detalhes do processo
+  const { processo, setProcesso, loading } = useProcessoDetalhes({ processoId, isAdvogado: true });
 
   // Hook para timeline
   const { addTimelineEntry } = useTimeline();
 
   const solicitarDocumentos = () => {
-    if (!caso) return;
+    if (!processo) return;
 
     try {
-      // Atualizar o caso do cliente na store
+      // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        "aceito", // status atual do caso cliente
+        "aceito", // status atual do processo cliente
         "aguardando_documentos",
         `Advogado solicitou documentos adicionais`,
         "advogado",
-        `Solicitação feita pelo advogado ${caso.advogadoNome}`
+        `Solicitação feita pelo advogado ${processo.advogado?.nome}`
       );
 
-      atualizarCasoCliente(caso.casoClienteId, {
+      atualizarProcessoCliente(processo.id, {
         status: StatusProcesso.AGUARDANDO_DADOS,
-        timeline: [...(caso.timeline || []), timelineEntryCliente]
+        timeline: [...(processo.timeline || []), timelineEntryCliente]
       });
 
-      // Atualizar o caso do advogado na store
+      // Atualizar o processo do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
-        caso.status,
+        processo.status,
         StatusProcesso.AGUARDANDO_DADOS,
         `Advogado solicitou documentos adicionais`,
         "advogado",
-        `Solicitação feita pelo advogado ${caso.advogadoNome}`
+        `Solicitação feita pelo advogado ${processo.advogado?.nome}`
       );
 
-      atualizarCasoAdvogado(caso.id, {
+      atualizarProcessoAdvogado(processo.id, {
         status: StatusProcesso.AGUARDANDO_DADOS,
-        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+        timeline: [...(processo.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: StatusProcesso.AGUARDANDO_DADOS });
+      setProcesso({ ...processo, status: StatusProcesso.AGUARDANDO_DADOS });
 
       success("Solicitação de documentos enviada ao cliente!");
     } catch (err) {
@@ -81,39 +81,39 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
   };
 
   const aprovarDocumentos = () => {
-    if (!caso) return;
+    if (!processo) return;
 
     try {
-      // Atualizar o caso do cliente na store
+      // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
         "aguardando_analise_documentos",
         "em_andamento",
         `Documentos aprovados pelo advogado`,
         "advogado",
-        `Advogado ${caso.advogadoNome} aprovou os documentos enviados`
+        `Advogado ${processo.advogado?.nome} aprovou os documentos enviados`
       );
 
-      atualizarCasoCliente(caso.casoClienteId, {
+      atualizarProcessoCliente(processo.id, {
         status: StatusProcesso.EM_ANDAMENTO,
-        timeline: [...(caso.timeline || []), timelineEntryCliente]
+        timeline: [...(processo.timeline || []), timelineEntryCliente]
       });
 
-      // Atualizar o caso do advogado na store
+      // Atualizar o processo do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
-        caso.status,
+        processo.status,
         StatusProcesso.EM_ANDAMENTO,
         `Documentos aprovados`,
         "advogado",
         `Documentos do cliente foram aprovados`
       );
 
-      atualizarCasoAdvogado(caso.id, {
+      atualizarProcessoAdvogado(processo.id, {
         status: StatusProcesso.EM_ANDAMENTO,
-        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+        timeline: [...(processo.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: StatusProcesso.EM_ANDAMENTO });
+      setProcesso({ ...processo, status: StatusProcesso.EM_ANDAMENTO });
 
       success("Documentos aprovados com sucesso!");
     } catch (err) {
@@ -123,39 +123,39 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
   };
 
   const rejeitarDocumentos = () => {
-    if (!caso) return;
+    if (!processo) return;
 
     try {
-      // Atualizar o caso do cliente na store
+      // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
         "aguardando_analise_documentos",
         "aguardando_documentos",
         `Documentos rejeitados pelo advogado`,
         "advogado",
-        `Advogado ${caso.advogadoNome} rejeitou os documentos. Novos documentos são necessários.`
+        `Advogado ${processo.advogado?.nome} rejeitou os documentos. Novos documentos são necessários.`
       );
 
-      atualizarCasoCliente(caso.casoClienteId, {
+      atualizarProcessoCliente(processo.id, {
         status: StatusProcesso.AGUARDANDO_DADOS,
-        timeline: [...(caso.timeline || []), timelineEntryCliente]
+        timeline: [...(processo.timeline || []), timelineEntryCliente]
       });
 
-      // Atualizar o caso do advogado na store
+      // Atualizar o processo do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
-        caso.status,
+        processo.status,
         StatusProcesso.AGUARDANDO_DADOS,
         `Documentos rejeitados`,
         "advogado",
         `Documentos foram rejeitados. Cliente deve enviar novos documentos.`
       );
 
-      atualizarCasoAdvogado(caso.id, {
+      atualizarProcessoAdvogado(processo.id, {
         status: StatusProcesso.AGUARDANDO_DADOS,
-        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+        timeline: [...(processo.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: StatusProcesso.AGUARDANDO_DADOS });
+      setProcesso({ ...processo, status: StatusProcesso.AGUARDANDO_DADOS });
 
       success("Documentos rejeitados. Cliente será notificado para enviar novos documentos.");
     } catch (err) {
@@ -164,63 +164,63 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
     }
   };
 
-  const protocolarCaso = () => {
-    if (!caso) return;
+  const protocolarProcesso = () => {
+    if (!processo) return;
 
     try {
-      // Atualizar o caso do cliente na store
+      // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        caso.status,
+        processo.status,
         "protocolado",
-        `Caso protocolado no fórum`,
+        `Processo protocolado no fórum`,
         "advogado",
-        `Advogado ${caso.advogadoNome} protocolou o caso no fórum competente`
+        `Advogado ${processo.advogado?.nome} protocolou o processo no fórum competente`
       );
 
-      atualizarCasoCliente(caso.casoClienteId, {
+      atualizarProcessoCliente(processo.id, {
         status: StatusProcesso.PROTOCOLADO,
-        timeline: [...(caso.timeline || []), timelineEntryCliente]
+        timeline: [...(processo.timeline || []), timelineEntryCliente]
       });
 
-      // Atualizar o caso do advogado na store
+      // Atualizar o processo do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
-        caso.status,
+        processo.status,
         StatusProcesso.PROTOCOLADO,
-        `Caso protocolado`,
+        `Processo protocolado`,
         "advogado",
-        `Caso foi protocolado no fórum competente`
+        `Processo foi protocolado no fórum competente`
       );
 
-      atualizarCasoAdvogado(caso.id, {
+      atualizarProcessoAdvogado(processo.id, {
         status: StatusProcesso.PROTOCOLADO,
-        timeline: [...(caso.timeline || []), timelineEntryAdvogado]
+        timeline: [...(processo.timeline || []), timelineEntryAdvogado]
       });
 
       // Atualizar o estado local
-      setCaso({ ...caso, status: StatusProcesso.PROTOCOLADO });
+      setProcesso({ ...processo, status: StatusProcesso.PROTOCOLADO });
 
-      success("Caso protocolado com sucesso!");
+      success("Processo protocolado com sucesso!");
     } catch (err) {
-      console.error("Erro ao protocolar caso:", err);
-      error("Erro ao protocolar caso. Tente novamente.");
+      console.error("Erro ao protocolar processo:", err);
+      error("Erro ao protocolar processo. Tente novamente.");
     }
   };
 
   if (loading) {
     return (
       <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Carregando caso...</h1>
+        <h1 className="text-2xl font-bold mb-4">Carregando processo...</h1>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
       </div>
     );
   }
 
-  if (!caso) {
+  if (!processo) {
     return (
       <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Caso não encontrado</h1>
-        <p className="text-muted-foreground mb-4">Não foi possível encontrar o caso solicitado.</p>
-        <Link href="/casos" className="text-primary underline">Voltar para lista de casos</Link>
+        <h1 className="text-2xl font-bold mb-4">Processo não encontrado</h1>
+        <p className="text-muted-foreground mb-4">Não foi possível encontrar o processo solicitado.</p>
+        <Link href="/processos" className="text-primary underline">Voltar para lista de processos</Link>
       </div>
     );
   }
@@ -229,12 +229,12 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
     <div className={`bg-background text-foreground p-8`}>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className={`text-3xl font-bold`}>{caso.titulo}</h1>
-          <p className="text-muted-foreground">Cliente: {caso.clienteNome}</p>
-          <p className="text-muted-foreground">Advogado: {caso.advogadoNome}</p>
+          <h1 className={`text-3xl font-bold`}>{processo.titulo}</h1>
+          <p className="text-muted-foreground">Cliente: {processo.cliente.nome}</p>
+          <p className="text-muted-foreground">Advogado: {processo.advogado?.nome}</p>
         </div>
-        <Badge variant={getStatusBadgeVariant(caso.status)}>
-          {getStatusLabel(caso.status)}
+        <Badge variant={getStatusBadgeVariant(processo.status)}>
+          {getStatusLabel(processo.status)}
         </Badge>
       </div>
 
@@ -242,7 +242,7 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
       <div className={`mb-6 flex gap-4 flex-wrap`}>
         <Button
           onClick={solicitarDocumentos}
-          disabled={caso.status === StatusProcesso.AGUARDANDO_DADOS || caso.status === StatusProcesso.PROTOCOLADO || caso.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
+          disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
           className="flex items-center gap-2"
           variant="outline"
         >
@@ -250,7 +250,7 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
           Solicitar Documentos
         </Button>
 
-        {caso.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS && caso.documentosAnexados && caso.documentosAnexados.length > 0 && (
+        {processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS && processo.documentosAnexados && processo.documentosAnexados.length > 0 && (
           <>
             <Button
               onClick={aprovarDocumentos}
@@ -272,12 +272,12 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
         )}
 
         <Button
-          onClick={protocolarCaso}
-          disabled={caso.status === StatusProcesso.PROTOCOLADO || caso.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
+          onClick={protocolarProcesso}
+          disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
           className="flex items-center gap-2"
         >
           <Send className="h-4 w-4" />
-          Protocolar Caso
+          Protocolar Processo
         </Button>
       </div>
 
@@ -291,19 +291,19 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <VisaoGeralComponent caso={caso} isAdvogado={true} />
+          <VisaoGeralComponent processo={processo} isAdvogado={true} />
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
-          <DocumentosComponent caso={caso} casoId={casoId} isAdvogado={true} />
+          <DocumentosComponent processo={processo} processoId={processoId} isAdvogado={true} />
         </TabsContent>
 
         <TabsContent value="timeline" className="space-y-4">
-          <TimelineComponent timeline={caso.timeline || []} isAdvogado={true} />
+          <TimelineComponent timeline={processo.timeline || []} isAdvogado={true} />
         </TabsContent>
 
         <TabsContent value="eventos" className="space-y-4">
-          <EventosComponent caso={caso} />
+          <EventosComponent processo={processo} />
         </TabsContent>
 
         <TabsContent value="client" className="space-y-4">
@@ -312,19 +312,19 @@ export function DetalheCasoAdvogado({ casoId }: DetalheCasoAdvogadoProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="font-medium">Nome</p>
-                <p className="text-muted-foreground">{caso.clienteNome}</p>
+                <p className="text-muted-foreground">{processo.cliente.nome}</p>
               </div>
               <div>
                 <p className="font-medium">ID do Cliente</p>
-                <p className="text-muted-foreground">#{caso.clienteId}</p>
+                <p className="text-muted-foreground">#{processo.cliente.id}</p>
               </div>
               <div>
                 <p className="font-medium">Tipo de Processo</p>
-                <p className="text-muted-foreground">{caso.tipoProcesso}</p>
+                <p className="text-muted-foreground">{processo.tipoProcesso}</p>
               </div>
               <div>
                 <p className="font-medium">Nível de Urgência</p>
-                <p className="text-muted-foreground capitalize">{caso.urgencia}</p>
+                <p className="text-muted-foreground capitalize">{processo.urgencia}</p>
               </div>
             </div>
           </div>

@@ -4,12 +4,12 @@ export { useNotificationStore } from './useNotificationStore';
 export { useThemeStore } from './useThemeStore';
 export { useAgendaStore } from './useAgendaStore';
 export {
-  useCasoStore,
-  useCasosClientePendentes,
-  useCasosAdvogadoAtivos,
-  useTotalCasosCliente,
-  useTotalCasosAdvogado,
-  useCasosPorStatus,
-  useCasoClientePorId,
-  useCasoAdvogadoPorId
-} from './useCasoStore'; 
+  useProcessoStore,
+  useProcessosClientePendentes,
+  useProcessosAdvogadoAtivos,
+  useTotalProcessosCliente,
+  useTotalProcessosAdvogado,
+  useProcessosPorStatus,
+  useProcessoClientePorId,
+  useProcessoAdvogadoPorId
+} from './useProcessoStore'; 

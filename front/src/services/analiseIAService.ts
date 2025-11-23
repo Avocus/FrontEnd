@@ -9,7 +9,7 @@ import {
 export type AnaliseResult = {
   success: boolean;
   message: string;
-  caso?: {
+  processo?: {
     clienteId: number;
     tipoProcesso: string; // ex: CIVIL
     titulo: string;
@@ -38,7 +38,7 @@ function mapCaseTypeToApi(type: string) {
 
 /**
  * Analisa um payload (formulário/JSON do cliente) para verificar se se trata
- * de um caso jurídico. Se for, corrige/resume o título e descrição e salva
+ * de um processo jurídico. Se for, corrige/resume o título e descrição e salva
  * um rascunho no localStorage no formato exigido.
  *
  * Entrada: qualquer objeto que contenha texto (ex: titulo, descricao, mensagem)
@@ -109,8 +109,8 @@ export async function analiseIAService(payload: Record<string, unknown>): Promis
 
     return {
       success: true,
-      message: "Texto identificado como caso jurídico (heurística local). Rascunho salvo.",
-      caso: finalCase,
+      message: "Texto identificado como processo jurídico (heurística local). Rascunho salvo.",
+      processo: finalCase,
     };
   }
 
@@ -120,7 +120,7 @@ export async function analiseIAService(payload: Record<string, unknown>): Promis
     return {
       success: false,
       message:
-        "Não foi possível confirmar que o texto se refere a um caso jurídico (sem chave de IA disponível). Forneça mais detalhes relacionados a direito para prosseguir.",
+        "Não foi possível confirmar que o texto se refere a um processo jurídico (sem chave de IA disponível). Forneça mais detalhes relacionados a direito para prosseguir.",
     };
   }
 
@@ -192,7 +192,7 @@ Responda apenas com JSON válido.`;
     }
 
     if (!parsedObj.isLegal) {
-      const reason = parsedObj.reason ? String(parsedObj.reason) : "Texto não identificado como caso jurídico suficiente para abertura de caso.";
+      const reason = parsedObj.reason ? String(parsedObj.reason) : "Texto não identificado como processo jurídico suficiente para abertura de processo.";
       return {
         success: false,
         message: reason,
@@ -217,8 +217,8 @@ Responda apenas com JSON válido.`;
 
     return {
       success: true,
-      message: "Texto identificado como caso jurídico. Rascunho salvo no localStorage.",
-      caso: finalCase,
+      message: "Texto identificado como processo jurídico. Rascunho salvo no localStorage.",
+      processo: finalCase,
     };
   } catch (error) {
     console.error("Erro na análise por IA:", error);
@@ -230,7 +230,7 @@ Responda apenas com JSON válido.`;
 }
 
   /**
-   * Analisa um texto/descrição de caso e retorna uma lista recomendada de documentos
+   * Analisa um texto/descrição de processo e retorna uma lista recomendada de documentos
    * e evidências que devem ser solicitadas ao cliente. A saída é um objeto com
    * `documentos` (array de strings) quando sucesso.
    */
@@ -244,12 +244,12 @@ Responda apenas com JSON válido.`;
       const genAI = new GoogleGenerativeAI(apiKeyLocal);
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-      const prompt = `Você é um assistente jurídico que lista todas as evidências e documentos relevantes para um caso descrito em texto (português - Brasil).
+      const prompt = `Você é um assistente jurídico que lista todas as evidências e documentos relevantes para um processo descrito em texto (português - Brasil).
   Retorne estritamente um JSON com a chave "documentos" contendo um array de strings curtas e normalizadas.
   Inclua tanto documentos formais (ex: certidões, contratos, laudos) quanto possíveis evidências eletrônicas e informais (ex: conversas de WhatsApp, e-mails, notas, áudios, vídeos, fotos, postagens, recibos, screenshots).
-  Se pertinente, acrescente documentos específicos por tipo de caso (ex: certidão de casamento/união estável para divórcio, boletim de ocorrência para violência, holerites para trabalhista).
+  Se pertinente, acrescente documentos específicos por tipo de processo (ex: certidão de casamento/união estável para divórcio, boletim de ocorrência para violência, holerites para trabalhista).
 
-  Entrada (contexto do caso):
+  Entrada (contexto do processo):
   """
   ${text}
   """

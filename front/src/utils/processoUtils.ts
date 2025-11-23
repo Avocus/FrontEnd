@@ -1,4 +1,4 @@
-import { CasoCliente, CasoAdvogado, TimelineEntry } from "@/types/entities";
+import { ProcessoCliente, ProcessoAdvogado, TimelineEntry } from "@/types/entities";
 import { StatusProcesso } from "@/types/enums";
 
 // Função utilitária para obter label do status
@@ -96,18 +96,18 @@ export const podeGerenciarDocumentos = (status: StatusProcesso, isAdvogado: bool
 };
 
 // Função utilitária para obter responsável
-export const getResponsavel = (caso: CasoCliente | CasoAdvogado, isAdvogado: boolean) => {
+export const getResponsavel = (processo: ProcessoCliente | ProcessoAdvogado, isAdvogado: boolean) => {
   if (isAdvogado) {
     // Para advogados, mostrar o cliente
-    return caso.cliente.nome;
+    return processo.cliente.nome;
   } else {
     // Para clientes, mostrar o advogado
-    if (caso.status === StatusProcesso.RASCUNHO) {
+    if (processo.status === StatusProcesso.RASCUNHO) {
       return "Relacionando com advogado";
-    } else if (caso.status === StatusProcesso.EM_ANDAMENTO) {
+    } else if (processo.status === StatusProcesso.EM_ANDAMENTO) {
       return "Em análise...";
     } else {
-      return caso.advogado?.nome || 'Advogado não definido';
+      return processo.advogado?.nome || 'Advogado não definido';
     }
   }
 };

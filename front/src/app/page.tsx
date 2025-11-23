@@ -308,7 +308,7 @@ export default function Home() {
 const features = [
   {
     icon: Gavel,
-    title: "Gestão de Casos",
+    title: "Gestão de Processos",
     description: "Controle completo de prazos, documentos e comunicação com clientes."
   },
   {
@@ -361,7 +361,7 @@ const testimonials = [
   {
     name: "Dr. Ana Silva",
     role: "Advogada Trabalhista",
-    quote: "A plataforma revolucionou minha produtividade. Consigo gerenciar todos os casos em um só lugar e ainda captar novos clientes qualificados.",
+    quote: "A plataforma revolucionou minha produtividade. Consigo gerenciar todos os processos em um só lugar e ainda captar novos clientes qualificados.",
     avatar: "/avatar-advogada.webp"
   },
   {
@@ -403,7 +403,7 @@ const clientBenefits = [
   {
     icon: FileText,
     title: "Transparência Total",
-    description: "Controle completo sobre seus casos",
+    description: "Controle completo sobre seus processos",
     features: [
       "Notificações sobre prazos importantes",
       "Histórico completo das movimentações",
@@ -421,7 +421,7 @@ const lawyerBenefits = [
     features: [
       {
         title: "Controle de Processos",
-        description: "Visualize prazos, andamentos e documentos de todos os casos"
+        description: "Visualize prazos, andamentos e documentos de todos os processos"
       },
       {
         title: "Automatização de Rotinas",

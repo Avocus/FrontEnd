@@ -9,6 +9,7 @@ import { NotificationButton } from "./NotificationButton"; // Importação do No
 import { useNotificationStore, useAuthStore } from "@/store";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 type NavItem = {
   label: string;
@@ -36,7 +37,7 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
     { label: "Chat", onClick: () => setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca" },
     { label: "Videoteca", href: "/videoteca" },
-    { label: "Casos", href: "/casos" },
+    { label: "Processos", href: "/processos" },
   ] : [
     { label: "Chat", onClick: () => setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca" },
@@ -102,6 +103,9 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
       <div className="flex items-center gap-4 flex-1 justify-end text-center">
         {user ? (
           <>
+            {/* Toggle de tema */}
+            <ThemeToggle />
+            
             {/* Botão de demonstração de notificações */}
             <NotificationButton />
             

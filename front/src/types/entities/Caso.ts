@@ -1,5 +1,5 @@
 /**
- * Interfaces relacionadas a casos jurídicos
+ * Interfaces relacionadas a processos jurídicos
  */
 
 import { TipoProcesso, StatusProcesso } from '@/types/enums';
@@ -7,7 +7,7 @@ import { Evento } from './Evento';
 import { ClienteDTO, AdvogadoDTO } from './Processo';
 
 /**
- * Interface para documentos anexados a um caso
+ * Interface para documentos anexados a um processo
  */
 export interface DocumentoAnexado {
   id: string;
@@ -19,7 +19,7 @@ export interface DocumentoAnexado {
 }
 
 /**
- * Interface para entradas do timeline de um caso
+ * Interface para entradas do timeline de um processo
  */
 export interface TimelineEntry {
   id: string;
@@ -32,9 +32,9 @@ export interface TimelineEntry {
 }
 
 /**
- * Interface base para casos
+ * Interface base para processos
  */
-export interface CasoBase {
+export interface ProcessoBase {
   id: string;
   titulo: string;
   tipoProcesso: TipoProcesso;
@@ -54,16 +54,16 @@ export interface CasoBase {
 }
 
 /**
- * Interface para casos visualizados pelo cliente
+ * Interface para processos visualizados pelo cliente
  */
-export interface CasoCliente extends CasoBase {
+export interface ProcessoCliente extends ProcessoBase {
   advogado?: AdvogadoDTO;
 }
 
 /**
- * Interface para casos visualizados pelo advogado
+ * Interface para processos visualizados pelo advogado
  */
-export interface CasoAdvogado extends CasoBase {
+export interface ProcessoAdvogado extends ProcessoBase {
   dataAceite: string;
   advogado: AdvogadoDTO;
 }
