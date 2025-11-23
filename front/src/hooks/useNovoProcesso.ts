@@ -24,7 +24,6 @@ export function useNovoProcesso() {
   const { isAdvogado } = useLayout()
   const { success, error: showError, status: showStatus } = useToast()
   const router = useRouter()
-  const { adicionarProcessoCliente } = useProcessoStore()
   const [isLoading, setIsLoading] = useState(false)
   const [clienteSelecionado, setClienteSelecionado] = useState<ClienteLista | null>(null)
   const [advogadoSelecionado, setAdvogadoSelecionado] = useState<{ id: string; nome: string; email: string; especialidades?: string[]; experiencia?: string } | null>(null)
@@ -95,72 +94,10 @@ export function useNovoProcesso() {
         return
       }
 
-      const novoProcesso = await criarProcesso(processoRequest as CriarProcessoRequest)
+      // TODO - ao criar como cliente, rascunho, ao criar como advogado, pendente
+      await criarProcesso(processoRequest as CriarProcessoRequest)
 
-      if (isAdvogado) {
-        if (!clienteSelecionado) {
-          showError("Selecione um cliente para o processo")
-          return
-        }
-
-        const processoAdvogado: ProcessoAdvogado = {
-          id: novoProcesso.id.toString(),
-          cliente: {
-            id: parseInt(clienteSelecionado.id),
-            nome: clienteSelecionado.nome,
-            email: clienteSelecionado.email || "",
-          },
-          advogado: {
-            id: parseInt(user.id || "0"),
-            nome: user.nome || "Advogado não informado",
-            email: user.email || "",
-            oab: "",
-          },
-          titulo: finalData.titulo,
-          tipoProcesso: finalData.tipoProcesso,
-          descricao: finalData.descricao,
-          situacaoAtual: finalData.situacaoAtual,
-          objetivos: finalData.objetivos,
-          urgencia: finalData.urgencia,
-          documentosDisponiveis: finalData.documentosDisponiveis,
-          dataSolicitacao: new Date().toISOString(),
-          dataAceite: new Date().toISOString(),
-          status: StatusProcesso.RASCUNHO
-        }
-
-        success("Processo criado com sucesso!")
-      } else {
-        const processoCliente: ProcessoCliente = {
-          id: novoProcesso.id.toString(),
-          cliente: {
-            id: parseInt(user?.id || "0"),
-            nome: user?.nome || "Nome não informado",
-            email: user?.email || "",
-          },
-          advogado: advogadoSelecionado ? {
-            id: parseInt(advogadoSelecionado.id),
-            nome: advogadoSelecionado.nome,
-            email: advogadoSelecionado.email || "",
-            oab: "",
-          } : undefined,
-          titulo: finalData.titulo,
-          tipoProcesso: finalData.tipoProcesso,
-          descricao: finalData.descricao,
-          situacaoAtual: finalData.situacaoAtual,
-          objetivos: finalData.objetivos,
-          urgencia: finalData.urgencia,
-          documentosDisponiveis: finalData.documentosDisponiveis,
-          dataSolicitacao: new Date().toISOString(),
-          status: StatusProcesso.RASCUNHO
-        }
-
-        adicionarProcessoCliente(processoCliente)
-        success("Solicitação de processo enviada com sucesso!")
-      }
-
-      if (typeof showStatus === "function") {
-        showStatus(String(StatusProcesso.RASCUNHO).toLowerCase(), "Processo criado com sucesso!")
-      }
+      success(isAdvogado ? "Processo criado com sucesso!" : "Solicitação de processo enviada com sucesso!")
 
       // Redirecionar após um breve delay
       setTimeout(() => {
@@ -173,7 +110,7 @@ export function useNovoProcesso() {
     } finally {
       setIsLoading(false)
     }
-  }, [user, success, showError, router, adicionarProcessoCliente, clienteSelecionado, advogadoSelecionado, isAdvogado, showStatus])
+  }, [user, success, showError, router, clienteSelecionado, advogadoSelecionado, isAdvogado, showStatus])
 
   return {
     isLoading,

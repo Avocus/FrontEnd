@@ -13,7 +13,6 @@ interface ProcessoState {
   // Ações para processos do cliente
   carregarProcessosCliente: () => void;
   buscarProcessoClientePorId: (id: string) => Promise<ProcessoCliente | null>;
-  adicionarProcessoCliente: (processo: ProcessoCliente) => void;
   atualizarProcessoCliente: (id: string, updates: Partial<ProcessoCliente>) => void;
   removerProcessoCliente: (id: string) => void;
 
@@ -93,12 +92,6 @@ export const useProcessoStore = create<ProcessoState>()(
             console.error('Erro ao buscar processo do cliente:', error);
             return null;
           }
-        },
-
-        adicionarProcessoCliente: (processo: ProcessoCliente) => {
-          set((state) => ({
-            processosCliente: [...state.processosCliente, processo]
-          }));
         },
 
         atualizarProcessoCliente: (id: string, updates: Partial<ProcessoCliente>) => {
