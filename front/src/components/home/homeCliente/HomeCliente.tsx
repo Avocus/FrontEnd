@@ -1,6 +1,5 @@
 "use client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useEffect } from "react";
 import { 
     Calendar, 
     Book, 
@@ -15,24 +14,10 @@ import {
     Plus,
     Download
 } from "lucide-react";
-import { useLayout } from "@/contexts/LayoutContext";
-import AuthGuard from "@/components/auth/AuthGuard";
 
 export function HomeCliente() {
 
-    const { updateConfig } = useLayout();
-
-    useEffect(() => {
-        updateConfig({
-            showNavbar: true,
-            showSidebar: false,
-            showFooter: true
-        });
-    }, [updateConfig]);
-
-    return <AuthGuard>
-             <DesktopView />
-           </AuthGuard>
+    return <DesktopView />
 }
 
 function DesktopView() {
