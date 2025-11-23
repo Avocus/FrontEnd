@@ -14,21 +14,17 @@ interface ProcessoState {
   carregarProcessosCliente: () => void;
   buscarProcessoClientePorId: (id: string) => Promise<ProcessoCliente | null>;
   atualizarProcessoCliente: (id: string, updates: Partial<ProcessoCliente>) => void;
-  removerProcessoCliente: (id: string) => void;
 
   // Ações para processos do advogado
   carregarProcessosAdvogado: () => void;
   buscarProcessoAdvogadoPorId: (id: string) => Promise<ProcessoAdvogado | null>;
   atualizarProcessoAdvogado: (id: string, updates: Partial<ProcessoAdvogado>) => void;
-  removerProcessoAdvogado: (id: string) => void;
 
   // Ações para notificações
   marcarProcessoComoNotificado: (id: string) => void;
   desmarcarProcessoComoNotificado: (id: string) => void;
   limparNotificacoes: () => void;
 
-  // Utilitários
-  limparTodosDados: () => void;
 }
 
 export const useProcessoStore = create<ProcessoState>()(
@@ -102,11 +98,6 @@ export const useProcessoStore = create<ProcessoState>()(
           }));
         },
 
-        removerProcessoCliente: (id: string) => {
-          set((state) => ({
-            processosCliente: state.processosCliente.filter(processo => processo.id !== id)
-          }));
-        },
 
         // Ações para processos do advogado
         carregarProcessosAdvogado: async () => {
@@ -181,12 +172,6 @@ export const useProcessoStore = create<ProcessoState>()(
           }));
         },
 
-        removerProcessoAdvogado: (id: string) => {
-          set((state) => ({
-            processosAdvogado: state.processosAdvogado.filter(processo => processo.id !== id)
-          }));
-        },
-
         // Ações para notificações
         marcarProcessoComoNotificado: (id: string) => {
           set((state) => ({
@@ -206,14 +191,6 @@ export const useProcessoStore = create<ProcessoState>()(
           set({ processosNotificados: new Set() });
         },
 
-        // Utilitários
-        limparTodosDados: () => {
-          set({
-            processosCliente: [],
-            processosAdvogado: [],
-            processosNotificados: new Set()
-          });
-        }
       }),
       {
         name: 'processo-store',

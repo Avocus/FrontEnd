@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/store"
 import { useLayout } from "@/contexts/LayoutContext"
-import { TipoProcesso, StatusProcesso } from "@/types/enums"
+import { TipoProcesso, StatusProcesso, getStatusProcessoLabel } from "@/types/enums"
 
 import { 
   Briefcase, 
@@ -22,7 +23,14 @@ import {
   Play,
   HelpCircle,
   List,
-  Grid
+  Grid,
+  Pause,
+  X,
+  Check,
+  Send,
+  FileCheck,
+  Gavel,
+  Archive
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProcessoStore } from "@/store"
@@ -39,6 +47,14 @@ export default function MeusProcessos() {
   const [isLoading, setIsLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list")
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(() => {
+    const allStatuses = new Set(Object.values(StatusProcesso))
+    allStatuses.delete(StatusProcesso.CONCLUIDO)
+    allStatuses.delete(StatusProcesso.ARQUIVADO)
+    allStatuses.delete(StatusProcesso.REJEITADO)
+    allStatuses.delete(StatusProcesso.ACEITO)
+    return allStatuses
+  })
 
   const carregarProcessos = useCallback(async () => {
     if (!user) return
@@ -83,38 +99,63 @@ export default function MeusProcessos() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      [StatusProcesso.RASCUNHO]: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      [StatusProcesso.EM_ANDAMENTO]: "bg-blue-100 text-blue-800 border-blue-200",
-      [StatusProcesso.AGUARDANDO_DADOS]: "bg-orange-100 text-orange-800 border-orange-200",
-      [StatusProcesso.EM_JULGAMENTO]: "bg-purple-100 text-purple-800 border-purple-200",
-      [StatusProcesso.CONCLUIDO]: "bg-green-100 text-green-800 border-green-200",
-      [StatusProcesso.ARQUIVADO]: "bg-red-100 text-red-800 border-red-200"
+      [StatusProcesso.RASCUNHO]: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700",
+      [StatusProcesso.PENDENTE]: "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600",
+      [StatusProcesso.EM_ANALISE]: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
+      [StatusProcesso.ACEITO]: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
+      [StatusProcesso.REJEITADO]: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700",
+      [StatusProcesso.AGUARDANDO_DADOS]: "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700",
+      [StatusProcesso.DADOS_ENVIADOS]: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700",
+      [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700",
+      [StatusProcesso.EM_ANDAMENTO]: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-700",
+      [StatusProcesso.PROTOCOLADO]: "bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900 dark:text-teal-200 dark:border-teal-700",
+      [StatusProcesso.EM_JULGAMENTO]: "bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:border-pink-700",
+      [StatusProcesso.CONCLUIDO]: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900 dark:text-emerald-200 dark:border-emerald-700",
+      [StatusProcesso.ARQUIVADO]: "bg-stone-100 text-stone-800 border-stone-200 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-600"
     }
-    return colors[status] || "bg-gray-100 text-gray-800 border-gray-200"
+    return colors[status] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
   }
 
   const getStatusIcon = (status: string) => {
     const icons: Record<string, React.ReactElement> = {
       [StatusProcesso.RASCUNHO]: <Clock className="h-3 w-3" />,
-      [StatusProcesso.EM_ANDAMENTO]: <Play className="h-3 w-3" />,
+      [StatusProcesso.PENDENTE]: <Pause className="h-3 w-3" />,
+      [StatusProcesso.EM_ANALISE]: <Search className="h-3 w-3" />,
+      [StatusProcesso.ACEITO]: <Check className="h-3 w-3" />,
+      [StatusProcesso.REJEITADO]: <X className="h-3 w-3" />,
       [StatusProcesso.AGUARDANDO_DADOS]: <FileText className="h-3 w-3" />,
-      [StatusProcesso.EM_JULGAMENTO]: <Search className="h-3 w-3" />,
+      [StatusProcesso.DADOS_ENVIADOS]: <Send className="h-3 w-3" />,
+      [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: <FileCheck className="h-3 w-3" />,
+      [StatusProcesso.EM_ANDAMENTO]: <Play className="h-3 w-3" />,
+      [StatusProcesso.PROTOCOLADO]: <FileText className="h-3 w-3" />,
+      [StatusProcesso.EM_JULGAMENTO]: <Gavel className="h-3 w-3" />,
       [StatusProcesso.CONCLUIDO]: <CheckCircle2 className="h-3 w-3" />,
-      [StatusProcesso.ARQUIVADO]: <AlertCircle className="h-3 w-3" />
+      [StatusProcesso.ARQUIVADO]: <Archive className="h-3 w-3" />
     }
     return icons[status] || <HelpCircle className="h-3 w-3" />
   }
 
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      [StatusProcesso.RASCUNHO]: "Rascunho",
-      [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
-      [StatusProcesso.AGUARDANDO_DADOS]: "Aguardando Documentos",
-      [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
-      [StatusProcesso.CONCLUIDO]: "Concluído",
-      [StatusProcesso.ARQUIVADO]: "Arquivado"
+  const getColumnColor = (status: string) => {
+    const colors: Record<string, string> = {
+      [StatusProcesso.RASCUNHO]: "bg-yellow-50 border-yellow-200 dark:bg-yellow-950 dark:border-yellow-800",
+      [StatusProcesso.PENDENTE]: "bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700",
+      [StatusProcesso.EM_ANALISE]: "bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800",
+      [StatusProcesso.ACEITO]: "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800",
+      [StatusProcesso.REJEITADO]: "bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800",
+      [StatusProcesso.AGUARDANDO_DADOS]: "bg-orange-50 border-orange-200 dark:bg-orange-950 dark:border-orange-800",
+      [StatusProcesso.DADOS_ENVIADOS]: "bg-purple-50 border-purple-200 dark:bg-purple-950 dark:border-purple-800",
+      [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "bg-indigo-50 border-indigo-200 dark:bg-indigo-950 dark:border-indigo-800",
+      [StatusProcesso.EM_ANDAMENTO]: "bg-cyan-50 border-cyan-200 dark:bg-cyan-950 dark:border-cyan-800",
+      [StatusProcesso.PROTOCOLADO]: "bg-teal-50 border-teal-200 dark:bg-teal-950 dark:border-teal-800",
+      [StatusProcesso.EM_JULGAMENTO]: "bg-pink-50 border-pink-200 dark:bg-pink-950 dark:border-pink-800",
+      [StatusProcesso.CONCLUIDO]: "bg-emerald-50 border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800",
+      [StatusProcesso.ARQUIVADO]: "bg-stone-50 border-stone-200 dark:bg-stone-900 dark:border-stone-700"
     }
-    return labels[status] || status
+    return colors[status] || "bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700"
+  }
+
+  const getStatusLabel = (status: string) => {
+    return getStatusProcessoLabel(status as StatusProcesso) || status
   }
 
   // agora usamos os estilos centralizados de urgência
@@ -137,16 +178,16 @@ export default function MeusProcessos() {
 
   // Funções para Kanban
   const getKanbanColumns = () => {
-    const columns = [
-      { key: 'rascunho', title: 'Rascunho', status: StatusProcesso.RASCUNHO, color: 'bg-yellow-50 border-yellow-200' },
-      { key: 'em_andamento', title: 'Em Andamento', status: StatusProcesso.EM_ANDAMENTO, color: 'bg-blue-50 border-blue-200' },
-      { key: 'aguardando', title: 'Aguardando', status: StatusProcesso.AGUARDANDO_DADOS, color: 'bg-orange-50 border-orange-200' },
-      { key: 'em_julgamento', title: 'Em Julgamento', status: StatusProcesso.EM_JULGAMENTO, color: 'bg-purple-50 border-purple-200' },
-      { key: 'concluido', title: 'Concluído', status: StatusProcesso.CONCLUIDO, color: 'bg-green-50 border-green-200' },
-      { key: 'arquivado', title: 'Arquivado', status: StatusProcesso.ARQUIVADO, color: 'bg-red-50 border-red-200' }
-    ]
+    const allColumns = Object.values(StatusProcesso).map(status => ({
+      key: status,
+      title: getStatusProcessoLabel(status),
+      status: status,
+      color: getColumnColor(status)
+    }))
 
-    return columns.map(col => ({
+    const selectedColumns = allColumns.filter(col => selectedStatuses.has(col.status))
+
+    return selectedColumns.map(col => ({
       ...col,
       processos: filteredProcessos.filter(processo => processo.status === col.status)
     }))
@@ -160,7 +201,7 @@ export default function MeusProcessos() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -189,6 +230,42 @@ export default function MeusProcessos() {
                 Kanban
               </Button>
             </div>
+            {viewMode === "kanban" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Filtrar Colunas
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>Status para exibir</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => setSelectedStatuses(new Set(Object.values(StatusProcesso)))}>
+                    Selecionar Todos
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSelectedStatuses(new Set())}>
+                    Desmarcar Todos
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {Object.values(StatusProcesso).map(status => (
+                    <DropdownMenuCheckboxItem
+                      key={status}
+                      checked={selectedStatuses.has(status)}
+                      onCheckedChange={(checked) => {
+                        const newSelected = new Set(selectedStatuses)
+                        if (checked) {
+                          newSelected.add(status)
+                        } else {
+                          newSelected.delete(status)
+                        }
+                        setSelectedStatuses(newSelected)
+                      }}
+                    >
+                      {getStatusProcessoLabel(status)}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
             <Button 
               onClick={handleNovoProcesso}
             >
@@ -308,42 +385,44 @@ export default function MeusProcessos() {
           </>
         ) : (
           /* Visão Kanban */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            {getKanbanColumns().map((column) => (
-              <div key={column.key} className={cn("rounded-lg border-2 p-4", column.color)}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-sm">{column.title}</h3>
-                  <Badge variant="secondary" className="text-xs">
-                    {column.processos.length}
-                  </Badge>
-                </div>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {column.processos.map((processo) => (
-                    <Card key={processo.id} className="shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleVerDetalhes(processo.id)}>
-                      <CardContent className="p-3">
-                        <h4 className="font-medium text-sm mb-2 line-clamp-2">{processo.titulo}</h4>
-                        <div className="text-xs text-muted-foreground mb-2">
-                          {isAdvogado ? processo.cliente.nome : getTipoProcessoLabel(processo.tipoProcesso)}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className={cn("text-xs font-medium", getUrgenciaStyles(processo.urgencia).text)}>
-                            {processo.urgencia}
+          <div className="overflow-x-auto pb-4">
+            <div className="flex gap-4">
+              {getKanbanColumns().map((column) => (
+                <div key={column.key} className={cn("rounded-lg border-2 p-4 flex-1 min-w-32", column.color)}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-sm">{column.title}</h3>
+                    <Badge variant="secondary" className="text-xs">
+                      {column.processos.length}
+                    </Badge>
+                  </div>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {column.processos.map((processo) => (
+                      <Card key={processo.id} className="shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleVerDetalhes(processo.id)}>
+                        <CardContent className="p-3">
+                          <h4 className="font-medium text-sm mb-2 line-clamp-2">{processo.titulo}</h4>
+                          <div className="text-xs text-muted-foreground mb-2">
+                            {isAdvogado ? processo.cliente.nome : getTipoProcessoLabel(processo.tipoProcesso)}
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {formatarData(processo.dataSolicitacao)}
+                          <div className="flex items-center justify-between">
+                            <div className={cn("text-xs font-medium", getUrgenciaStyles(processo.urgencia).text)}>
+                              {processo.urgencia}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {formatarData(processo.dataSolicitacao)}
+                            </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {column.processos.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      Nenhum processo
-                    </div>
-                  )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {column.processos.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground text-sm">
+                        Nenhum processo
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 

@@ -88,117 +88,8 @@ function ColorPicker({ value, onChange }: { value: EventoCor, onChange: (cor: Ev
   )
 }
 
-// Componente card de evento
-function EventoCard({ evento, onEdit, onDelete }: {
-  evento: Evento,
-  onEdit: (evento: Evento) => void,
-  onDelete: (id: number) => void
-}) {
-  const dataEvento = new Date(evento.dataInicio)
-  const dataFim = evento.dataFim ? new Date(evento.dataFim) : null
-  
-  const getStatusIcon = () => {
-    switch (evento.status) {
-      case EventoStatus.CONFIRMADO:
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />
-      case EventoStatus.PENDENTE:
-        return <Clock className="h-4 w-4 text-yellow-500" />
-      case EventoStatus.CANCELADO:
-        return <X className="h-4 w-4 text-red-500" />
-      default:
-        return null
-    }
-  }
+// Componente card de evento será definido dentro do componente principal
 
-  const getStatusClass = () => {
-    let classes = "evento-card"
-    
-    if (isPast(dataEvento)) classes += " evento-passado"
-    if (isToday(dataEvento)) classes += " evento-hoje"
-    if (isTomorrow(dataEvento)) classes += " evento-amanha"
-    
-    // Adicionar classe baseada no tipo
-    switch (evento.tipo) {
-      case EventoTipo.AUDIENCIA:
-        classes += " evento-audiencia"
-        break
-      case EventoTipo.REUNIAO:
-        classes += " evento-reuniao"
-        break
-      case EventoTipo.PRAZO:
-        classes += " evento-prazo"
-        break
-      default:
-        classes += " evento-outro"
-    }
-    
-    return classes
-  }
-
-  return (
-    <div
-      className={`p-4 border rounded-lg bg-card hover:bg-accent/50 transition-all cursor-pointer ${getStatusClass()}`}
-      style={{ borderLeftColor: evento.cor, borderLeftWidth: '4px' }}
-      onClick={() => onEdit(evento)}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-medium text-foreground">{evento.titulo}</h3>
-            {getStatusIcon()}
-          </div>
-          
-          <div className="space-y-1 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Clock className="h-3 w-3" />
-              <span>{format(dataEvento, "HH:mm", { locale: ptBR })}</span>
-              {dataFim && (
-                <span>até {format(dataFim, "HH:mm", { locale: ptBR })}</span>
-              )}
-            </div>
-            
-            {evento.local && (
-              <div className="flex items-center gap-2">
-                <MapPin className="h-3 w-3" />
-                <span>{evento.local}</span>
-              </div>
-            )}
-            
-            {evento.notificarPorEmail && (
-              <div className="flex items-center gap-2">
-                <Mail className="h-3 w-3" />
-                <span className="text-blue-600">
-                  Notificar por e-mail
-                </span>
-              </div>
-            )}
-          </div>
-          
-          {evento.descricao && (
-            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-              {evento.descricao}
-            </p>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2 ml-4">
-          <Badge variant="outline">{evento.tipo}</Badge>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-destructive/10"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(evento.id)
-            }}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export function AgendaCompleta() {
   const [date, setDate] = useState<Date>(new Date())
@@ -239,6 +130,8 @@ export function AgendaCompleta() {
 
   // Hook para notificações
   const { verificarNotificacoes } = useNotificacoes()
+
+  const { isAdvogado } = useLayout()
 
   useEffect(() => {
     loadEventos()
@@ -367,24 +260,142 @@ export function AgendaCompleta() {
     )
   }
 
+  // Componente card de evento
+  function EventoCard({ evento, onEdit, onDelete }: {
+    evento: Evento,
+    onEdit: (evento: Evento) => void,
+    onDelete: (id: number) => void
+  }) {
+    const dataEvento = new Date(evento.dataInicio)
+    const dataFim = evento.dataFim ? new Date(evento.dataFim) : null
+    
+    const getStatusIcon = () => {
+      switch (evento.status) {
+        case EventoStatus.CONFIRMADO:
+          return <CheckCircle2 className="h-4 w-4 text-green-500" />
+        case EventoStatus.PENDENTE:
+          return <Clock className="h-4 w-4 text-yellow-500" />
+        case EventoStatus.CANCELADO:
+          return <X className="h-4 w-4 text-red-500" />
+        default:
+          return null
+      }
+    }
+
+    const getStatusClass = () => {
+      let classes = "evento-card"
+      
+      if (isPast(dataEvento)) classes += " evento-passado"
+      if (isToday(dataEvento)) classes += " evento-hoje"
+      if (isTomorrow(dataEvento)) classes += " evento-amanha"
+      
+      // Adicionar classe baseada no tipo
+      switch (evento.tipo) {
+        case EventoTipo.AUDIENCIA:
+          classes += " evento-audiencia"
+          break
+        case EventoTipo.REUNIAO:
+          classes += " evento-reuniao"
+          break
+        case EventoTipo.PRAZO:
+          classes += " evento-prazo"
+          break
+        default:
+          classes += " evento-outro"
+      }
+      
+      return classes
+    }
+
+    return (
+      <div
+        className={`p-4 border rounded-lg bg-card hover:bg-accent/50 transition-all cursor-pointer ${getStatusClass()}`}
+        style={{ borderLeftColor: evento.cor, borderLeftWidth: '4px' }}
+        onClick={() => isAdvogado && onEdit(evento)}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-medium text-foreground">{evento.titulo}</h3>
+              {getStatusIcon()}
+            </div>
+            
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Clock className="h-3 w-3" />
+                <span>{format(dataEvento, "HH:mm", { locale: ptBR })}</span>
+                {dataFim && (
+                  <span>até {format(dataFim, "HH:mm", { locale: ptBR })}</span>
+                )}
+              </div>
+              
+              {evento.local && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3 w-3" />
+                  <span>{evento.local}</span>
+                </div>
+              )}
+              
+              {evento.notificarPorEmail && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-3 w-3" />
+                  <span className="text-blue-600">
+                    Notificar por e-mail
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {evento.descricao && (
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                {evento.descricao}
+              </p>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2 ml-4">
+            <Badge variant="outline">{evento.tipo}</Badge>
+            {isAdvogado && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-destructive/10"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(evento.id)
+                }}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto p-4 lg:py-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl lg:text-3xl font-bold">Agenda Completa</h1>
         <div className="flex gap-2">
-          <Button 
-            onClick={verificarNotificacoes} 
-            variant="outline" 
-            size="sm"
-            title="Verificar e enviar notificações pendentes"
-          >
-            <Bell className="h-4 w-4 mr-2" />
-            Notificar
-          </Button>
-          <Button onClick={handleOpenDialog} variant="default">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Novo Evento
-          </Button>
+          {isAdvogado && (
+            <Button 
+              onClick={verificarNotificacoes} 
+              variant="outline" 
+              size="sm"
+              title="Verificar e enviar notificações pendentes"
+            >
+              <Bell className="h-4 w-4 mr-2" />
+              Notificar
+            </Button>
+          )}
+          {isAdvogado && (
+            <Button onClick={handleOpenDialog} variant="default">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Novo Evento
+            </Button>
+          )}
         </div>
       </div>
 
@@ -451,13 +462,15 @@ export function AgendaCompleta() {
                   <div className="text-center py-8 text-muted-foreground">
                     <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Nenhum evento para esta data</p>
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={handleOpenDialog}
-                    >
-                      Adicionar evento
-                    </Button>
+                    {isAdvogado && (
+                      <Button
+                        variant="outline"
+                        className="mt-4"
+                        onClick={handleOpenDialog}
+                      >
+                        Adicionar evento
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
