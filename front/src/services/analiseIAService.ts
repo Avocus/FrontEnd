@@ -307,3 +307,86 @@ export function getRascunhoSalvo() {
   }
   return null;
 }
+
+/**
+ * Reescreve/ajusta uma dúvida enviada pelo cliente usando Gemini (quando disponível)
+ * para ficar mais clara para um advogado. Retorna o texto reformatado ou um
+ * fallback se a chave não estiver disponível.
+ */
+export async function formatDoubt(title: string, text: string): Promise<{ success: boolean; formatted?: string; message?: string; raw?: unknown }> {
+  const apiKeyLocal = process.env.NEXT_PUBLIC_API_KEY_GEMINI;
+
+  const combined = `${title || ''}\n\n${text || ''}`.trim();
+
+  if (!combined) {
+    return { success: false, message: 'Título e texto vazios.' };
+  }
+
+  // Fallback simples quando não há chave: limpa espaço e faz pequenas correções
+  if (!apiKeyLocal) {
+    const cleaned = combined.replace(/\s+/g, ' ').trim();
+    // Tenta criar uma versão curta e objetiva
+    const short = cleaned.length > 800 ? `${cleaned.slice(0, 800)}...` : cleaned;
+    return { success: true, formatted: short, message: 'Fallback local (sem chave Gemini) usado.' };
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKeyLocal);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+    const prompt = `Você é um assistente que reescreve/pergunta formulando claramente uma dúvida jurídica em português (Brasil) para ser enviada a um advogado.
+Receba um título e um texto do cliente. Responda apenas com JSON válido com a chave 'formatted' contendo a dúvida final (máx 1000 caracteres) e opcionalmente 'notes' com observações curtas.
+
+Entrada:
+TITLE:\n"""
+${title}
+"""
+
+TEXTO:\n"""
+${text}
+"""
+
+Saída:`;
+
+    const chat = model.startChat({ generationConfig: { temperature: 0.12, maxOutputTokens: 600 } });
+    const result = await chat.sendMessage(prompt);
+    const textResp = result.response.text();
+
+    const jsonMatch = textResp.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      // se não veio JSON, retorna a resposta bruta como formatted (limpa)
+      const fallback = textResp.replace(/\s+/g, ' ').trim();
+      return { success: true, formatted: fallback.slice(0, 1000), raw: textResp };
+    }
+
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      // tentativa de limpeza simples
+      const cleaned = jsonMatch[0].replace(/[“”]/g, '"').replace(/,\s*\}/g, '}');
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch (e) {
+        console.warn('formatDoubt: falha ao parsear JSON da IA', e);
+      }
+    }
+
+    if (!parsed || typeof parsed !== 'object') {
+      const fallback = textResp.replace(/\s+/g, ' ').trim();
+      return { success: true, formatted: fallback.slice(0, 1000), raw: textResp };
+    }
+
+    const obj = parsed as Record<string, unknown>;
+    const formatted = String(obj.formatted || obj.formattedText || obj.rewritten || '');
+    if (!formatted) {
+      const fallback = textResp.replace(/\s+/g, ' ').trim();
+      return { success: true, formatted: fallback.slice(0, 1000), raw: parsed };
+    }
+
+    return { success: true, formatted: formatted.slice(0, 2000), raw: parsed };
+  } catch (error) {
+    console.error('formatDoubt: erro ao chamar Gemini', error);
+    return { success: false, message: 'Erro na chamada à IA.' };
+  }
+}

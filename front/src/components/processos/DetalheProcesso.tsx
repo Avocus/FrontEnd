@@ -28,6 +28,7 @@ import { VisaoGeralComponent } from "./shared/VisaoGeralComponent";
 import { DocumentosComponent } from "./shared/DocumentosComponent";
 import { TimelineComponent } from "./shared/TimelineComponent";
 import { EventosComponent } from "./shared/EventosComponent";
+import Chat from "./shared/Chat";
 
 // Utilitários
 import { getStatusLabel, getResponsavel } from "@/utils/processoUtils";
@@ -89,11 +90,12 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+      <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
           <TabsTrigger value="timeline">Andamentos</TabsTrigger>
           <TabsTrigger value="eventos">Eventos</TabsTrigger>
+        <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="status">Status</TabsTrigger>
         </TabsList>
 
@@ -111,6 +113,10 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
 
         <TabsContent value="eventos" className="space-y-4">
           <EventosComponent processo={processo} />
+        </TabsContent>
+
+        <TabsContent value="chat" className="space-y-4">
+          <Chat processoId={processoId} isAdvogado={isAdvogado} />
         </TabsContent>
 
         <TabsContent value="status" className="space-y-4">

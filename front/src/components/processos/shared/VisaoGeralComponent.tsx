@@ -112,6 +112,7 @@ export function VisaoGeralComponent({ processo, isAdvogado }: VisaoGeralComponen
           )}
         </div>
       </div>
+
     </div>
   );
 }
