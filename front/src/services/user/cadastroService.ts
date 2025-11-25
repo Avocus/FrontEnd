@@ -1,14 +1,13 @@
 import api from '@/lib/api';
 
-interface AddressParams {
-    rua?: string;
-    numero?: string;
-    bairro?: string;
-    cidade?: string;
-    estado?: string;
-    pais?: string;
-    cep?: string;
-    complemento?: string;
+interface DadosContatoParams {
+    site?: string;
+    instagram?: string;
+    facebook?: string;
+    linkedin?: string;
+    youtube?: string;
+    twitter?: string;
+    telefone?: string;
 }
 
 interface UserParams {
@@ -22,6 +21,9 @@ interface UserParams {
     dateOfBirth?: string;
     phone?: string;
     address?: AddressParams;
+    bio?: string;
+    especialidades?: string[];
+    dadosContato?: DadosContatoParams;
 }
 
 export const cadastrarUsuario = async (params: UserParams) => {

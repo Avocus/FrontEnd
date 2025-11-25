@@ -119,43 +119,39 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(handleLoginEmail)}>
-            <div className="grid gap-6">
-              <div className="grid gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    className={getFieldValidationClassLocal("email")}
-                    {...register("email")}
-                  />
-                  {errors.email && touchedFields.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Senha</Label>
-                    <Link
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                      onClick={() => document.getElementById("dialog-trigger")?.click()}
-                    >
-                      Esqueci minha senha
-                    </Link>
-                  </div>
-                  <Input id="password" type="password" className={getFieldValidationClassLocal("password")} {...register("password")} />
-                  {errors.password && touchedFields.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
-                </div>
-                <div className="grid gap-2">
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-secondary text-secondary-foreground" 
-                    disabled={!isValid || isLoading}
-                  >
-                    {isLoading ? "Entrando..." : "Entrar"}
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  className={getFieldValidationClassLocal("email")}
+                  {...register("email")}
+                />
+                {errors.email && touchedFields.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
               </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Senha</Label>
+                  <Link
+                    href="#"
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                    onClick={() => document.getElementById("dialog-trigger")?.click()}
+                  >
+                    Esqueci minha senha
+                  </Link>
+                </div>
+                <Input id="password" type="password" className={getFieldValidationClassLocal("password")} {...register("password")} />
+                {errors.password && touchedFields.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full bg-secondary text-secondary-foreground" 
+                disabled={!isValid || isLoading}
+              >
+                {isLoading ? "Entrando..." : "Entrar"}
+              </Button>
               <div className="text-center text-sm">
                 Não possui conta?{" "}
                 <Link

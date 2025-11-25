@@ -13,6 +13,16 @@ const addressSchema = z.object({
   complemento: z.string().optional(),
 });
 
+const dadosContatoSchema = z.object({
+  site: z.string().optional(),
+  instagram: z.string().optional(),
+  facebook: z.string().optional(),
+  linkedin: z.string().optional(),
+  youtube: z.string().optional(),
+  twitter: z.string().optional(),
+  telefone: z.string().optional(),
+});
+
 export const cadastroSchema = z.object({
   name: z.string().min(3, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
@@ -31,6 +41,11 @@ export const cadastroSchema = z.object({
   dateOfBirth: z.string().min(1, "Data de nascimento é obrigatória"),
   phone: z.string().min(8, "Telefone inválido"),
   address: addressSchema,
+
+  // Campos específicos para advogado
+  bio: z.string().optional(),
+  especialidades: z.array(z.enum(["CIVIL", "PENAL", "TRABALHISTA", "ADMINISTRATIVO", "CONSUMIDOR", "FAMILIAR", "PREVIDENCIARIO", "OUTROS"])).optional(),
+  dadosContato: dadosContatoSchema.optional(),
 }).superRefine((data, ctx) => {
   // senha
   if (data.password !== data.confirmPassword) {
