@@ -21,7 +21,8 @@ import { UserTypeSelector } from './UserTypeSelector';
 import { PasswordRequirements } from './PasswordRequirements';
 import { useToast } from '../../hooks/useToast';
 import { getFieldValidationClass } from '../../utils/formValidation';
-import { TIPOS_PROCESSO, TipoProcesso } from '../../constants/processo';
+import { TIPOS_PROCESSO, TipoProcesso, ESPECIALIDADES, Especialidade } from '../../constants/processo';
+import { getEspecialidadeLabel } from '../../types/enums';
 
 type InviteData = { isInvite: boolean; token: string } | null;
 
@@ -60,7 +61,7 @@ export function CadastroForm({
       cpf: "",
       oab: "",
       dateOfBirth: "",
-      phone: "",
+      telefone: "",
       address: {
         rua: "",
         numero: "",
@@ -99,7 +100,7 @@ export function CadastroForm({
   const handleEspecialidadeChange = (tipo: string, checked: boolean) => {
     const current = especialidadesValue;
     if (checked) {
-      setValue("especialidades", [...current, tipo as TipoProcesso]);
+      setValue("especialidades", [...current, tipo as Especialidade]);
     } else {
       setValue("especialidades", current.filter((e: string) => e !== tipo));
     }
@@ -153,7 +154,7 @@ export function CadastroForm({
       case 1:
         return ["name", "email", "password", "confirmPassword", "role"];
       case 2:
-        return ["cpf", "dateOfBirth", "phone", "address"];
+        return ["cpf", "dateOfBirth", "telefone", "address"];
       case 3:
         return selectedRole === 'advogado' ? ["oab", "bio", "especialidades", "dadosContato"] : [];
       default:
@@ -210,8 +211,16 @@ export function CadastroForm({
       cpf: finalData.cpf,
       oab: finalData.oab,
       dateOfBirth: finalData.dateOfBirth,
-      phone: finalData.phone,
-      address: finalData.address,
+      telefone: finalData.telefone,
+      address: finalData.address ? {
+        logradouro: finalData.address.rua,
+        numero: finalData.address.numero,
+        complemento: finalData.address.complemento,
+        bairro: finalData.address.bairro,
+        cidade: finalData.address.cidade,
+        estado: finalData.address.estado,
+        cep: finalData.address.cep,
+      } : undefined,
       bio: finalData.bio,
       especialidades: finalData.especialidades,
       dadosContato: finalData.dadosContato,
@@ -383,10 +392,10 @@ export function CadastroForm({
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="phone">Telefone</Label>
-                    <Input id="phone" type="tel" {...register("phone")} />
+                    <Label htmlFor="telefone">Telefone</Label>
+                    <Input id="telefone" type="tel" {...register("telefone")} />
                     <div className="min-h-[20px]">
-                      {errors.phone && <span className="text-red-500 text-sm">{errors.phone.message}</span>}
+                      {errors.telefone && <span className="text-red-500 text-sm">{errors.telefone.message}</span>}
                     </div>
                   </div>
 
@@ -464,7 +473,7 @@ export function CadastroForm({
                   <div className="flex flex-col gap-2">
                     <Label>Especialidades</Label>
                     <div className="flex flex-col gap-2">
-                      {TIPOS_PROCESSO.map((tipo) => (
+                      {ESPECIALIDADES.map((tipo) => (
                         <div key={tipo} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -473,7 +482,7 @@ export function CadastroForm({
                             onChange={(e) => handleEspecialidadeChange(tipo, e.target.checked)}
                             className="h-4 w-4"
                           />
-                          <Label htmlFor={`especialidade-${tipo}`}>{tipo}</Label>
+                          <Label htmlFor={`especialidade-${tipo}`}>{getEspecialidadeLabel(tipo)}</Label>
                         </div>
                       ))}
                     </div>

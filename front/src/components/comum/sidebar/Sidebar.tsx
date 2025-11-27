@@ -102,7 +102,10 @@ export function Sidebar({
 
   const casosItems: SidebarItemProps[] = [
     { label: "Meus Processos", href: "/processos", icon: <Briefcase className="h-5 w-5" /> },
-    ...(isClient ? [{ label: "Novo Processo", href: "/processos/novo", icon: <FilePlus className="h-5 w-5" /> }] : []),
+    ...(isClient ? [
+      { label: "Novo Ticket", href: "/tickets", icon: <FilePlus className="h-5 w-5" /> },
+      { label: "Novo Processo", href: "/processos/novo", icon: <FilePlus className="h-5 w-5" /> }
+    ] : []),
     { label: "Documentos", href: "/documentos", icon: <FileText className="h-5 w-5" /> , disabled: true },
     ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}] : [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}])
   ];

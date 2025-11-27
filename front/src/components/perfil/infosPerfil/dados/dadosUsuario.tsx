@@ -8,7 +8,7 @@ import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User, S
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getProfileData, updateProfileData } from '@/services/user/profileService';
+import { getProfileData, updateProfileData, UserDadosDTO } from '@/services/user/profileService';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import toast from "react-hot-toast";
 import { useProfileStore, useAuthStore } from "@/store";
-import { ClienteProfile } from "@/types/entities/Profile";
+import { ClienteProfile, AdvogadoProfile } from "@/types/entities/Profile";
 import { StatusProcesso } from "@/types/enums";
 import { Configs } from "@/components/perfil/configs";
 
@@ -32,34 +32,70 @@ export function DadosUsuario() {
         defaultValues: profile as unknown as ClienteProfile
     });
 
-    useEffect(() => {
-
-        const fetchProfile = async () => {
-            try {
-                const perfilData = await getProfileData();
+    const fetchProfile = async () => {
+        try {
+            const perfilData: UserDadosDTO = await getProfileData();
+            
+            if (perfilData.advogado) {
+                // É advogado
+                const advogadoProfile: AdvogadoProfile = {
+                    id: perfilData.advogado.id.toString(),
+                    userId: perfilData.advogado.id.toString(),
+                    nome: perfilData.advogado.nome,
+                    email: perfilData.advogado.email,
+                    telefone: perfilData.advogado.telefone,
+                    cpf: perfilData.advogado.cpf,
+                    dataNascimento: perfilData.advogado.dataNascimento,
+                    endereco: perfilData.endereco ? `${perfilData.endereco.numero || ''} ${perfilData.endereco.complemento || ''} ${perfilData.endereco.bairro || ''}`.trim() : undefined,
+                    cidade: perfilData.endereco?.cidade,
+                    estado: perfilData.endereco?.estado,
+                    foto: undefined, // TODO: add fotoPerfil if available
+                    oab: perfilData.advogado.oab,
+                    bio: perfilData.advogado.bio,
+                    especialidades: perfilData.advogado.especialidades,
+                };
                 
+                updateProfileStore(advogadoProfile);
+                // For editing, we might need to adjust the form
+            } else {
+                // É cliente
                 const clienteProfile: ClienteProfile = {
-                    id: user?.id || '',
-                    userId: user?.id || '',
+                    id: perfilData.cliente?.id?.toString() || '',
+                    userId: perfilData.cliente?.id?.toString() || '',
                     nome: perfilData.nome,
                     email: perfilData.email,
                     telefone: perfilData.telefone,
                     cpf: perfilData.cpf,
                     dataNascimento: perfilData.dataNascimento,
-                    endereco: perfilData.endereco,
-                    cidade: perfilData.cidade,
-                    estado: perfilData.estado,
-                    foto: perfilData.fotoPerfil,
+                    endereco: perfilData.endereco ? `${perfilData.endereco.numero || ''} ${perfilData.endereco.complemento || ''} ${perfilData.endereco.bairro || ''}`.trim() : undefined,
+                    cidade: perfilData.endereco?.cidade,
+                    estado: perfilData.endereco?.estado,
+                    foto: undefined, // TODO: add fotoPerfil if available
                 };
                 
                 updateProfileStore(clienteProfile);
-                form.reset(perfilData);
-            } catch (err) {
-                setError("Não foi possível carregar os dados do perfil");
-                console.error(err);
+                
+                // Reset form with cliente data
+                const formData = {
+                    nome: perfilData.nome,
+                    email: perfilData.email,
+                    telefone: perfilData.telefone,
+                    cpf: perfilData.cpf,
+                    dataNascimento: perfilData.dataNascimento,
+                    endereco: perfilData.endereco ? `${perfilData.endereco.numero || ''} ${perfilData.endereco.complemento || ''} ${perfilData.endereco.bairro || ''}`.trim() : '',
+                    cidade: perfilData.endereco?.cidade || '',
+                    estado: perfilData.endereco?.estado || '',
+                    fotoPerfil: undefined,
+                };
+                form.reset(formData);
             }
-        };
+        } catch (err) {
+            setError("Não foi possível carregar os dados do perfil");
+            console.error(err);
+        }
+    };
 
+    useEffect(() => {
         fetchProfile();
     }, [updateProfileStore, form, user]);
 
@@ -97,6 +133,8 @@ export function DadosUsuario() {
             </div>
         );
     }
+
+    const isAdvogado = profile && 'oab' in profile;
 
     const renderInformacoesTab = () => (
         <Card>
@@ -195,7 +233,40 @@ export function DadosUsuario() {
                                     </FormItem>
                                 )}
                             />
+
+                            {isAdvogado && (
+                                <div>
+                                    <FormLabel>OAB</FormLabel>
+                                    <div className="flex items-start gap-3 mt-2">
+                                        <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                        <p className="text-muted-foreground">{(profile as AdvogadoProfile).oab || "Não informado"}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
+
+                        {isAdvogado && (
+                            <div className="pt-4 border-t">
+                                <h3 className="text-lg font-medium mb-4">Informações Profissionais</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <FormLabel>Especialidades</FormLabel>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {(profile as AdvogadoProfile).especialidades?.map((esp, index) => (
+                                                <Badge key={index} variant="secondary">{esp}</Badge>
+                                            )) || <p className="text-muted-foreground">Nenhuma especialidade informada</p>}
+                                        </div>
+                                    </div>
+
+                                    {(profile as AdvogadoProfile).bio && (
+                                        <div>
+                                            <FormLabel>Biografia</FormLabel>
+                                            <p className="text-muted-foreground mt-2">{(profile as AdvogadoProfile).bio}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="pt-4 border-t">
                             <h3 className="text-lg font-medium mb-4">Endereço</h3>
@@ -385,7 +456,7 @@ export function DadosUsuario() {
                         </div>
                     </Avatar>
                     <h2 className="mt-3 text-2xl font-bold">{profile?.nome || 'Usuário'}</h2>
-                    <p className="text-muted-foreground">Cliente</p>
+                    <p className="text-muted-foreground">{isAdvogado ? 'Advogado' : 'Cliente'}</p>
 
                     <div className="flex gap-3 mt-4">
                         <Button size="sm" variant="outline" asChild>

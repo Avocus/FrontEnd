@@ -25,6 +25,19 @@ export enum TipoProcesso {
   OUTROS = 'OUTROS'
 }
 
+export enum Especialidade {
+  DIREITO_CIVIL = 'DIREITO_CIVIL',
+  DIREITO_PENAL = 'DIREITO_PENAL',
+  DIREITO_TRABALHISTA = 'DIREITO_TRABALHISTA',
+  DIREITO_TRIBUTARIO = 'DIREITO_TRIBUTARIO',
+  DIREITO_FAMILIAR = 'DIREITO_FAMILIAR',
+  DIREITO_CONSUMIDOR = 'DIREITO_CONSUMIDOR',
+  DIREITO_AMBIENTAL = 'DIREITO_AMBIENTAL',
+  DIREITO_ADMINISTRATIVO = 'DIREITO_ADMINISTRATIVO',
+  DIREITO_PREVIDENCIARIO = 'DIREITO_PREVIDENCIARIO',
+  DIREITO_IMOBILIARIO = 'DIREITO_IMOBILIARIO'
+}
+
 export const getStatusProcessoLabel = (status: StatusProcesso): string => {
   const labels: Record<StatusProcesso, string> = {
     [StatusProcesso.RASCUNHO]: 'Rascunho',
@@ -56,4 +69,20 @@ export const getTipoProcessoLabel = (tipo: TipoProcesso): string => {
     [TipoProcesso.OUTROS]: "Outros"
   }
   return labels[tipo] || tipo
+}
+
+export const getEspecialidadeLabel = (especialidade: Especialidade): string => {
+  const labels: Record<Especialidade, string> = {
+    [Especialidade.DIREITO_CIVIL]: "Direito Civil",
+    [Especialidade.DIREITO_PENAL]: "Direito Penal",
+    [Especialidade.DIREITO_TRABALHISTA]: "Direito Trabalhista",
+    [Especialidade.DIREITO_TRIBUTARIO]: "Direito Tributário",
+    [Especialidade.DIREITO_FAMILIAR]: "Direito de Família",
+    [Especialidade.DIREITO_CONSUMIDOR]: "Direito do Consumidor",
+    [Especialidade.DIREITO_AMBIENTAL]: "Direito Ambiental",
+    [Especialidade.DIREITO_ADMINISTRATIVO]: "Direito Administrativo",
+    [Especialidade.DIREITO_PREVIDENCIARIO]: "Direito Previdenciário",
+    [Especialidade.DIREITO_IMOBILIARIO]: "Direito Imobiliário"
+  }
+  return labels[especialidade] || especialidade
 }

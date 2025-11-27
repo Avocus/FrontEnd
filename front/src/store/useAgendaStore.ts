@@ -179,7 +179,6 @@ export const useAgendaStore = create<AgendaState>()(
             return diasAteEvento <= evento.diasLembrarAntes &&
                    diasAteEvento >= 0 &&
                    evento.notificarPorEmail &&
-                   evento.status !== 'CONCLUIDO' &&
                    evento.status !== 'CANCELADO';
           });
         }

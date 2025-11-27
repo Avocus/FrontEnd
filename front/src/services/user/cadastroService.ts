@@ -1,4 +1,5 @@
 import api from '@/lib/api';
+import { Endereco } from '@/types/entities/Endereco';
 
 interface DadosContatoParams {
     site?: string;
@@ -19,8 +20,8 @@ interface UserParams {
     cpf?: string;
     oab?: string;
     dateOfBirth?: string;
-    phone?: string;
-    address?: AddressParams;
+    telefone?: string;
+    address?: Endereco;
     bio?: string;
     especialidades?: string[];
     dadosContato?: DadosContatoParams;

@@ -39,12 +39,12 @@ export const cadastroSchema = z.object({
   cpf: z.string().min(11, "CPF inválido"),
   oab: z.string().optional(),
   dateOfBirth: z.string().min(1, "Data de nascimento é obrigatória"),
-  phone: z.string().min(8, "Telefone inválido"),
+  telefone: z.string().min(8, "Telefone inválido"),
   address: addressSchema,
 
   // Campos específicos para advogado
   bio: z.string().optional(),
-  especialidades: z.array(z.enum(["CIVIL", "PENAL", "TRABALHISTA", "ADMINISTRATIVO", "CONSUMIDOR", "FAMILIAR", "PREVIDENCIARIO", "OUTROS"])).optional(),
+  especialidades: z.array(z.enum(["DIREITO_CIVIL", "DIREITO_PENAL", "DIREITO_TRABALHISTA", "DIREITO_TRIBUTARIO", "DIREITO_FAMILIAR", "DIREITO_CONSUMIDOR", "DIREITO_AMBIENTAL", "DIREITO_ADMINISTRATIVO", "DIREITO_PREVIDENCIARIO", "DIREITO_IMOBILIARIO"])).optional(),
   dadosContato: dadosContatoSchema.optional(),
 }).superRefine((data, ctx) => {
   // senha

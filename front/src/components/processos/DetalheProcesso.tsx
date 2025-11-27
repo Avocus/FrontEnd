@@ -95,7 +95,7 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
           <TabsTrigger value="documents">Documentos</TabsTrigger>
           <TabsTrigger value="timeline">Andamentos</TabsTrigger>
           <TabsTrigger value="eventos">Eventos</TabsTrigger>
-        <TabsTrigger value="chat">Chat</TabsTrigger>
+          <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="status">Status</TabsTrigger>
         </TabsList>
 
