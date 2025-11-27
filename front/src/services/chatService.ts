@@ -60,7 +60,7 @@ export const sendMessage = (processId: string, message: any) => {
     const token = getToken();
     console.log('Token from cookies:', token);
 
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
     console.log('Headers being sent:', headers);
 
     stompClient.publish({
