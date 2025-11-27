@@ -27,10 +27,10 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
   const [notificacoesOpen, setNotificacoesOpen] = useState(false);
   const { notificacoes } = useNotificationStore();
   const unreadCount = notificacoes.filter(n => !n.lida).length;
-  const { logout, user } = useAuthStore();
+  const { logout, user, isAuthenticated } = useAuthStore();
   const router = useRouter();
 
-  const navItems: NavItem[] = user ? [
+  const navItems: NavItem[] = isAuthenticated ? [
     { label: "Home", href: "/home" },
     { label: "Agenda", href: "/agenda" },
     { label: "Serviços", href: "#" },
@@ -101,7 +101,7 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
 
       {/* Seção do perfil no canto direito */}
       <div className="flex items-center gap-4 flex-1 justify-end text-center">
-        {user ? (
+        {isAuthenticated ? (
           <>
             {/* Toggle de tema */}
             <ThemeToggle />
