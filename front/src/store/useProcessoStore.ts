@@ -46,9 +46,9 @@ export const useProcessoStore = create<ProcessoState>()(
               id: processo.id.toString(),
               situacaoAtual: processo.status,
               dataSolicitacao: processo.dataAbertura,
+              urgencia: processo.urgencia,
               // Campos que existem no frontend mas não no backend
               objetivos: '',
-              urgencia: 'media',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
               motivoRejeicao: undefined
@@ -70,9 +70,9 @@ export const useProcessoStore = create<ProcessoState>()(
               id: processo.id.toString(),
               situacaoAtual: processo.status,
               dataSolicitacao: processo.dataAbertura,
+              urgencia: processo.urgencia,
               // Campos que existem no frontend mas não no backend
               objetivos: '',
-              urgencia: 'media',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
               motivoRejeicao: undefined
@@ -113,9 +113,9 @@ export const useProcessoStore = create<ProcessoState>()(
               dataSolicitacao: processo.dataAbertura,
               dataAceite: processo.dataAbertura,
               advogado: processo.advogado!,
+              urgencia: processo.urgencia,
               // Campos que existem no frontend mas não no backend
               objetivos: '',
-              urgencia: 'media',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
               motivoRejeicao: undefined
@@ -144,9 +144,9 @@ export const useProcessoStore = create<ProcessoState>()(
               dataSolicitacao: processo.dataAbertura,
               dataAceite: processo.dataAbertura,
               advogado: processo.advogado,
+              urgencia: processo.urgencia,
               // Campos que existem no frontend mas não no backend
               objetivos: '',
-              urgencia: 'media',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
               motivoRejeicao: undefined

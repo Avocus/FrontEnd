@@ -15,7 +15,7 @@ export interface NovoProcessoFormData {
   descricao: string
   situacaoAtual: string
   objetivos: string
-  urgencia: "baixa" | "media" | "alta"
+  urgencia: "BAIXA" | "MEDIA" | "ALTA"
   documentosDisponiveis?: string
 }
 

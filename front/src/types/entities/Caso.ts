@@ -41,7 +41,7 @@ export interface ProcessoBase {
   descricao: string;
   situacaoAtual: string;
   objetivos: string;
-  urgencia: "baixa" | "media" | "alta";
+  urgencia: "BAIXA" | "MEDIA" | "ALTA";
   documentosDisponiveis?: string;
   dataSolicitacao: string;
   status: StatusProcesso;

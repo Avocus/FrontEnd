@@ -31,7 +31,7 @@ const novoTicketSchema = z.object({
   objetivos: z.string()
     .min(10, "Objetivos devem ter pelo menos 10 caracteres")
     .max(500, "Objetivos devem ter no máximo 500 caracteres"),
-  urgencia: z.enum(["baixa", "media", "alta"], {
+  urgencia: z.enum(["BAIXA", "MEDIA", "ALTA"], {
     message: "Selecione um nível de urgência"
   }),
 })
@@ -196,25 +196,25 @@ export default function NovoTicketForm() {
                 <Label htmlFor="urgencia">Nível de Urgência *</Label>
                 <Select
                   value={watchedValues.urgencia}
-                  onValueChange={(value) => setValue("urgencia", value as "baixa" | "media" | "alta", { shouldValidate: true })}
+                  onValueChange={(value) => setValue("urgencia", value as "BAIXA" | "MEDIA" | "ALTA", { shouldValidate: true })}
                 >
                   <SelectTrigger className={getFieldValidationClass("urgencia")}>
                     <SelectValue placeholder="Selecione o nível de urgência" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="baixa">
+                    <SelectItem value="BAIXA">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500"></div>
                         Baixa - Não há pressa
                       </div>
                     </SelectItem>
-                    <SelectItem value="media">
+                    <SelectItem value="MEDIA">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
                         Média - Algumas semanas
                       </div>
                     </SelectItem>
-                    <SelectItem value="alta">
+                    <SelectItem value="ALTA">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-red-500"></div>
                         Alta - Urgente

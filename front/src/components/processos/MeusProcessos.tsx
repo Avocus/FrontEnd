@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuthStore } from "@/store"
 import { useLayout } from "@/contexts/LayoutContext"
 import { TipoProcesso, StatusProcesso, getStatusProcessoLabel } from "@/types/enums"
+import { getStatusColor, getStatusIcon, getColumnColor } from "@/utils/processoUtils"
 
 import { 
   Briefcase, 
@@ -57,7 +58,10 @@ export default function MeusProcessos() {
   })
 
   const carregarProcessos = useCallback(async () => {
-    if (!user) return
+    if (!user) {
+      setIsLoading(false)
+      return
+    }
 
     try {
       if (isAdvogado) {
@@ -95,67 +99,6 @@ export default function MeusProcessos() {
       [TipoProcesso.OUTROS]: "Outros"
     }
     return labels[tipo] || tipo
-  }
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      [StatusProcesso.RASCUNHO]: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700",
-      [StatusProcesso.PENDENTE]: "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600",
-      [StatusProcesso.EM_ANALISE]: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
-      [StatusProcesso.ACEITO]: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
-      [StatusProcesso.REJEITADO]: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700",
-      [StatusProcesso.AGUARDANDO_DADOS]: "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700",
-      [StatusProcesso.DADOS_ENVIADOS]: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700",
-      [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700",
-      [StatusProcesso.EM_ANDAMENTO]: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-700",
-      [StatusProcesso.PROTOCOLADO]: "bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900 dark:text-teal-200 dark:border-teal-700",
-      [StatusProcesso.EM_JULGAMENTO]: "bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:border-pink-700",
-      [StatusProcesso.CONCLUIDO]: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900 dark:text-emerald-200 dark:border-emerald-700",
-      [StatusProcesso.ARQUIVADO]: "bg-stone-100 text-stone-800 border-stone-200 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-600"
-    }
-    return colors[status] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
-  }
-
-  const getStatusIcon = (status: string) => {
-    const icons: Record<string, React.ReactElement> = {
-      [StatusProcesso.RASCUNHO]: <Clock className="h-3 w-3" />,
-      [StatusProcesso.PENDENTE]: <Pause className="h-3 w-3" />,
-      [StatusProcesso.EM_ANALISE]: <Search className="h-3 w-3" />,
-      [StatusProcesso.ACEITO]: <Check className="h-3 w-3" />,
-      [StatusProcesso.REJEITADO]: <X className="h-3 w-3" />,
-      [StatusProcesso.AGUARDANDO_DADOS]: <FileText className="h-3 w-3" />,
-      [StatusProcesso.DADOS_ENVIADOS]: <Send className="h-3 w-3" />,
-      [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: <FileCheck className="h-3 w-3" />,
-      [StatusProcesso.EM_ANDAMENTO]: <Play className="h-3 w-3" />,
-      [StatusProcesso.PROTOCOLADO]: <FileText className="h-3 w-3" />,
-      [StatusProcesso.EM_JULGAMENTO]: <Gavel className="h-3 w-3" />,
-      [StatusProcesso.CONCLUIDO]: <CheckCircle2 className="h-3 w-3" />,
-      [StatusProcesso.ARQUIVADO]: <Archive className="h-3 w-3" />
-    }
-    return icons[status] || <HelpCircle className="h-3 w-3" />
-  }
-
-  const getColumnColor = (status: string) => {
-    const colors: Record<string, string> = {
-      [StatusProcesso.RASCUNHO]: "bg-yellow-50 border-yellow-200 dark:bg-yellow-950 dark:border-yellow-800",
-      [StatusProcesso.PENDENTE]: "bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700",
-      [StatusProcesso.EM_ANALISE]: "bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800",
-      [StatusProcesso.ACEITO]: "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800",
-      [StatusProcesso.REJEITADO]: "bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800",
-      [StatusProcesso.AGUARDANDO_DADOS]: "bg-orange-50 border-orange-200 dark:bg-orange-950 dark:border-orange-800",
-      [StatusProcesso.DADOS_ENVIADOS]: "bg-purple-50 border-purple-200 dark:bg-purple-950 dark:border-purple-800",
-      [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "bg-indigo-50 border-indigo-200 dark:bg-indigo-950 dark:border-indigo-800",
-      [StatusProcesso.EM_ANDAMENTO]: "bg-cyan-50 border-cyan-200 dark:bg-cyan-950 dark:border-cyan-800",
-      [StatusProcesso.PROTOCOLADO]: "bg-teal-50 border-teal-200 dark:bg-teal-950 dark:border-teal-800",
-      [StatusProcesso.EM_JULGAMENTO]: "bg-pink-50 border-pink-200 dark:bg-pink-950 dark:border-pink-800",
-      [StatusProcesso.CONCLUIDO]: "bg-emerald-50 border-emerald-200 dark:bg-emerald-950 dark:border-emerald-800",
-      [StatusProcesso.ARQUIVADO]: "bg-stone-50 border-stone-200 dark:bg-stone-900 dark:border-stone-700"
-    }
-    return colors[status] || "bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700"
-  }
-
-  const getStatusLabel = (status: string) => {
-    return getStatusProcessoLabel(status as StatusProcesso) || status
   }
 
   // agora usamos os estilos centralizados de urgência
@@ -354,7 +297,7 @@ export default function MeusProcessos() {
                           className={cn("flex items-center gap-1", getStatusColor(processo.status))}
                         >
                           {getStatusIcon(processo.status)}
-                          {getStatusLabel(processo.status)}
+                          {getStatusProcessoLabel(processo.status)}
                         </Badge>
                       </div>
                     </CardHeader>

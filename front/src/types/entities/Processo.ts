@@ -30,6 +30,7 @@ export interface ProcessoDTO {
   descricao: string;
   status: StatusProcesso;
   tipoProcesso: TipoProcesso;
+  urgencia: "BAIXA" | "MEDIA" | "ALTA";
   dataAbertura: string;
   cliente: ClienteDTO;
   advogado: AdvogadoDTO;

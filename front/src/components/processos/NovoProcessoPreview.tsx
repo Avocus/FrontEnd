@@ -15,7 +15,7 @@ interface NovoProcessoPreviewProps {
     descricao: string
     situacaoAtual: string
     objetivos: string
-    urgencia: "baixa" | "media" | "alta"
+    urgencia: "BAIXA" | "MEDIA" | "ALTA"
     documentosDisponiveis?: string
   }
   payload: {
@@ -26,7 +26,7 @@ interface NovoProcessoPreviewProps {
     descricao: string
     situacaoAtual: string
     objetivos: string
-    urgencia: "baixa" | "media" | "alta"
+    urgencia: "BAIXA" | "MEDIA" | "ALTA"
     documentosDisponiveis?: string
     dataSolicitacao: string
     status: string
