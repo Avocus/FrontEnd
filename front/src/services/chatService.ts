@@ -27,6 +27,14 @@ export const connect = (processId: string, onMessageReceived: (message: any) => 
     console.error('Additional details: ' + frame.body);
   };
 
+  // Adicionar headers de autenticação
+  const token = localStorage.getItem('token');
+  if (token) {
+    stompClient.connectHeaders = {
+      Authorization: `Bearer ${token}`
+    };
+  }
+
   stompClient.activate();
 };
 
