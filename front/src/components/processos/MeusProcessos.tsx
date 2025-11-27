@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils"
 import { useProcessoStore } from "@/store"
 import { getUrgenciaStyles } from "@/lib/urgency"
 import LoadingScreen from "../common/LoadingScreen"
+import { StatusBadge } from "./shared/StatusBadge"
 
 export default function MeusProcessos() {
   const { user } = useAuthStore()
@@ -293,12 +294,7 @@ export default function MeusProcessos() {
                             </div>
                           </div>
                         </div>
-                        <Badge 
-                          className={cn("flex items-center gap-1", getStatusColor(processo.status))}
-                        >
-                          {getStatusIcon(processo.status)}
-                          {getStatusProcessoLabel(processo.status)}
-                        </Badge>
+                        <StatusBadge status={processo.status} isAdvogado={isAdvogado} />
                       </div>
                     </CardHeader>
                     
