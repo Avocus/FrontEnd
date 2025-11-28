@@ -12,7 +12,6 @@ import { useAuthStore } from "@/store"
 import { useNovoTicket, NovoTicketFormData } from "@/hooks/useNovoTicket";
 import { TipoProcesso, getTipoProcessoLabel } from "@/types/enums"
 import { cn } from "@/lib/utils"
-import { getUrgenciaLabel } from "@/lib/urgency"
 
 // Schema de validação para o formulário
 const novoTicketSchema = z.object({
@@ -25,15 +24,6 @@ const novoTicketSchema = z.object({
   descricao: z.string()
     .min(20, "Descrição deve ter pelo menos 20 caracteres")
     .max(1000, "Descrição deve ter no máximo 1000 caracteres"),
-  situacaoAtual: z.string()
-    .min(10, "Situação atual deve ter pelo menos 10 caracteres")
-    .max(500, "Situação atual deve ter no máximo 500 caracteres"),
-  objetivos: z.string()
-    .min(10, "Objetivos devem ter pelo menos 10 caracteres")
-    .max(500, "Objetivos devem ter no máximo 500 caracteres"),
-  urgencia: z.enum(["BAIXA", "MEDIA", "ALTA"], {
-    message: "Selecione um nível de urgência"
-  }),
 })
 
 type LocalNovoTicketFormData = z.infer<typeof novoTicketSchema>
@@ -55,9 +45,6 @@ export default function NovoTicketForm() {
       titulo: "",
       tipoProcesso: undefined,
       descricao: "",
-      situacaoAtual: "",
-      objetivos: "",
-      urgencia: undefined,
     }
   })
 
@@ -78,9 +65,6 @@ export default function NovoTicketForm() {
       titulo: data.titulo,
       tipoProcesso: data.tipoProcesso,
       descricao: data.descricao,
-      situacaoAtual: data.situacaoAtual,
-      objetivos: data.objetivos,
-      urgencia: data.urgencia,
     };
     await onSubmit(ticketData);
   }
@@ -158,75 +142,6 @@ export default function NovoTicketForm() {
                 <p className="text-red-500 text-sm">{errors.descricao.message}</p>
               )}
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="situacaoAtual">Situação Atual *</Label>
-              <Textarea
-                id="situacaoAtual"
-                placeholder="Descreva a situação atual do problema, o que já foi tentado, prazos envolvidos..."
-                className={cn("min-h-[100px]", getFieldValidationClass("situacaoAtual"))}
-                {...register("situacaoAtual")}
-              />
-              <p className="text-xs text-gray-500">
-                {watchedValues.situacaoAtual?.length || 0}/500 caracteres
-              </p>
-              {errors.situacaoAtual && touchedFields.situacaoAtual && (
-                <p className="text-red-500 text-sm">{errors.situacaoAtual.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="objetivos">Objetivos e Resultado Esperado *</Label>
-              <Textarea
-                id="objetivos"
-                placeholder="O que você espera alcançar com esta solicitação? Quais são seus objetivos principais?"
-                className={cn("min-h-[100px]", getFieldValidationClass("objetivos"))}
-                {...register("objetivos")}
-              />
-              <p className="text-xs text-gray-500">
-                {watchedValues.objetivos?.length || 0}/500 caracteres
-              </p>
-              {errors.objetivos && touchedFields.objetivos && (
-                <p className="text-red-500 text-sm">{errors.objetivos.message}</p>
-              )}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="urgencia">Nível de Urgência *</Label>
-                <Select
-                  value={watchedValues.urgencia}
-                  onValueChange={(value) => setValue("urgencia", value as "BAIXA" | "MEDIA" | "ALTA", { shouldValidate: true })}
-                >
-                  <SelectTrigger className={getFieldValidationClass("urgencia")}>
-                    <SelectValue placeholder="Selecione o nível de urgência" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BAIXA">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        Baixa - Não há pressa
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="MEDIA">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                        Média - Algumas semanas
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="ALTA">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        Alta - Urgente
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.urgencia && (
-                  <p className="text-red-500 text-sm">{errors.urgencia.message}</p>
-                )}
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -260,15 +175,8 @@ export default function NovoTicketForm() {
             </div>
 
             <div>
-              <Label className="text-sm font-medium">Urgência</Label>
-              <p className="text-sm text-muted-foreground">
-                {watchedValues.urgencia ? getUrgenciaLabel(watchedValues.urgencia) : "Não selecionada"}
-              </p>
-            </div>
-
-            <div>
               <Label className="text-sm font-medium">Status</Label>
-              <p className="text-sm text-muted-foreground">Solicitado</p>
+              <p className="text-sm text-muted-foreground">Aberto</p>
             </div>
           </CardContent>
         </Card>

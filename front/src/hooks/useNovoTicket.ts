@@ -6,9 +6,6 @@ export interface NovoTicketFormData {
   titulo: string;
   tipoProcesso: string;
   descricao: string;
-  situacaoAtual: string;
-  objetivos: string;
-  urgencia: string;
 }
 
 export const useNovoTicket = () => {
@@ -22,9 +19,6 @@ export const useNovoTicket = () => {
         titulo: data.titulo,
         tipoProcesso: data.tipoProcesso,
         descricao: data.descricao,
-        situacaoAtual: data.situacaoAtual,
-        objetivos: data.objetivos,
-        urgencia: data.urgencia,
       };
 
       const response = await api.post('/ticket', payload);

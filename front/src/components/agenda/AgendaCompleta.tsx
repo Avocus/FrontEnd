@@ -109,6 +109,7 @@ export function AgendaCompleta() {
   const [lembrarAntes, setLembrarAntes] = useState(1440) // 24 horas
   const [clienteSelecionado, setClienteSelecionado] = useState<{id: number | string, nome: string} | null>(null)
   const [processoSelecionado, setProcessoSelecionado] = useState<{id: number, titulo: string} | null>(null)
+  const [error, setError] = useState<string>("")
   
   // Estados para modais de busca
   const [showProcessoModal, setShowProcessoModal] = useState(false)
@@ -151,6 +152,7 @@ export function AgendaCompleta() {
     setClienteSelecionado(null)
     setProcessoSelecionado(null)
     setEventoEditando(null)
+    setError("")
   }
 
   const handleOpenDialog = () => {
@@ -186,6 +188,18 @@ export function AgendaCompleta() {
 
   const handleSaveEvent = async () => {
     if (!titulo.trim()) return
+
+    if (selectedEndTime) {
+      const start = new Date(date)
+      start.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0)
+      const end = new Date(date)
+      end.setHours(selectedEndTime.getHours(), selectedEndTime.getMinutes(), 0, 0)
+      if (end <= start) {
+        setError("O horário de término deve ser posterior ao horário de início.")
+        return
+      }
+    }
+    setError("")
 
     const eventDate = new Date(date)
     eventDate.setHours(selectedTime.getHours())
@@ -548,6 +562,8 @@ export function AgendaCompleta() {
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            
             <div className="grid gap-2">
               <Label htmlFor="titulo">Título *</Label>
               <Input
