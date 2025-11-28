@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { getStatusTicketLabel } from '@/types/enums';
 
 const AdvogadoTicketsList: React.FC = () => {
   const { tickets, fetchAssignedTickets, isLoading } = useTickets();
@@ -30,7 +31,7 @@ const AdvogadoTicketsList: React.FC = () => {
               <CardTitle>{ticket.titulo}</CardTitle>
               <div className="flex items-center gap-2">
                 <Badge variant={ticket.status === 'PENDING' ? 'secondary' : ticket.status === 'ASSIGNED' ? 'default' : 'outline'}>
-                  {ticket.status}
+                  {getStatusTicketLabel(ticket.status)}
                 </Badge>
                 <span className="text-sm text-gray-500">
                   Cliente: {ticket.clienteNome}
@@ -39,7 +40,7 @@ const AdvogadoTicketsList: React.FC = () => {
             </CardHeader>
             <CardContent>
               <p className="mb-4">{ticket.descricao}</p>
-              <Link href={`/ticket/${ticket.id}`}>
+              <Link href={`/tickets/${ticket.id}`}>
                 <Button>Ver Detalhes</Button>
               </Link>
             </CardContent>

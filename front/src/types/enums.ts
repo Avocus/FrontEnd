@@ -25,6 +25,13 @@ export enum TipoProcesso {
   OUTROS = 'OUTROS'
 }
 
+export enum StatusTicket {
+  PENDING = 'PENDING',
+  ASSIGNED = 'ASSIGNED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
+}
+
 export enum Especialidade {
   DIREITO_CIVIL = 'DIREITO_CIVIL',
   DIREITO_PENAL = 'DIREITO_PENAL',
@@ -85,4 +92,14 @@ export const getEspecialidadeLabel = (especialidade: Especialidade): string => {
     [Especialidade.DIREITO_IMOBILIARIO]: "Direito Imobiliário"
   }
   return labels[especialidade] || especialidade
+}
+
+export const getStatusTicketLabel = (status: string): string => {
+  const labels: Record<string, string> = {
+    [StatusTicket.PENDING]: 'Pendente',
+    [StatusTicket.ASSIGNED]: 'Atribuído',
+    [StatusTicket.COMPLETED]: 'Concluído',
+    [StatusTicket.CANCELLED]: 'Cancelado'
+  }
+  return labels[status] || status
 }

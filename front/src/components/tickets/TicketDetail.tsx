@@ -6,9 +6,11 @@ import { useMensagens, Mensagem } from '@/hooks/useMensagens';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAuthStore } from '@/store';
 import MensagemList from './MensagemList';
 import MensagemInput from './MensagemInput';
+import { useRouter } from 'next/navigation';
+import { getStatusTicketLabel } from '@/types/enums';
+import { useLayout } from "@/contexts/LayoutContext";
 
 interface TicketDetailProps {
   ticketId: string;
@@ -17,8 +19,10 @@ interface TicketDetailProps {
 const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
   const { fetchTicketDetail, assignTicket, completeTicket, generateProcess, isLoading } = useTickets();
   const { mensagens, fetchMensagens, sendMensagem } = useMensagens();
-  const { user } = useAuthStore();
+  const router = useRouter();
   const [ticket, setTicket] = useState<Ticket | null>(null);
+
+  const { isAdvogado } = useLayout();
 
   useEffect(() => {
     const loadTicket = async () => {
@@ -53,8 +57,9 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
 
   const handleGenerateProcess = async () => {
     try {
-      await generateProcess(ticketId);
-      // Atualizar status ou redirecionar
+      const processoId = await generateProcess(ticketId);
+      // Redirecionar para o processo recém-criado
+      router.push(`/processos/${processoId}`);
     } catch (error) {
       console.error('Erro ao gerar processo:', error);
     }
@@ -72,11 +77,9 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
     return <div>Carregando...</div>;
   }
 
-  const isCliente = user?.client === true;
-  const isAdvogado = user?.client === false;
   const canAssign = isAdvogado && ticket.status === 'PENDING';
-  const canComplete = isCliente && ticket.status === 'ASSIGNED';
-  const canGenerateProcess = isAdvogado && ticket.advogadoResponsavelId === user?.id;
+  const canComplete = !isAdvogado && ticket.status === 'ASSIGNED';
+  const canGenerateProcess = isAdvogado && ticket.status === 'ASSIGNED';
 
   return (
     <div className="space-y-6">
@@ -85,7 +88,7 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
           <CardTitle>{ticket.titulo}</CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant={ticket.status === 'PENDING' ? 'secondary' : ticket.status === 'ASSIGNED' ? 'default' : 'outline'}>
-              {ticket.status}
+              {getStatusTicketLabel(ticket.status)}
             </Badge>
             <span className="text-sm text-gray-500">
               Cliente: {ticket.clienteNome}

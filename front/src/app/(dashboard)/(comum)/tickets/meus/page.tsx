@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store'
 import api from '@/lib/api'
-import { TipoProcesso, getTipoProcessoLabel } from '@/types/enums'
+import { TipoProcesso, getTipoProcessoLabel, getStatusTicketLabel } from '@/types/enums'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ResponseContent } from '@/types/api/responses'
+import Link from 'next/link'
 
 interface Ticket {
   id: number
@@ -52,16 +53,6 @@ export default function MeusTicketsPage() {
     }
   }
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'Pendente'
-      case 'ASSIGNED': return 'Atribuído'
-      case 'COMPLETED': return 'Concluído'
-      case 'CANCELLED': return 'Cancelado'
-      default: return status
-    }
-  }
-
   if (loading) {
     return <div className="flex justify-center items-center h-64">Carregando...</div>
   }
@@ -98,7 +89,7 @@ export default function MeusTicketsPage() {
                         {getTipoProcessoLabel(ticket.tipoProcesso)}
                       </Badge>
                       <Badge className={getStatusColor(ticket.status)}>
-                        {getStatusLabel(ticket.status)}
+                        {getStatusTicketLabel(ticket.status)}
                       </Badge>
                     </div>
                   </div>
@@ -113,12 +104,12 @@ export default function MeusTicketsPage() {
               <CardContent>
                 <p className="text-muted-foreground mb-4">{ticket.descricao}</p>
                 <div className="flex justify-end">
-                  <a
-                    href={`/ticket/${ticket.id}`}
+                  <Link
+                    href={`/tickets/${ticket.id}`}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Ver Detalhes
-                  </a>
+                  </Link>
                 </div>
               </CardContent>
             </Card>

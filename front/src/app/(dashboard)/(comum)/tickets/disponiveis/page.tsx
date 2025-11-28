@@ -6,25 +6,20 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store'
 import { useTickets } from '@/hooks/useTickets'
-import { TipoProcesso, getTipoProcessoLabel } from '@/types/enums'
+import { TipoProcesso, getTipoProcessoLabel, getStatusTicketLabel } from '@/types/enums'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import Link from 'next/link'
 
 import { ResponseContent } from '@/types/api/responses'
 
 export default function TicketsPage() {
-  const { tickets, fetchTickets, fetchAssignedTickets, assignTicket, isLoading } = useTickets()
+  const { tickets, fetchTickets, assignTicket, isLoading } = useTickets()
   const { user } = useAuthStore()
 
   useEffect(() => {
-    if (user?.client === false) {
-      // Advogados veem tickets assigned
-      fetchAssignedTickets()
-    } else {
-      // Clientes veem lista de tickets
-      fetchTickets()
-    }
-  }, [user])
+    fetchTickets()
+  }, [])
 
   const handlePegarTicket = async (ticketId: number) => {
     try {
@@ -44,16 +39,6 @@ export default function TicketsPage() {
     }
   }
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'Pendente'
-      case 'ASSIGNED': return 'Atribuído'
-      case 'COMPLETED': return 'Concluído'
-      case 'CANCELLED': return 'Cancelado'
-      default: return status
-    }
-  }
-
   if (isLoading) {
     return <div className="flex justify-center items-center h-64">Carregando...</div>
   }
@@ -62,7 +47,7 @@ export default function TicketsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">
-          {user?.client === false ? 'Meus Tickets Atribuídos' : 'Meus Tickets'}
+          {user?.client === false ? 'Tickets Disponíveis' : 'Meus Tickets'}
         </h1>
       </div>
 
@@ -72,7 +57,7 @@ export default function TicketsPage() {
             <CardContent className="flex items-center justify-center h-32">
               <p className="text-muted-foreground">
                 {user?.client === false 
-                  ? 'Você ainda não pegou nenhum ticket.' 
+                  ? 'Nenhum ticket disponível no momento.' 
                   : 'Você ainda não criou nenhum ticket.'
                 }
               </p>
@@ -87,10 +72,10 @@ export default function TicketsPage() {
                     <CardTitle className="text-xl">{ticket.titulo}</CardTitle>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
-                        {getTipoProcessoLabel(ticket.tipoProcesso)}
+                        {getTipoProcessoLabel(ticket.tipoProcesso as TipoProcesso)}
                       </Badge>
                       <Badge className={getStatusColor(ticket.status)}>
-                        {getStatusLabel(ticket.status)}
+                        {getStatusTicketLabel(ticket.status)}
                       </Badge>
                     </div>
                   </div>
@@ -103,13 +88,13 @@ export default function TicketsPage() {
               <CardContent>
                 <p className="text-muted-foreground mb-4">{ticket.descricao}</p>
                 <div className="flex justify-end gap-2">
-                  <a
-                    href={`/ticket/${ticket.id}`}
+                  <Link
+                    href={`/tickets/${ticket.id}`}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Ver Detalhes
-                  </a>
-                  {user?.client === true && ticket.status === 'PENDING' && (
+                  </Link>
+                  {ticket.status === 'PENDING' && (
                     <Button
                       onClick={() => handlePegarTicket(ticket.id)}
                       className="bg-green-600 hover:bg-green-700"
@@ -117,7 +102,7 @@ export default function TicketsPage() {
                       Pegar Caso
                     </Button>
                   )}
-                  {user?.client === true && ticket.status === 'ASSIGNED' && (
+                  {ticket.status === 'ASSIGNED' && (
                     <Button variant="outline" disabled>
                       Caso já atribuído
                     </Button>

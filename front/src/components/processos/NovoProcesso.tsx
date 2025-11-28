@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, FileText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +18,30 @@ export default function NovoProcesso() {
   const [previewPayload, setPreviewPayload] = useState<any>(null)
   const { isAdvogado } = useLayout()
   const { user } = useAuthStore()
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("novoProcessoPreview")
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Extract form data from payload
+        const formData: NovoProcessoFormData = {
+          titulo: parsed.titulo || "",
+          tipoProcesso: parsed.tipoProcesso || undefined,
+          descricao: parsed.descricao || "",
+          situacaoAtual: parsed.situacaoAtual || "",
+          objetivos: parsed.objetivos || "",
+          urgencia: parsed.urgencia || undefined,
+          documentosDisponiveis: parsed.documentosDisponiveis || "",
+        }
+        setPreviewData(formData)
+        setPreviewPayload(parsed)
+      }
+    } catch (err) {
+      console.error("Erro ao carregar dados do localStorage:", err)
+    }
+  }, [])
 
   const {
     isLoading,
@@ -64,13 +88,13 @@ export default function NovoProcesso() {
 
   const handleBackToForm = () => {
     setShowPreview(false)
-    setPreviewData(null)
-    setPreviewPayload(null)
   }
 
   const handleSubmitFromPreview = () => {
     if (previewData) {
       onSubmit(previewData)
+      // Clear localStorage after successful submission
+      localStorage.removeItem("novoProcessoPreview")
     }
   }
 
@@ -112,6 +136,7 @@ export default function NovoProcesso() {
 
         <NovoProcessoForm
           onPreview={handlePreview}
+          initialData={previewData}
           clienteSelecionado={clienteSelecionado}
           setClienteSelecionado={setClienteSelecionado}
           advogadoSelecionado={advogadoSelecionado}

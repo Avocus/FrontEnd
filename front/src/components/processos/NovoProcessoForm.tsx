@@ -47,6 +47,7 @@ type NovoProcessoFormData = z.infer<typeof novoProcessoSchema>
 
 interface NovoProcessoFormProps {
   onPreview: (data: NovoProcessoFormData) => void
+  initialData?: NovoProcessoFormData | null
   clienteSelecionado: ClienteLista | null
   setClienteSelecionado: (cliente: ClienteLista | null) => void
   advogadoSelecionado: { id: string; nome: string; email: string; especialidades?: string[]; experiencia?: string } | null
@@ -59,6 +60,7 @@ interface NovoProcessoFormProps {
 
 export default function NovoProcessoForm({
   onPreview,
+  initialData,
   clienteSelecionado,
   setClienteSelecionado,
   advogadoSelecionado,
@@ -81,7 +83,7 @@ export default function NovoProcessoForm({
   } = useForm<NovoProcessoFormData>({
     resolver: zodResolver(novoProcessoSchema),
     mode: "onChange",
-    defaultValues: {
+    defaultValues: initialData || {
       titulo: "",
       tipoProcesso: undefined,
       descricao: "",

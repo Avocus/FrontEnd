@@ -94,7 +94,8 @@ export const useTickets = () => {
   const generateProcess = async (id: string) => {
     setIsLoading(true);
     try {
-      await api.post(TICKET_ROUTES.GENERATE_PROCESS(id));
+      const response = await api.post(TICKET_ROUTES.GENERATE_PROCESS(id)) as { data: { data: number } };
+      return response.data.data;
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Erro ao gerar processo';
       showError(errorMessage);

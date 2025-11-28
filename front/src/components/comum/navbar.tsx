@@ -50,8 +50,8 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
   ];
 
   const handleLogout = useCallback(() => {
-    logout(); // Chama a função de logout do useAuthStore
-    router.push("/login"); // Redireciona para a página de login
+    logout();
+    router.push("/login");
   }, [logout, router]);
 
   const formatName = useCallback((name: string) => {
