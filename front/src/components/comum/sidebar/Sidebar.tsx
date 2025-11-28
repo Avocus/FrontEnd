@@ -96,20 +96,19 @@ export function Sidebar({
     { label: "Chat", icon: <MessageCircle className="h-5 w-5" />, onClick: () => setChatOpen && setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca", icon: <BookOpen className="h-5 w-5" /> },
     { label: "Videoteca", href: "/videoteca", icon: <Video className="h-5 w-5" /> },
-    // Item específico para clientes: Dúvidas (abre a tela de dúvidas)
-    ...(isClient ? [{ label: 'Dúvidas', href: '/duvidas', icon: <FileText className="h-5 w-5" /> }] : []),
   ];
 
   const casosItems: SidebarItemProps[] = [
     { label: "Meus Processos", href: "/processos", icon: <Briefcase className="h-5 w-5" /> },
     ...(isClient ? [
+      { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> },
       { label: "Novo Ticket", href: "/tickets/criar", icon: <FilePlus className="h-5 w-5" /> },
-      { label: "Novo Processo", href: "/processos/novo", icon: <FilePlus className="h-5 w-5" /> }
     ] : [
-      { label: "Tickets Disponíveis", href: "/tickets/disponiveis", icon: <FilePlus className="h-5 w-5" /> }
+      { label: "Tickets Disponíveis", href: "/tickets/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
+      { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> }
     ]),
     { label: "Documentos", href: "/documentos", icon: <FileText className="h-5 w-5" /> , disabled: true },
-    ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}] : [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}])
+    ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}]: [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}]),
   ];
 
   return (

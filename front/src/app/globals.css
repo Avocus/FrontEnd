@@ -267,6 +267,30 @@ body {
     background: rgba(255, 255, 255, 0.2);
   }
 
+  /* Estilo específico para chat de mensagens */
+  .chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .chat-messages::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .chat-messages::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 3px;
+  }
+  
+  .chat-messages::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.7);
+  }
+  
+  .chat-messages {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.5) hsl(var(--muted) / 0.3);
+  }
+
   /* Classes utilitárias para cores do dashboard */
   .bg-dashboard-blue {
     background-color: hsl(var(--dashboard-blue));

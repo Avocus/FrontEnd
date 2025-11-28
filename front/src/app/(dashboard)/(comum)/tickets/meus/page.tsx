@@ -2,35 +2,43 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/store'
-import { useTickets } from '@/hooks/useTickets'
+import api from '@/lib/api'
 import { TipoProcesso, getTipoProcessoLabel } from '@/types/enums'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-
 import { ResponseContent } from '@/types/api/responses'
 
-export default function TicketsPage() {
-  const { tickets, fetchTickets, fetchAssignedTickets, assignTicket, isLoading } = useTickets()
+interface Ticket {
+  id: number
+  titulo: string
+  descricao: string
+  tipoProcesso: TipoProcesso
+  status: string
+  dataSolicitacao: string
+  clienteNome: string
+  advogadoNome?: string
+}
+
+export default function MeusTicketsPage() {
+  const [tickets, setTickets] = useState<Ticket[]>([])
+  const [loading, setLoading] = useState(true)
   const { user } = useAuthStore()
 
   useEffect(() => {
-    if (user?.client === false) {
-      // Advogados veem tickets assigned
-      fetchAssignedTickets()
-    } else {
-      // Clientes veem lista de tickets
-      fetchTickets()
-    }
-  }, [user])
+    loadTickets()
+  }, [])
 
-  const handlePegarTicket = async (ticketId: number) => {
+  const loadTickets = async () => {
     try {
-      await assignTicket(ticketId.toString())
+      const endpoint = user?.client === false ? '/ticket/assigned' : '/ticket'
+      const response = await api.get<ResponseContent<Ticket[]>>(endpoint)
+      setTickets(response.data.data || [])
     } catch (error) {
-      console.error('Erro ao pegar ticket:', error)
+      console.error('Erro ao carregar tickets:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -54,7 +62,7 @@ export default function TicketsPage() {
     }
   }
 
-  if (isLoading) {
+  if (loading) {
     return <div className="flex justify-center items-center h-64">Carregando...</div>
   }
 
@@ -96,32 +104,21 @@ export default function TicketsPage() {
                   </div>
                   <div className="text-right text-sm text-muted-foreground">
                     <p>{format(new Date(ticket.dataSolicitacao), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                    <p>Cliente: {ticket.clienteNome}</p>
+                    {ticket.advogadoNome && (
+                      <p>Advogado: {ticket.advogadoNome}</p>
+                    )}
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground mb-4">{ticket.descricao}</p>
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end">
                   <a
                     href={`/ticket/${ticket.id}`}
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Ver Detalhes
                   </a>
-                  {user?.client === true && ticket.status === 'PENDING' && (
-                    <Button
-                      onClick={() => handlePegarTicket(ticket.id)}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      Pegar Caso
-                    </Button>
-                  )}
-                  {user?.client === true && ticket.status === 'ASSIGNED' && (
-                    <Button variant="outline" disabled>
-                      Caso já atribuído
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>
