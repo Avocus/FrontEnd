@@ -9,6 +9,7 @@ import api from '@/lib/api'
 import { TipoProcesso, getTipoProcessoLabel } from '@/types/enums'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { ResponseContent } from '@/types/api/responses'
 
 interface Ticket {
   id: number
@@ -31,8 +32,8 @@ export default function TicketsPage() {
 
   const loadTickets = async () => {
     try {
-      const response = await api.get('/ticket') as { data: Ticket[] }
-      setTickets(response.data)
+      const response = await api.get<ResponseContent<Ticket[]>>('/ticket')
+      setTickets(response.data.data || [])
     } catch (error) {
       console.error('Erro ao carregar tickets:', error)
     } finally {

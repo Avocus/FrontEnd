@@ -21,9 +21,9 @@ export const useNovoTicket = () => {
         descricao: data.descricao,
       };
 
-      const response = await api.post('/ticket', payload);
+      const response = await api.post('/ticket', payload) as { data: { data: any } };
       success('Ticket criado com sucesso!');
-      return response.data;
+      return response.data.data;
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Erro ao criar ticket';
       showError(errorMessage);
