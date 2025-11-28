@@ -1,4 +1,5 @@
 import api from '@/lib/api';
+import { Especialidade } from '@/types';
 import { PerfilCliente } from '@/types/entities/Cliente';
 import { AdvogadoProfile } from '@/types/entities/Profile';
 
@@ -24,7 +25,7 @@ export interface UserDadosDTO {
     oab: string;
     bio?: string;
     email: string;
-    especialidades?: string[];
+    especialidades?: Especialidade[];
     dataNascimento?: string;
     telefone?: string;
   };

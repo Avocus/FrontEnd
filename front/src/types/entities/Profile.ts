@@ -1,3 +1,4 @@
+import { Especialidade } from '../enums';
 import { Documento } from './Documento';
 import { Processo } from './Processo';
 
@@ -34,7 +35,7 @@ export interface AdvogadoProfile extends BaseProfile {
   faculdade?: string;
   areasAtuacao?: string[];
   avaliacao?: number;
-  especialidades?: string[];
+  especialidades?: Especialidade[];
   custoHora?: number;
 }
 

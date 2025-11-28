@@ -17,7 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import toast from "react-hot-toast";
 import { useProfileStore, useAuthStore } from "@/store";
 import { ClienteProfile, AdvogadoProfile } from "@/types/entities/Profile";
-import { StatusProcesso } from "@/types/enums";
+import { StatusProcesso, getEspecialidadeLabel } from "@/types/enums";
 import { Configs } from "@/components/perfil/configs";
 
 export function DadosUsuario() {
@@ -42,7 +42,7 @@ export function DadosUsuario() {
                     id: perfilData.advogado.id.toString(),
                     userId: perfilData.advogado.id.toString(),
                     nome: perfilData.advogado.nome,
-                    email: perfilData.advogado.email,
+                    email: perfilData.email,
                     telefone: perfilData.advogado.telefone,
                     cpf: perfilData.advogado.cpf,
                     dataNascimento: perfilData.advogado.dataNascimento,
@@ -56,7 +56,18 @@ export function DadosUsuario() {
                 };
                 
                 updateProfileStore(advogadoProfile);
-                // For editing, we might need to adjust the form
+
+                form.reset({
+                    nome: advogadoProfile.nome || "",
+                    email: advogadoProfile.email || "",
+                    telefone: advogadoProfile.telefone || "",
+                    cpf: advogadoProfile.cpf || "",
+                    dataNascimento: advogadoProfile.dataNascimento || "",
+                    endereco: advogadoProfile.endereco || "",
+                    cidade: advogadoProfile.cidade || "",
+                    estado: advogadoProfile.estado || "",
+                    fotoPerfil: undefined
+                });
             } else {
                 // É cliente
                 const clienteProfile: ClienteProfile = {
@@ -253,7 +264,7 @@ export function DadosUsuario() {
                                         <FormLabel>Especialidades</FormLabel>
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {(profile as AdvogadoProfile).especialidades?.map((esp, index) => (
-                                                <Badge key={index} variant="secondary">{esp}</Badge>
+                                                <Badge key={index} variant="secondary">{getEspecialidadeLabel(esp)}</Badge>
                                             )) || <p className="text-muted-foreground">Nenhuma especialidade informada</p>}
                                         </div>
                                     </div>
