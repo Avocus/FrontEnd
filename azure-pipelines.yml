@@ -4,7 +4,7 @@ trigger:
       - main  # Aciona o pipeline quando a branch 'main' for atualizada
 
 pool:
-  name: 'Default'
+  vmImage: 'windows-latest'
 
 steps:
   # 1. Checkout completo da branch main (sem clone superficial)
