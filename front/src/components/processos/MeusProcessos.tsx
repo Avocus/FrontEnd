@@ -9,29 +9,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuthStore } from "@/store"
 import { useLayout } from "@/contexts/LayoutContext"
 import { TipoProcesso, StatusProcesso, getStatusProcessoLabel } from "@/types/enums"
-import { getStatusColor, getStatusIcon, getColumnColor } from "@/utils/processoUtils"
+import { getColumnColor } from "@/utils/processoUtils"
 
 import { 
   Briefcase, 
   Plus, 
-  Clock, 
   AlertCircle, 
-  CheckCircle2, 
   Eye,
   Calendar,
   FileText,
   Search,
-  Play,
-  HelpCircle,
   List,
-  Grid,
-  Pause,
-  X,
-  Check,
-  Send,
-  FileCheck,
-  Gavel,
-  Archive
+  Grid
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProcessoStore } from "@/store"

@@ -21,6 +21,28 @@ export const getEventos = async (): Promise<Evento[]> => {
 };
 
 /**
+ * Busca apenas eventos futuros (dataFim ou dataInicio >= agora)
+ */
+export const getEventosFuturos = async (): Promise<Evento[]> => {
+  try {
+    const eventos = await getEventos();
+    const agora = Date.now();
+
+    const futuros = (eventos || []).filter((e) => {
+      const dataInicio = e.dataInicio;
+      if (!dataInicio) return false;
+      const time = new Date(dataInicio).getTime();
+      return !isNaN(time) && time >= agora;
+    });
+
+    return futuros;
+  } catch (error) {
+    console.error('Erro ao buscar eventos futuros:', error);
+    throw error;
+  }
+};
+
+/**
  * Busca um evento por ID
  */
 export const getEventoById = async (id: number): Promise<Evento> => {
