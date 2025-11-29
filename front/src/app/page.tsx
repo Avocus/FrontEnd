@@ -106,7 +106,7 @@ export default function Home() {
               <Card className="h-full hover:shadow-xl transition-shadow">
                 <CardHeader>
                   <div className="bg-secondary p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                    <feature.icon className="text-aw==secondary-foreground" />
+                    <feature.icon className="text-primary" />
                   </div>
                   <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>

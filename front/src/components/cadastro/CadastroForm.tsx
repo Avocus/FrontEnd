@@ -552,6 +552,7 @@ export function CadastroForm({
                   <Button 
                     type="button" 
                     onClick={handleNext}
+                    variant={"primary"}
                   >
                     Próximo
                     <ChevronRight className="h-4 w-4 ml-2" />

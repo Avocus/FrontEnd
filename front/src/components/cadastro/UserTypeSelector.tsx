@@ -1,5 +1,4 @@
 import { User, Scale, Check } from "lucide-react";
-import { Label } from "@/components/ui/label";
 
 type UserType = "cliente" | "advogado";
 
@@ -11,26 +10,26 @@ interface UserTypeSelectorProps {
 export function UserTypeSelector({ selectedRole, onChange }: UserTypeSelectorProps) {
   return (
     <div className="space-y-2">
-      <Label>Tipo de Usuário</Label>
+      <span className="text-primary-foreground">Tipo de Usuário</span>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
         <div
           className={`relative border-2 rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 ${
             selectedRole === "cliente"
-              ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-lg ring-2 ring-blue-200 dark:ring-blue-700"
-              : "border-border hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10"
+              ? "border-secondary bg-primary shadow-lg ring-2 ring-primary"
+              : "border-border hover:border-secondary"
           }`}
           onClick={() => onChange("cliente")}
         >
           {selectedRole === "cliente" && (
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-              <Check className="h-4 w-4 text-white" />
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-primary">
+              <Check className="h-4 w-4 text-primary" />
             </div>
           )}
           <div
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
               selectedRole === "cliente"
-                ? "bg-blue-600 text-white"
-                : "bg-primary/10 text-primary"
+                ? "bg-secondary text-primary"
+                : "bg-primary text-secondary"
             }`}
           >
             <User className="h-6 w-6" />
@@ -53,21 +52,21 @@ export function UserTypeSelector({ selectedRole, onChange }: UserTypeSelectorPro
         <div
           className={`relative border-2 rounded-lg p-4 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 ${
             selectedRole === "advogado"
-              ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-lg ring-2 ring-blue-200 dark:ring-blue-700"
-              : "border-border hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10"
+              ? "border-secondary bg-primary shadow-lg ring-2 ring-primary"
+              : "border-border hover:border-secondary"
           }`}
           onClick={() => onChange("advogado")}
         >
           {selectedRole === "advogado" && (
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-              <Check className="h-4 w-4 text-white" />
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
+              <Check className="h-4 w-4 text-primary" />
             </div>
           )}
           <div
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
               selectedRole === "advogado"
-                ? "bg-blue-600 text-white"
-                : "bg-primary/10 text-primary"
+                ? "bg-secondary text-primary"
+                : "bg-primary text-secondary"
             }`}
           >
             <Scale className="h-6 w-6" />

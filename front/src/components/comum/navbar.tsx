@@ -138,7 +138,7 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
           <>
             
             {/* Botão de login */}
-            <Button onClick={() => router.push("/login")}>
+            <Button onClick={() => router.push("/login")} variant={"primary"}>
               Entrar
             </Button>
           </>
