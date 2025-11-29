@@ -6,6 +6,7 @@ interface LoginCredentials {
 }
 
 interface LoginResponse {
+  userId: number;
   jwt: string;
   name: string;
   client: boolean;

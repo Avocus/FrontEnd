@@ -473,7 +473,6 @@ export function DadosUsuario() {
                         <Button size="sm" variant="outline" asChild>
                             <Link href="/perfil/editar">Editar Perfil</Link>
                         </Button>
-                        <Button size="sm" variant="outline">Mensagens</Button>
                     </div>
                 </div>
             </CardContent>

@@ -133,24 +133,22 @@ export function Notificacoes({ open, onOpenChange }: NotificacoesProps) {
                                                     {notificacao.mensagem}
                                                 </p>
                                                 
-                                                <div className="flex flex-col sm:flex-row justify-between mt-2 gap-2">
-                                                    {!notificacao.lida ? (
+                                                <div className={`flex items-center mt-2 gap-2 ${!notificacao.lida ? 'justify-between' : 'justify-end'}`}>
+                                                    {!notificacao.lida && (
                                                         <Button 
                                                             variant="ghost" 
                                                             size="sm" 
                                                             onClick={() => markAsRead(notificacao.id)}
-                                                            className="h-8 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 sm:w-auto"
+                                                            className="h-8 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2"
                                                         >
                                                             Marcar como lida
                                                         </Button>
-                                                    ) : (
-                                                        <div></div>
                                                     )}
                                                     <Button 
                                                         variant="ghost" 
                                                         size="sm" 
                                                         onClick={() => removeNotification(notificacao.id)}
-                                                        className="h-8 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2 sm:w-auto"
+                                                        className="h-8 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2"
                                                     >
                                                         Remover
                                                     </Button>

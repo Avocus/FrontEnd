@@ -5,7 +5,6 @@ import { Bell } from "lucide-react";
 import { useState, memo, useCallback } from "react";
 import { ChatAvocuss } from "./chatAvocuss"; // Importação do ChatAvocuss
 import { Notificacoes } from "./notificacoes";
-import { NotificationButton } from "./NotificationButton"; // Importação do NotificationButton
 import { useNotificationStore, useAuthStore } from "@/store";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -105,9 +104,6 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
           <>
             {/* Toggle de tema */}
             <ThemeToggle />
-            
-            {/* Botão de demonstração de notificações */}
-            <NotificationButton />
             
             {/* Ícone de notificações */}
             <div className="relative">

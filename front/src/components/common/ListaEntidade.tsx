@@ -123,11 +123,6 @@ function ListaEntidadeComponent<T extends EntityItem>({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge
-                    variant={item.status === "ativo" ? "default" : "secondary"}
-                  >
-                    {item.status === "ativo" ? "Ativo" : item.status === "pendente" ? "Pendente" : "Inativo"}
-                  </Badge>
                   {onDetailsClick && (
                     <Button variant="outline" size="sm" onClick={() => onDetailsClick(item)}>
                       {detailsButtonText}

@@ -12,4 +12,6 @@ export {
   useProcessosPorStatus,
   useProcessoClientePorId,
   useProcessoAdvogadoPorId
-} from './useProcessoStore'; 
+} from './useProcessoStore';
+export { useDocumentoStore } from './useDocumentoStore';
+export { useDadoRequisitadoStore } from './useDadoRequisitadoStore'; 

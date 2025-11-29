@@ -14,4 +14,5 @@ export * from './Prazo';
 export * from './Processo';
 export * from './Profile';
 export * from './Role';
-export * from './User'; 
+export * from './User';
+export * from './DadoRequisitado'; 

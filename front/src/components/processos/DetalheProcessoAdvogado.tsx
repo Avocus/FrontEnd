@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,8 +20,12 @@ import { useTimeline } from "@/hooks/useTimeline";
 import { VisaoGeralComponent } from "./shared/VisaoGeralComponent";
 import { DocumentosComponent } from "./shared/DocumentosComponent";
 import { TimelineComponent } from "./shared/TimelineComponent";
+import { SolicitarDocumentoModal } from "./SolicitarDocumentoModal";
 import { EventosComponent } from "./shared/EventosComponent";
 import Chat from "./shared/Chat";
+import { DadosRequisitadosList } from "./DadosRequisitadosList";
+import { DocumentosList } from "./DocumentosList";
+import { UploadDocumentoButton } from "./UploadDocumentoButton";
 
 // Utilitários
 import { getStatusLabel, getStatusBadgeVariant } from "@/utils/processoUtils";
@@ -38,6 +43,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
 
   // Hook para timeline
   const { addTimelineEntry } = useTimeline();
+  const [modalSolicitarAberto, setModalSolicitarAberto] = useState(false);
 
   const solicitarDocumentos = () => {
     if (!processo) return;
@@ -242,7 +248,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
       {/* Botões de ação */}
       <div className={`mb-6 flex gap-4 flex-wrap`}>
         <Button
-          onClick={solicitarDocumentos}
+          onClick={() => setModalSolicitarAberto(true)}
           disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
           className="flex items-center gap-2"
           variant="outline"
@@ -296,8 +302,46 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           <VisaoGeralComponent processo={processo} isAdvogado={true} />
         </TabsContent>
 
-        <TabsContent value="documents" className="space-y-4">
-          <DocumentosComponent processo={processo} processoId={processoId} isAdvogado={true} />
+        <TabsContent value="documents" className="space-y-6">
+          {/* Seção de Solicitações de Documentos */}
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Documentos Solicitados ao Cliente</h3>
+            </div>
+            <DadosRequisitadosList
+              processoId={processoId}
+              clienteId={processo.cliente.id}
+              isAdvogado={true}
+            />
+          </div>
+
+          {/* Seção de Todos os Documentos */}
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Todos os Documentos</h3>
+            </div>
+            <DocumentosList
+              processoId={processoId}
+              isAdvogado={true}
+            />
+          </div>
+
+          {/* Seção de Upload Livre (Advogado) */}
+          <div className="border rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-4">Upload de Documento</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Envie documentos adicionais relacionados ao processo sem vinculá-los a uma solicitação específica.
+            </p>
+            <UploadDocumentoButton
+              processoId={processoId}
+              clienteId={processo.cliente.id}
+              enviadoPorAdvogado={true}
+              onUploadComplete={() => {
+                // Recarregar documentos após upload
+                window.location.reload();
+              }}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="timeline" className="space-y-4">
@@ -336,6 +380,14 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Modal de Solicitação de Documentos */}
+      <SolicitarDocumentoModal
+        open={modalSolicitarAberto}
+        onOpenChange={setModalSolicitarAberto}
+        processoId={processoId}
+        clienteId={processo.cliente.id}
+      />
     </div>
   );
 }

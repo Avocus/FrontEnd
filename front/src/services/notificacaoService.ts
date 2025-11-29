@@ -1,99 +1,56 @@
-import { Evento } from '@/types';
-import { useAgendaStore } from '@/store/useAgendaStore';
+import api from '@/lib/api';
+import { Notificacao, NotificacaoTipo } from '@/types';
 
-export const verificarNotificacoes = async (): Promise<void> => {
-  try {
-    // Buscar eventos da store
-    const { eventos } = useAgendaStore.getState();
+export const notificacaoService = {
+  async listar(): Promise<{ data: Notificacao[] }> {
+    console.log('📡 Buscando notificações do backend...');
+    const response = await api.get<{ data: any[] }>('/notificacao');
+    console.log('✅ Notificações recebidas:', response.data);
+    
+    // Mapear os dados do backend para o formato do frontend
+    const notificacoes: Notificacao[] = response.data.data.map((n: any) => ({
+      id: n.id.toString(),
+      titulo: n.titulo,
+      mensagem: n.mensagem,
+      tipo: n.tipo as NotificacaoTipo,
+      dataHora: n.dataHora,
+      lida: n.lida,
+      link: n.link
+    }));
 
-    const eventosParaNotificar = getEventosParaNotificar(eventos);
+    return { data: notificacoes };
+  },
 
-    for (const evento of eventosParaNotificar) {
-      await enviarNotificacao(evento);
-    }
-  } catch (error) {
-    console.error('Erro ao verificar notificações:', error);
-  }
-};
+  async listarNaoLidas(): Promise<{ data: Notificacao[] }> {
+    const response = await api.get<{ data: any[] }>('/notificacao/nao-lidas');
+    
+    const notificacoes: Notificacao[] = response.data.data.map((n: any) => ({
+      id: n.id.toString(),
+      titulo: n.titulo,
+      mensagem: n.mensagem,
+      tipo: n.tipo as NotificacaoTipo,
+      dataHora: n.dataHora,
+      lida: n.lida,
+      link: n.link
+    }));
 
-/**
- * Filtra eventos que precisam de notificação
- */
-const getEventosParaNotificar = (eventos: Evento[]): Evento[] => {
-  const agora = new Date();
+    return { data: notificacoes };
+  },
 
-  return eventos.filter(evento => {
-    if (!evento.notificarPorEmail) {
-      return false;
-    }
+  async contarNaoLidas(): Promise<number> {
+    const response = await api.get<{ data: number }>('/notificacao/contador-nao-lidas');
+    return response.data.data;
+  },
 
-    const dataEvento = new Date(evento.dataInicio);
-    const minutosAntes = evento.diasLembrarAntes * 24 * 60; // converter dias para minutos
-    const dataNotificacao = new Date(dataEvento);
-    dataNotificacao.setMinutes(dataNotificacao.getMinutes() - minutosAntes);
+  async marcarComoLida(id: string): Promise<void> {
+    await api.patch(`/notificacao/${id}/marcar-lida`);
+  },
 
-    return dataNotificacao <= agora && dataEvento > agora;
-  });
-};
+  async marcarTodasComoLidas(): Promise<void> {
+    await api.patch('/notificacao/marcar-todas-lidas');
+  },
 
-const enviarNotificacao = async (evento: Evento): Promise<void> => {
-  try {
-    const emailUsuario = 'mateus.asfonseca@gmail.com'; // TODO - ajustar
-
-    const response = await fetch('/api/agenda/notificacao-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        para: emailUsuario,
-        titulo: evento.titulo,
-        dataEvento: evento.dataInicio,
-        descricao: evento.descricao,
-        localizacao: evento.local,
-      }),
-    });
-
-    if (response.ok) {
-      // Marcar como notificado na store
-      // marcarComoNotificado(evento.id.toString());
-      console.log(`✅ Notificação enviada para evento: ${evento.titulo}`);
-    } else {
-      const errorData = await response.json();
-      console.error(`❌ Erro ao enviar notificação para evento: ${evento.titulo}`, errorData);
-    }
-  } catch (error) {
-    console.error('Erro ao enviar notificação:', error);
-  }
-};
-
-const marcarComoNotificado = (eventoId: string): void => {
-  try {
-    // useAgendaStore.getState().marcarEmailNotificado(eventoId);
-  } catch (error) {
-    console.error('Erro ao marcar evento como notificado:', error);
-  }
-};
-
-export const enviarNotificacaoManual = async (evento: Evento, email: string): Promise<boolean> => {
-  try {
-    const response = await fetch('/api/agenda/notificacao-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        para: email,
-        titulo: evento.titulo,
-        dataEvento: evento.dataInicio,
-        descricao: evento.descricao,
-        localizacao: evento.local,
-      }),
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error('Erro ao enviar notificação manual:', error);
-    return false;
+  async excluir(id: string): Promise<void> {
+    await api.delete(`/notificacao/${id}`);
   }
 };
