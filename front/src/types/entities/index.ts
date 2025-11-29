@@ -11,7 +11,7 @@ export * from './Evento';
 export * from './Mensagem';
 export * from './Notificacao';
 export * from './Prazo';
-export * from './Processo';
+export type { Processo, ProcessoDTO, ClienteDTO, AdvogadoDTO, StatusUpdateDTO, ProcessoCliente, TimelineEntry, ProcessoStatus } from './Processo';
 export * from './Profile';
 export * from './Role';
 export * from './User';

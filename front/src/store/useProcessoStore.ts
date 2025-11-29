@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { ProcessoCliente, ProcessoAdvogado } from '@/types/entities';
+import { ProcessoCliente, ProcessoAdvogado, TimelineEntry } from '@/types/entities';
 import { listarProcessos, buscarProcessoPorId } from '@/services/processo/processoService';
 import { StatusProcesso } from '@/types/enums';
 
@@ -27,7 +27,7 @@ interface ProcessoState {
 
 }
 
-export const useProcessoStore = create<ProcessoState>()(
+const useProcessoStoreBase = create<ProcessoState>()(
   devtools(
     persist(
       (set) => ({
@@ -51,7 +51,9 @@ export const useProcessoStore = create<ProcessoState>()(
               objetivos: '',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
-              motivoRejeicao: undefined
+              motivoRejeicao: undefined,
+              timeline: [],
+              eventos: []
             }));
             set({ processosCliente });
           } catch (error) {
@@ -71,11 +73,22 @@ export const useProcessoStore = create<ProcessoState>()(
               situacaoAtual: processo.status,
               dataSolicitacao: processo.dataAbertura,
               urgencia: processo.urgencia,
+              // Mapear linhaDoTempo para timeline
+              timeline: processo.linhaDoTempo ? processo.linhaDoTempo.map(update => ({
+                id: update.id.toString(),
+                data: update.dataAtualizacao,
+                statusAnterior: update.statusAnterior,
+                novoStatus: update.novoStatus,
+                descricao: update.descricao,
+                autor: "sistema" as const, // Por enquanto, definir como sistema
+                observacoes: undefined
+              })) : [],
               // Campos que existem no frontend mas não no backend
               objetivos: '',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
-              motivoRejeicao: undefined
+              motivoRejeicao: undefined,
+              eventos: []
             };
 
             // Adicionar à store
@@ -118,7 +131,9 @@ export const useProcessoStore = create<ProcessoState>()(
               objetivos: '',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
-              motivoRejeicao: undefined
+              motivoRejeicao: undefined,
+              timeline: [],
+              eventos: []
             }));
             set({ processosAdvogado });
           } catch (error) {
@@ -145,11 +160,22 @@ export const useProcessoStore = create<ProcessoState>()(
               dataAceite: processo.dataAbertura,
               advogado: processo.advogado,
               urgencia: processo.urgencia,
+              // Mapear linhaDoTempo para timeline
+              timeline: processo.linhaDoTempo ? processo.linhaDoTempo.map(update => ({
+                id: update.id.toString(),
+                data: update.dataAtualizacao,
+                statusAnterior: update.statusAnterior,
+                novoStatus: update.novoStatus,
+                descricao: update.descricao,
+                autor: "sistema" as const, // Por enquanto, definir como sistema
+                observacoes: undefined
+              })) : [],
               // Campos que existem no frontend mas não no backend
               objetivos: '',
               documentosDisponiveis: undefined,
               documentosAnexados: [],
-              motivoRejeicao: undefined
+              motivoRejeicao: undefined,
+              eventos: []
             };
 
             // Adicionar à store
@@ -209,24 +235,27 @@ export const useProcessoStore = create<ProcessoState>()(
 
 // Selectors otimizados para performance
 export const useProcessosClientePendentes = () => 
-  useProcessoStore((state) => state.processosCliente.filter(processo => processo.status === StatusProcesso.PENDENTE));
+  useProcessoStoreBase((state) => state.processosCliente.filter(processo => processo.status === StatusProcesso.PENDENTE));
 
 export const useProcessosAdvogadoAtivos = () => 
-  useProcessoStore((state) => state.processosAdvogado.filter(processo => 
+  useProcessoStoreBase((state) => state.processosAdvogado.filter(processo => 
     processo.status === StatusProcesso.ACEITO || processo.status === StatusProcesso.EM_ANDAMENTO || processo.status === StatusProcesso.AGUARDANDO_DADOS
   ));
 
 export const useTotalProcessosCliente = () => 
-  useProcessoStore((state) => state.processosCliente.length);
+  useProcessoStoreBase((state) => state.processosCliente.length);
 
 export const useTotalProcessosAdvogado = () => 
-  useProcessoStore((state) => state.processosAdvogado.length);
+  useProcessoStoreBase((state) => state.processosAdvogado.length);
 
 export const useProcessosPorStatus = (status: ProcessoCliente['status']) => 
-  useProcessoStore((state) => state.processosCliente.filter(processo => processo.status === status));
+  useProcessoStoreBase((state) => state.processosCliente.filter(processo => processo.status === status));
 
 export const useProcessoClientePorId = (id: string) => 
-  useProcessoStore((state) => state.processosCliente.find(processo => processo.id === id));
+  useProcessoStoreBase((state) => state.processosCliente.find(processo => processo.id === id));
 
 export const useProcessoAdvogadoPorId = (id: string) => 
-  useProcessoStore((state) => state.processosAdvogado.find(processo => processo.id === id));
+  useProcessoStoreBase((state) => state.processosAdvogado.find(processo => processo.id === id));
+
+// Export the main store
+export const useProcessoStore = useProcessoStoreBase;

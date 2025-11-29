@@ -10,12 +10,15 @@ interface DocumentosListProps {
   clienteId?: number;
   isAdvogado?: boolean;
   onDelete?: (documentoId: string) => void;
+  onStatusChange?: () => void;
 }
 
 export function DocumentosList({
   processoId,
   clienteId,
   isAdvogado = false,
+  onDelete,
+  onStatusChange,
 }: DocumentosListProps) {
   const { documentosPorProcesso, isLoading, loadDocumentos, downloadDocumento, deleteDocumento } = useDocumentoStore();
 

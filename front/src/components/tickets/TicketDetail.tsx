@@ -10,6 +10,7 @@ import MensagemList from './MensagemList';
 import MensagemInput from './MensagemInput';
 import { useRouter } from 'next/navigation';
 import { getStatusTicketLabel } from '@/types/enums';
+import { useAuthStore } from '@/store';
 import { useLayout } from "@/contexts/LayoutContext";
 
 interface TicketDetailProps {
@@ -18,10 +19,11 @@ interface TicketDetailProps {
 
 const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
   const { fetchTicketDetail, assignTicket, completeTicket, generateProcess, isLoading } = useTickets();
-  const { mensagens, fetchMensagens, sendMensagem } = useMensagens();
+  const { mensagens, fetchMensagens, sendMensagem } = useMensagens(ticketId);
   const router = useRouter();
   const [ticket, setTicket] = useState<Ticket | null>(null);
 
+  const { user } = useAuthStore();
   const { isAdvogado } = useLayout();
 
   useEffect(() => {
@@ -67,7 +69,12 @@ const TicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
 
   const handleSendMessage = async (conteudo: string) => {
     try {
-      await sendMensagem(ticketId, { conteudo });
+      const messageData = {
+        ticketId: parseInt(ticketId),
+        mensagem: conteudo,
+        ...(isAdvogado ? { advogadoId: parseInt(user?.id || '0') } : { clienteId: parseInt(user?.id || '0') })
+      };
+      await sendMensagem(ticketId, messageData);
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
     }

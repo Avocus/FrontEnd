@@ -131,8 +131,8 @@ export const getColumnColor = (status: string) => {
 
 // Função utilitária para adicionar entrada no timeline
 export const addTimelineEntry = (
-  statusAnterior: string | undefined,
-  novoStatus: string,
+  statusAnterior: StatusProcesso | undefined,
+  novoStatus: StatusProcesso,
   descricao: string,
   autor: "cliente" | "advogado" | "sistema",
   observacoes?: string

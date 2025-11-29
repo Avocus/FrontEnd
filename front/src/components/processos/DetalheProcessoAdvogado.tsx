@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/useToast";
 import { useProcessoStore } from "@/store";
@@ -26,9 +25,10 @@ import Chat from "./shared/Chat";
 import { DadosRequisitadosList } from "./DadosRequisitadosList";
 import { DocumentosList } from "./DocumentosList";
 import { UploadDocumentoButton } from "./UploadDocumentoButton";
+import { StatusBadge } from "./shared/StatusBadge";
 
 // Utilitários
-import { getStatusLabel, getStatusBadgeVariant } from "@/utils/processoUtils";
+import { getStatusLabel } from "@/utils/processoUtils";
 
 interface DetalheProcessoAdvogadoProps {
   processoId: string;
@@ -39,7 +39,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
   const { atualizarProcessoCliente, atualizarProcessoAdvogado } = useProcessoStore();
 
   // Usar hook customizado para carregar detalhes do processo
-  const { processo, setProcesso, loading } = useProcessoDetalhes({ processoId, isAdvogado: true });
+  const { processo, setProcesso, loading, refetch } = useProcessoDetalhes({ processoId, isAdvogado: true });
 
   // Hook para timeline
   const { addTimelineEntry } = useTimeline();
@@ -51,8 +51,8 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     try {
       // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        "aceito", // status atual do processo cliente
-        "aguardando_documentos",
+        StatusProcesso.ACEITO, // status atual do processo cliente
+        StatusProcesso.AGUARDANDO_DADOS,
         `Advogado solicitou documentos adicionais`,
         "advogado",
         `Solicitação feita pelo advogado ${processo.advogado?.nome}`
@@ -93,8 +93,8 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     try {
       // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        "aguardando_analise_documentos",
-        "em_andamento",
+        StatusProcesso.AGUARDANDO_ANALISE_DADOS,
+        StatusProcesso.EM_ANDAMENTO,
         `Documentos aprovados pelo advogado`,
         "advogado",
         `Advogado ${processo.advogado?.nome} aprovou os documentos enviados`
@@ -135,8 +135,8 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     try {
       // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        "aguardando_analise_documentos",
-        "aguardando_documentos",
+        StatusProcesso.AGUARDANDO_ANALISE_DADOS,
+        StatusProcesso.AGUARDANDO_DADOS,
         `Documentos rejeitados pelo advogado`,
         "advogado",
         `Advogado ${processo.advogado?.nome} rejeitou os documentos. Novos documentos são necessários.`
@@ -178,7 +178,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
       // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
         processo.status,
-        "protocolado",
+        StatusProcesso.PROTOCOLADO,
         `Processo protocolado no fórum`,
         "advogado",
         `Advogado ${processo.advogado?.nome} protocolou o processo no fórum competente`
@@ -240,9 +240,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           <p className="text-muted-foreground">Cliente: {processo.cliente.nome}</p>
           <p className="text-muted-foreground">Advogado: {processo.advogado?.nome}</p>
         </div>
-        <Badge variant={getStatusBadgeVariant(processo.status)}>
-          {getStatusLabel(processo.status)}
-        </Badge>
+        <StatusBadge status={processo.status} isAdvogado={true} />
       </div>
 
       {/* Botões de ação */}
@@ -312,6 +310,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
               processoId={processoId}
               clienteId={processo.cliente.id}
               isAdvogado={true}
+              onStatusChange={refetch}
             />
           </div>
 
@@ -323,6 +322,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
             <DocumentosList
               processoId={processoId}
               isAdvogado={true}
+              onStatusChange={refetch}
             />
           </div>
 
@@ -387,6 +387,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
         onOpenChange={setModalSolicitarAberto}
         processoId={processoId}
         clienteId={processo.cliente.id}
+        onStatusChange={refetch}
       />
     </div>
   );

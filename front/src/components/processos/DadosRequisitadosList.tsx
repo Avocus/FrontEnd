@@ -17,6 +17,7 @@ interface DadosRequisitadosListProps {
   processoId: string;
   clienteId: number;
   isAdvogado?: boolean;
+  onStatusChange?: () => void;
 }
 
 const TIPO_ICONS: Record<TipoDado, string> = {
@@ -39,6 +40,7 @@ export function DadosRequisitadosList({
   processoId,
   clienteId,
   isAdvogado = false,
+  onStatusChange,
 }: DadosRequisitadosListProps) {
   const { dadosPorProcesso, isLoading, loadDadosRequisitados } = useDadoRequisitadoStore();
 
@@ -67,6 +69,7 @@ export function DadosRequisitadosList({
   const handleUploadComplete = () => {
     setUploadingDadoId(null);
     loadDadosRequisitados(processoId);
+    onStatusChange?.();
   };
 
   if (isLoading) {

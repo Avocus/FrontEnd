@@ -15,6 +15,7 @@ interface SolicitarDocumentoModalProps {
   onOpenChange: (open: boolean) => void;
   processoId: string;
   clienteId: number;
+  onStatusChange?: () => void;
 }
 
 export function SolicitarDocumentoModal({
@@ -22,6 +23,7 @@ export function SolicitarDocumentoModal({
   onOpenChange,
   processoId,
   clienteId,
+  onStatusChange,
 }: SolicitarDocumentoModalProps) {
   const { criarSolicitacao, isLoading } = useDadoRequisitadoStore();
   const { success, error: showError } = useToast();
@@ -63,6 +65,7 @@ export function SolicitarDocumentoModal({
         observacoes: '',
       });
 
+      onStatusChange?.();
       onOpenChange(false);
     } catch (err) {
       showError('Erro ao enviar solicitação. Tente novamente.');
