@@ -4,7 +4,7 @@ trigger:
       - main  # Aciona o pipeline quando a branch 'main' for atualizada
 
 pool:
-  vmImage: 'windows-latest'
+  name: 'Azure Pipelines'
 
 steps:
   # 1. Checkout completo da branch main (sem clone superficial)
