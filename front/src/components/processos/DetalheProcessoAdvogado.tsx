@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from "@/hooks/useToast";
 import { useProcessoStore } from "@/store";
 import { ProcessoAdvogado } from "@/types/entities";
-import { StatusProcesso } from "@/types/enums";
+import { getStatusProcessoLabel, StatusProcesso } from "@/types/enums";
 import { FileText, Send } from "lucide-react";
 import Link from "next/link";
 
@@ -19,11 +21,16 @@ import { useTimeline } from "@/hooks/useTimeline";
 import { VisaoGeralComponent } from "./shared/VisaoGeralComponent";
 import { DocumentosComponent } from "./shared/DocumentosComponent";
 import { TimelineComponent } from "./shared/TimelineComponent";
+import { SolicitarDocumentoModal } from "./SolicitarDocumentoModal";
 import { EventosComponent } from "./shared/EventosComponent";
 import Chat from "./shared/Chat";
+import { DadosRequisitadosList } from "./DadosRequisitadosList";
+import { DocumentosList } from "./DocumentosList";
+import { UploadDocumentoButton } from "./UploadDocumentoButton";
+import { StatusBadge } from "./shared/StatusBadge";
 
 // Utilitários
-import { getStatusLabel, getStatusBadgeVariant } from "@/utils/processoUtils";
+import { getStatusLabel } from "@/utils/processoUtils";
 
 interface DetalheProcessoAdvogadoProps {
   processoId: string;
@@ -34,10 +41,11 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
   const { atualizarProcessoCliente, atualizarProcessoAdvogado } = useProcessoStore();
 
   // Usar hook customizado para carregar detalhes do processo
-  const { processo, setProcesso, loading } = useProcessoDetalhes({ processoId, isAdvogado: true });
+  const { processo, setProcesso, loading, refetch } = useProcessoDetalhes({ processoId, isAdvogado: true });
 
   // Hook para timeline
   const { addTimelineEntry } = useTimeline();
+  const [modalSolicitarAberto, setModalSolicitarAberto] = useState(false);
 
   const solicitarDocumentos = () => {
     if (!processo) return;
@@ -45,8 +53,8 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     try {
       // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        "aceito", // status atual do processo cliente
-        "aguardando_documentos",
+        StatusProcesso.ACEITO, // status atual do processo cliente
+        StatusProcesso.AGUARDANDO_DADOS,
         `Advogado solicitou documentos adicionais`,
         "advogado",
         `Solicitação feita pelo advogado ${processo.advogado?.nome}`
@@ -87,8 +95,8 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     try {
       // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        "aguardando_analise_documentos",
-        "em_andamento",
+        StatusProcesso.AGUARDANDO_ANALISE_DADOS,
+        StatusProcesso.EM_ANDAMENTO,
         `Documentos aprovados pelo advogado`,
         "advogado",
         `Advogado ${processo.advogado?.nome} aprovou os documentos enviados`
@@ -129,8 +137,8 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     try {
       // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
-        "aguardando_analise_documentos",
-        "aguardando_documentos",
+        StatusProcesso.AGUARDANDO_ANALISE_DADOS,
+        StatusProcesso.AGUARDANDO_DADOS,
         `Documentos rejeitados pelo advogado`,
         "advogado",
         `Advogado ${processo.advogado?.nome} rejeitou os documentos. Novos documentos são necessários.`
@@ -166,44 +174,56 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
   };
 
   const protocolarProcesso = () => {
+    // agora abrimos modal de seleção de status (implementado abaixo)
+    setStatusModalOpen(true);
+  };
+
+  // Modal e lógica para seleção de status
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<StatusProcesso | null>(null);
+
+  const possibleStatuses: StatusProcesso[] = Object.values(StatusProcesso).filter(
+    (s) => s !== processo?.status
+  ) as StatusProcesso[];
+
+  const performStatusChange = (newStatus: StatusProcesso) => {
     if (!processo) return;
 
     try {
-      // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
         processo.status,
-        "protocolado",
-        `Processo protocolado no fórum`,
+        newStatus,
+        `Status alterado para ${getStatusProcessoLabel(newStatus)}`,
         "advogado",
-        `Advogado ${processo.advogado?.nome} protocolou o processo no fórum competente`
+        `Advogado ${processo.advogado?.nome} mudou o status para ${newStatus}`
       );
 
       atualizarProcessoCliente(processo.id, {
-        status: StatusProcesso.PROTOCOLADO,
+        status: newStatus,
         timeline: [...(processo.timeline || []), timelineEntryCliente]
       });
 
-      // Atualizar o processo do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
         processo.status,
-        StatusProcesso.PROTOCOLADO,
-        `Processo protocolado`,
+        newStatus,
+        `Status alterado para ${newStatus}`,
         "advogado",
-        `Processo foi protocolado no fórum competente`
+        `Status atualizado para ${newStatus}`
       );
 
       atualizarProcessoAdvogado(processo.id, {
-        status: StatusProcesso.PROTOCOLADO,
+        status: newStatus,
         timeline: [...(processo.timeline || []), timelineEntryAdvogado]
       });
 
-      // Atualizar o estado local
-      setProcesso({ ...processo, status: StatusProcesso.PROTOCOLADO });
+      setProcesso({ ...processo, status: newStatus });
+      setStatusModalOpen(false);
+      setSelectedStatus(null);
 
-      success("Processo protocolado com sucesso!");
+      success(`Status alterado para ${getStatusProcessoLabel(newStatus)} com sucesso!`);
     } catch (err) {
-      console.error("Erro ao protocolar processo:", err);
-      error("Erro ao protocolar processo. Tente novamente.");
+      console.error("Erro ao alterar status:", err);
+      error("Erro ao alterar status. Tente novamente.");
     }
   };
 
@@ -234,15 +254,13 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           <p className="text-muted-foreground">Cliente: {processo.cliente.nome}</p>
           <p className="text-muted-foreground">Advogado: {processo.advogado?.nome}</p>
         </div>
-        <Badge variant={getStatusBadgeVariant(processo.status)}>
-          {getStatusLabel(processo.status)}
-        </Badge>
+        <StatusBadge status={processo.status} isAdvogado={true} />
       </div>
 
       {/* Botões de ação */}
       <div className={`mb-6 flex gap-4 flex-wrap`}>
         <Button
-          onClick={solicitarDocumentos}
+          onClick={() => setModalSolicitarAberto(true)}
           disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
           className="flex items-center gap-2"
           variant="outline"
@@ -275,10 +293,10 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
         <Button
           onClick={protocolarProcesso}
           disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-          className="flex items-center gap-2"
+          variant="primary" size="sm" className="bg-primary hover:bg-secondary"
         >
           <Send className="h-4 w-4" />
-          Protocolar Processo
+          Trocar Status do Processo
         </Button>
       </div>
 
@@ -296,8 +314,48 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           <VisaoGeralComponent processo={processo} isAdvogado={true} />
         </TabsContent>
 
-        <TabsContent value="documents" className="space-y-4">
-          <DocumentosComponent processo={processo} processoId={processoId} isAdvogado={true} />
+        <TabsContent value="documents" className="space-y-6">
+          {/* Seção de Solicitações de Documentos */}
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Documentos Solicitados ao Cliente</h3>
+            </div>
+            <DadosRequisitadosList
+              processoId={processoId}
+              clienteId={processo.cliente.id}
+              isAdvogado={true}
+              onStatusChange={refetch}
+            />
+          </div>
+
+          {/* Seção de Todos os Documentos */}
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Todos os Documentos</h3>
+            </div>
+            <DocumentosList
+              processoId={processoId}
+              isAdvogado={true}
+              onStatusChange={refetch}
+            />
+          </div>
+
+          {/* Seção de Upload Livre (Advogado) */}
+          <div className="border rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-4">Upload de Documento</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Envie documentos adicionais relacionados ao processo sem vinculá-los a uma solicitação específica.
+            </p>
+            <UploadDocumentoButton
+              processoId={processoId}
+              clienteId={processo.cliente.id}
+              enviadoPorAdvogado={true}
+              onUploadComplete={() => {
+                // Recarregar documentos após upload
+                window.location.reload();
+              }}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="timeline" className="space-y-4">
@@ -336,6 +394,50 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           </div>
         </TabsContent>
       </Tabs>
+      {/* Modal de seleção de status (avançar/mudar status do processo) */}
+      <Dialog open={statusModalOpen} onOpenChange={(open) => { setStatusModalOpen(open); if (open) setSelectedStatus(possibleStatuses[0] || null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Alterar status do processo</DialogTitle>
+            <DialogDescription>
+              Selecione o novo status para o processo. Isso criará um novo registro na timeline e notificará as partes conforme configurado.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">Status atual: <strong>{getStatusProcessoLabel(processo.status)}</strong></p>
+
+            <Select value={selectedStatus ?? undefined} onValueChange={(value) => setSelectedStatus(value as StatusProcesso)}>
+              <SelectTrigger>
+                <SelectValue>{selectedStatus ? getStatusProcessoLabel(selectedStatus) : 'Escolha um status'}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {possibleStatuses.map((s) => (
+                  <SelectItem key={s} value={s}>{getStatusProcessoLabel(s)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setStatusModalOpen(false); setSelectedStatus(null); }}>
+              Cancelar
+            </Button>
+            <Button onClick={() => selectedStatus && performStatusChange(selectedStatus)} disabled={!selectedStatus}>
+              Confirmar alteração
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Solicitação de Documentos */}
+      <SolicitarDocumentoModal
+        open={modalSolicitarAberto}
+        onOpenChange={setModalSolicitarAberto}
+        processoId={processoId}
+        clienteId={processo.cliente.id}
+        onStatusChange={refetch}
+      />
     </div>
   );
 }

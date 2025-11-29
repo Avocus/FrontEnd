@@ -1,5 +1,5 @@
 import { ProcessoCliente, ProcessoAdvogado } from "@/types/entities";
-import { StatusProcesso } from "@/types/enums";
+import { getStatusProcessoLabel, StatusProcesso } from "@/types/enums";
 
 interface VisaoGeralComponentProps {
   processo: ProcessoCliente | ProcessoAdvogado;
@@ -85,21 +85,21 @@ export function VisaoGeralComponent({ processo, isAdvogado }: VisaoGeralComponen
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="border rounded-lg p-4">
           <h2 className="text-xl font-semibold mb-2">Informações do Processo</h2>
-          <div className="space-y-2">
-            <p><span className="font-medium">Status:</span> {processo.status}</p>
-            <p><span className="font-medium">Data de Solicitação:</span> {new Date(processo.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
+          <div className="space-y-2 text-muted-foreground">
+            <p><span className="font-medium text-foreground">Status:</span> {getStatusProcessoLabel(processo.status)}</p>
+            <p><span className="font-medium text-foreground">Data de Solicitação:</span> {new Date(processo.dataSolicitacao).toLocaleDateString('pt-BR')}</p>
             {isAdvogado && (processo as ProcessoAdvogado).dataAceite && (
-              <p><span className="font-medium">Data de Aceite:</span> {new Date((processo as ProcessoAdvogado).dataAceite).toLocaleDateString('pt-BR')}</p>
+              <p><span className="font-medium text-foreground">Data de Aceite:</span> {new Date((processo as ProcessoAdvogado).dataAceite).toLocaleDateString('pt-BR')}</p>
             )}
-            <p><span className="font-medium">Tipo de Processo:</span> {processo.tipoProcesso}</p>
-            <p><span className="font-medium">Urgência:</span> {processo.urgencia}</p>
-            <p><span className="font-medium">Descrição:</span> {processo.descricao}</p>
+            <p><span className="font-medium text-foreground">Tipo de Processo:</span> {processo.tipoProcesso}</p>
+            <p><span className="font-medium text-foreground">Urgência:</span> {processo.urgencia}</p>
+            <p><span className="font-medium text-foreground">Descrição:</span> {processo.descricao}</p>
           </div>
         </div>
 
         <div className="border rounded-lg p-4">
           <h2 className="text-xl font-semibold mb-2">Situação Atual</h2>
-          <p className="text-sm text-muted-foreground mb-4">{processo.situacaoAtual}</p>
+          <p className="text-sm text-muted-foreground mb-4">{getStatusProcessoLabel(processo.situacaoAtual as StatusProcesso)}</p>
 
           <h3 className="font-medium mb-2">Objetivos</h3>
           <p className="text-sm text-muted-foreground mb-4">{processo.objetivos}</p>

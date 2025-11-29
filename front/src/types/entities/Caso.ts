@@ -4,7 +4,7 @@
 
 import { TipoProcesso, StatusProcesso } from '@/types/enums';
 import { Evento } from './Evento';
-import { ClienteDTO, AdvogadoDTO } from './Processo';
+import { ClienteDTO, AdvogadoDTO, TimelineEntry } from './Processo';
 
 /**
  * Interface para documentos anexados a um processo
@@ -16,19 +16,6 @@ export interface DocumentoAnexado {
   tamanho: number;
   dataEnvio: string;
   conteudo: string; // Base64 do arquivo
-}
-
-/**
- * Interface para entradas do timeline de um processo
- */
-export interface TimelineEntry {
-  id: string;
-  data: string;
-  statusAnterior?: string;
-  novoStatus: string;
-  descricao: string;
-  autor: "cliente" | "advogado" | "sistema";
-  observacoes?: string;
 }
 
 /**

@@ -30,11 +30,13 @@ export interface NotificacaoState {
   naoLidas: number;
   isLoading: boolean;
   error: string | null;
-  
-  loadNotifications: () => Promise<void>;
+  isWebSocketConnected: boolean;
   addNotification: (notificacao: Omit<Notificacao, 'id' | 'dataHora' | 'lida'>) => void;
-  removeNotification: (id: string) => void;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
+  removeNotification: (id: string) => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
   clearAll: () => void;
+  loadNotifications: () => Promise<void>;
+  connectWebSocket: (userId: string) => void;
+  disconnectWebSocket: () => void;
 } 

@@ -107,7 +107,6 @@ export function Sidebar({
       { label: "Tickets Disponíveis", href: "/tickets/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
       { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> }
     ]),
-    { label: "Documentos", href: "/documentos", icon: <FileText className="h-5 w-5" /> , disabled: true },
     ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}]: [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}]),
   ];
 

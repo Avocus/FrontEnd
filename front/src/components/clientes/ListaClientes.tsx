@@ -83,11 +83,6 @@ export function ListaClientes() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge
-                    variant={cliente.status === "ativo" ? "default" : "secondary"}
-                  >
-                    {cliente.status === "ativo" ? "Ativo" : cliente.status === "pendente" ? "Pendente" : "Inativo"}
-                  </Badge>
                   <Button variant="outline" size="sm">
                     Ver Detalhes
                   </Button>

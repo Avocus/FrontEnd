@@ -38,7 +38,7 @@ import {
 } from "lucide-react"
 import { useAgendaStore } from "@/store/useAgendaStore"
 import { TimePicker } from "@/components/ui/time-picker"
-import { Evento, EventoTipo, EventoStatus, EventoCor, CreateEventoPayload, UpdateEventoPayload, ValidatedUpdateEventoPayload } from "@/types"
+import { Evento, EventoTipo, EventoStatus, EventoCor, CreateEventoPayload, ValidatedUpdateEventoPayload } from "@/types"
 import { useEffect, useState } from "react"
 import { format, isToday, isTomorrow, isPast } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -405,7 +405,7 @@ export function AgendaCompleta() {
             </Button>
           )}
           {isAdvogado && (
-            <Button onClick={handleOpenDialog} variant="default">
+            <Button onClick={handleOpenDialog} variant="primary" size="sm" className="bg-primary hover:bg-secondary">
               <PlusCircle className="h-4 w-4 mr-2" />
               Novo Evento
             </Button>
@@ -752,7 +752,7 @@ export function AgendaCompleta() {
             <DialogClose asChild>
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
-            <Button onClick={handleSaveEvent} disabled={!titulo.trim()}>
+            <Button onClick={handleSaveEvent} disabled={!titulo.trim()} variant="primary" size="sm" className="bg-primary hover:bg-secondary">
               {eventoEditando ? 'Atualizar' : 'Salvar'}
             </Button>
           </DialogFooter>

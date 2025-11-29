@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useProcessoStore } from "@/store";
-import { ProcessoCliente, ProcessoAdvogado, Evento } from "@/types/entities";
+import { ProcessoCliente, ProcessoAdvogado, Evento, TimelineEntry } from "@/types/entities";
 import { StatusProcesso } from "@/types/enums";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
 // Definição do tipo TimelineEntry
-interface TimelineEntry {
-  id: string;
-  data: string;
-  statusAnterior?: string;
-  novoStatus: string;
-  descricao: string;
-  autor: "cliente" | "advogado" | "sistema";
-  observacoes?: string;
-}
+// interface TimelineEntry {
+//   id: string;
+//   data: string;
+//   statusAnterior?: string;
+//   novoStatus: string;
+//   descricao: string;
+//   autor: "cliente" | "advogado" | "sistema";
+//   observacoes?: string;
+// }
 
 // Hooks customizados
 import { useProcessoDetalhes } from "@/hooks/useProcessoDetalhes";
@@ -29,14 +29,16 @@ import { DocumentosComponent } from "./shared/DocumentosComponent";
 import { TimelineComponent } from "./shared/TimelineComponent";
 import { EventosComponent } from "./shared/EventosComponent";
 import Chat from "./shared/Chat";
+import { DadosRequisitadosList } from "./DadosRequisitadosList";
+import { DocumentosList } from "./DocumentosList";
 
 // Utilitários
 import { getStatusLabel, getResponsavel } from "@/utils/processoUtils";
 
 // Função utilitária para adicionar entrada no timeline
 const addTimelineEntry = (
-  statusAnterior: string | undefined,
-  novoStatus: string,
+  statusAnterior: StatusProcesso | undefined,
+  novoStatus: StatusProcesso,
   descricao: string,
   autor: "cliente" | "advogado" | "sistema",
   observacoes?: string
@@ -57,7 +59,7 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
   const { isMobile, isAdvogado } = useLayout();
 
   // Usar hook customizado para carregar detalhes do processo
-  const { processo, loading } = useProcessoDetalhes({ processoId, isAdvogado });
+  const { processo, loading, refetch } = useProcessoDetalhes({ processoId, isAdvogado });
 
   if (loading) {
     return (
@@ -103,8 +105,32 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
           <VisaoGeralComponent processo={processo} isAdvogado={isAdvogado} />
         </TabsContent>
 
-        <TabsContent value="documents" className="space-y-4">
-          <DocumentosComponent processo={processo} processoId={processoId} isAdvogado={isAdvogado} />
+        <TabsContent value="documents" className="space-y-6">
+          {/* Seção de Documentos Solicitados (Pendentes) */}
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Documentos Pendentes</h3>
+            </div>
+            <DadosRequisitadosList
+              processoId={processoId}
+              clienteId={processo.cliente.id}
+              isAdvogado={false}
+              onStatusChange={refetch}
+            />
+          </div>
+
+          {/* Seção de Meus Documentos */}
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Meus Documentos</h3>
+            </div>
+            <DocumentosList
+              processoId={processoId}
+              clienteId={processo.cliente.id}
+              isAdvogado={false}
+              onStatusChange={refetch}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="timeline" className="space-y-4">

@@ -1,15 +1,18 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { Notificacao, NotificacaoState, NotificacaoTipo } from '@/types';
+import { connectNotifications, disconnectNotifications } from '@/services/notificationWebSocketService';
+import { notificacaoService } from '@/services/notificacaoService';
 
 export const useNotificationStore = create<NotificacaoState>()(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         notificacoes: [],
         naoLidas: 0,
         isLoading: false,
         error: null,
+        isWebSocketConnected: false,
         
         addNotification: (notificacao: Omit<Notificacao, 'id' | 'dataHora' | 'lida'>) => set((state) => {
           const novaNotificacao: Notificacao = {
@@ -27,36 +30,56 @@ export const useNotificationStore = create<NotificacaoState>()(
           };
         }),
         
-        removeNotification: (id: string) => set((state) => {
-          const notificacoes = state.notificacoes.filter((n) => n.id !== id);
-          
-          return {
-            notificacoes,
-            naoLidas: notificacoes.filter(n => !n.lida).length
-          };
-        }),
+        removeNotification: async (id: string) => {
+          try {
+            await notificacaoService.excluir(id);
+
+            set((state) => {
+              const notificacoes = state.notificacoes.filter((n) => n.id !== id);
+
+              return {
+                notificacoes,
+                naoLidas: notificacoes.filter(n => !n.lida).length
+              };
+            });
+          } catch (error) {
+            console.error('Erro ao excluir notificação:', error);
+          }
+        },
         
-        markAsRead: (id: string) => set((state) => {
-          const notificacoes = state.notificacoes.map((n) =>
-            n.id === id ? { ...n, lida: true } : n
-          );
-          
-          return {
-            notificacoes,
-            naoLidas: notificacoes.filter(n => !n.lida).length
-          };
-        }),
+        markAsRead: async (id: string) => {
+          try {
+            await notificacaoService.marcarComoLida(id);
+
+            set((state) => {
+              const notificacoes = state.notificacoes.map((n) =>
+                n.id === id ? { ...n, lida: true } : n
+              );
+
+              return {
+                notificacoes,
+                naoLidas: notificacoes.filter(n => !n.lida).length
+              };
+            });
+          } catch (error) {
+            console.error('Erro ao marcar notificação como lida:', error);
+          }
+        },
         
-        markAllAsRead: () => set((state) => {
-          const notificacoes = state.notificacoes.map((n) => ({ ...n, lida: true }));
-          
-          return {
-            notificacoes,
-            naoLidas: 0
-          };
-        }),
+        markAllAsRead: async () => {
+          try {
+            await notificacaoService.marcarTodasComoLidas();
+
+            set((state) => ({
+              notificacoes: state.notificacoes.map((n) => ({ ...n, lida: true })),
+              naoLidas: 0
+            }));
+          } catch (error) {
+            console.error('Erro ao marcar todas as notificações como lidas:', error);
+          }
+        },
         
-        clearAll: () => set({ 
+        clearAll: () => set({
           notificacoes: [],
           naoLidas: 0
         }),
@@ -64,41 +87,54 @@ export const useNotificationStore = create<NotificacaoState>()(
         loadNotifications: async () => {
           set({ isLoading: true });
           try {
-            // Aqui faria uma chamada à API para carregar notificações
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Dados simulados
-            const notificacoes: Notificacao[] = [
-              {
-                id: '1',
-                titulo: 'Novo caso atribuído',
-                mensagem: 'Você foi atribuído ao caso #12345',
-                tipo: NotificacaoTipo.INFO,
-                dataHora: new Date().toISOString(),
-                lida: false
-              },
-              {
-                id: '2',
-                titulo: 'Prazo se aproximando',
-                mensagem: 'Você tem um prazo que vence amanhã',
-                tipo: NotificacaoTipo.ALERTA,
-                dataHora: new Date().toISOString(),
-                lida: false
-              }
-            ];
-            
-            set({ 
-              notificacoes, 
+            const response = await notificacaoService.listar();
+            const notificacoes = response.data;
+
+            set({
+              notificacoes,
               naoLidas: notificacoes.filter(n => !n.lida).length,
-              isLoading: false 
+              isLoading: false
             });
           } catch (error) {
-            set({ 
+            console.error('Erro ao carregar notificações:', error);
+            set({
               error: error instanceof Error ? error.message : 'Erro ao carregar notificações',
-              isLoading: false 
+              isLoading: false
             });
           }
-        }
+        },
+
+        connectWebSocket: (userId: string) => {
+          if (get().isWebSocketConnected) return;
+
+          connectNotifications(userId, (notification: any) => {
+            const newNotification: Notificacao = {
+              id: notification.id.toString(),
+              titulo: notification.titulo,
+              mensagem: notification.mensagem,
+              tipo: notification.tipo as NotificacaoTipo,
+              dataHora: notification.dataHora,
+              lida: notification.lida,
+              link: notification.link
+            };
+
+            set((state) => {
+              const notificacoes = [newNotification, ...state.notificacoes];
+              return {
+                notificacoes,
+                naoLidas: notificacoes.filter(n => !n.lida).length,
+                isWebSocketConnected: true
+              };
+            });
+          });
+
+          set({ isWebSocketConnected: true });
+        },
+
+        disconnectWebSocket: () => {
+          disconnectNotifications();
+          set({ isWebSocketConnected: false });
+        },
       }),
       {
         name: 'notification-storage',
@@ -109,4 +145,4 @@ export const useNotificationStore = create<NotificacaoState>()(
       }
     )
   )
-); 
+);

@@ -5,8 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Search, User, Plus } from "lucide-react";
+import { Search, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getMeusAdvogados } from "@/services/cliente/clienteService";
+import { useToast } from "@/hooks/useToast";
+import { Badge } from "@/components/ui/badge";
 
 interface AdvogadoLista {
   id: string;
@@ -22,31 +25,6 @@ interface ModalBuscaAdvogadoProps {
   onAdvogadoSelect: (advogado: AdvogadoLista) => void;
 }
 
-// Dados mockados para advogados (substituir por API real)
-const advogadosMock: AdvogadoLista[] = [
-  {
-    id: "1",
-    nome: "Dr. João Silva",
-    email: "joao.silva@advocacia.com",
-    especialidades: ["Direito Civil", "Direito do Consumidor"],
-    experiencia: "15 anos"
-  },
-  {
-    id: "2",
-    nome: "Dra. Maria Santos",
-    email: "maria.santos@advocacia.com",
-    especialidades: ["Direito Trabalhista", "Direito Previdenciário"],
-    experiencia: "12 anos"
-  },
-  {
-    id: "3",
-    nome: "Dr. Pedro Oliveira",
-    email: "pedro.oliveira@advocacia.com",
-    especialidades: ["Direito Penal", "Direito Administrativo"],
-    experiencia: "10 anos"
-  }
-];
-
 export function ModalBuscaAdvogado({
   isOpen,
   onOpenChange,
@@ -56,6 +34,7 @@ export function ModalBuscaAdvogado({
   const [advogados, setAdvogados] = useState<AdvogadoLista[]>([]);
   const [filteredAdvogados, setFilteredAdvogados] = useState<AdvogadoLista[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { error: showError } = useToast();
 
   useEffect(() => {
     if (isOpen) {
@@ -81,11 +60,18 @@ export function ModalBuscaAdvogado({
   const loadAdvogados = async () => {
     setIsLoading(true);
     try {
-      // Simular chamada de API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setAdvogados(advogadosMock);
-      setFilteredAdvogados(advogadosMock);
+      const data = await getMeusAdvogados();
+      const advogadosFormatados = data.map(adv => ({
+        id: adv.id,
+        nome: adv.nome,
+        email: adv.email,
+        especialidades: adv.especialidades,
+        experiencia: undefined // O DTO não tem esse campo, pode remover se não for necessário
+      }));
+      setAdvogados(advogadosFormatados);
+      setFilteredAdvogados(advogadosFormatados);
     } catch (error) {
+      showError('Erro ao carregar advogados: ' + error);
       console.error('Erro ao carregar advogados:', error);
     } finally {
       setIsLoading(false);
@@ -148,14 +134,13 @@ export function ModalBuscaAdvogado({
                       <div>
                         <div className="font-medium">{advogado.nome}</div>
                         <div className="text-sm text-muted-foreground">{advogado.email}</div>
-                        {advogado.especialidades && (
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {advogado.especialidades.join(", ")}
-                          </div>
-                        )}
-                        {advogado.experiencia && (
-                          <div className="text-xs text-muted-foreground">
-                            {advogado.experiencia} de experiência
+                        {advogado.especialidades && advogado.especialidades.length > 0 && (
+                          <div className="flex gap-1 flex-wrap mt-1">
+                            {advogado.especialidades.map((esp, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {esp}
+                              </Badge>
+                            ))}
                           </div>
                         )}
                       </div>
