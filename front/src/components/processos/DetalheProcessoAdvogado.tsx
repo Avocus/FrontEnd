@@ -423,7 +423,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
             <Button variant="outline" onClick={() => { setStatusModalOpen(false); setSelectedStatus(null); }}>
               Cancelar
             </Button>
-            <Button onClick={() => selectedStatus && performStatusChange(selectedStatus)} disabled={!selectedStatus}>
+            <Button variant={"primary"} onClick={() => selectedStatus && performStatusChange(selectedStatus)} disabled={!selectedStatus}>
               Confirmar alteração
             </Button>
           </DialogFooter>
