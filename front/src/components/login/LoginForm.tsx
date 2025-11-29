@@ -23,6 +23,7 @@ import { getFieldValidationClass } from "../../utils/formValidation";
 import { useToast } from "@/hooks/useToast";
 import { PrivacyPolicy } from "@/components/login/PrivacyPolicy";
 import { ServiceTerms } from "@/components/login/ServiceTerms";
+import { resetPasswordRequest } from "@/services/user/RedefinirSenhaService";
 
 export function LoginForm({
   className,
@@ -88,12 +89,12 @@ export function LoginForm({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleForgotPassword = useCallback(async (_data: ResetPasswordData) => {
     try {
-      // TODO: Implementar recuperação de senha
-      // await sendPasswordResetEmail(auth, data.resetEmail);
+      await resetPasswordRequest(_data.resetEmail);
       setResetEmailSent(true);
-      setError(null); // Limpar erros anteriores
+      setError(null);
     } catch (error) {
       console.error("Erro na recuperação de senha:", error);
+      setResetEmailSent(false);
       setError("Erro ao enviar email de recuperação. Verifique o email e tente novamente.");
     }
   }, [setError]);
@@ -202,13 +203,6 @@ export function LoginForm({
               </Button>
             </div>
           </form>
-          <DialogFooter className="sm:justify-start">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Fechar
-              </Button>
-            </DialogClose>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
