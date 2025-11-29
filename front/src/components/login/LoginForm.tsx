@@ -147,7 +147,7 @@ export function LoginForm({
               </div>
               <Button 
                 type="submit" 
-                className="w-full bg-secondary text-secondary-foreground" 
+                variant={"primary"} 
                 disabled={!isValid || isLoading}
               >
                 {isLoading ? "Entrando..." : "Entrar"}
