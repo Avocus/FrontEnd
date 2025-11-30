@@ -73,6 +73,9 @@ export function LoginForm({
 
   const handleLoginEmail = useCallback(async (data: LoginFormData) => {
     try {
+      // Resetar último erro exibido para garantir que mensagens repetidas sejam mostradas novamente
+      setLastErrorShown(null);
+
       // Usar a função login do useAuthStore
       await login({
         email: data.email,
