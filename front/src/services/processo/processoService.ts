@@ -2,6 +2,12 @@ import api from '@/lib/api';
 import { ProcessoDTO } from '@/types/entities/Processo';
 import { PROCESSO_ROUTES } from '@/lib/api-routes';
 
+export interface DadoRequisitadoRequest {
+  nomeDado: string;
+  tipo: 'DOCUMENTO' | 'INFORMACAO';
+  responsavel: 'CLIENTE' | 'ADVOGADO' | 'AMBOS';
+}
+
 export interface CriarProcessoRequest {
   clienteId: string;
   advogadoId?: string;
@@ -13,6 +19,7 @@ export interface CriarProcessoRequest {
   urgencia: string;
   documentosDisponiveis?: string;
   status: string;
+  dadosRequisitados?: DadoRequisitadoRequest[];
 }
 
 export interface ProcessoDisponivel extends ProcessoDTO {

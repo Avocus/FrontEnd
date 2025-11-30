@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, FileText } from "lucide-react"
+import { ArrowLeft, FileText, Sparkles, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getUrgenciaLabel, getUrgenciaStyles } from "@/lib/urgency"
 import { TipoProcesso, getTipoProcessoLabel, getStatusProcessoLabel, StatusProcesso } from "@/types/enums"
@@ -17,6 +17,8 @@ interface NovoProcessoPreviewProps {
     objetivos: string
     urgencia: "BAIXA" | "MEDIA" | "ALTA"
     documentosDisponiveis?: string
+    documentosSugeridos?: string[]
+    documentosSelecionados?: string[]
   }
   payload: {
     clienteNome: string
@@ -28,12 +30,15 @@ interface NovoProcessoPreviewProps {
     objetivos: string
     urgencia: "BAIXA" | "MEDIA" | "ALTA"
     documentosDisponiveis?: string
+    documentosSugeridos?: string[]
+    documentosSelecionados?: string[]
     dataSolicitacao: string
     status: string
   }
   isAdvogado: boolean
   onBackToForm: () => void
   onSubmit: () => void
+  onDocumentoToggle: (documento: string) => void
   isLoading: boolean
 }
 
@@ -43,8 +48,10 @@ export default function NovoProcessoPreview({
   isAdvogado,
   onBackToForm,
   onSubmit,
+  onDocumentoToggle,
   isLoading,
 }: NovoProcessoPreviewProps) {
+  const documentosSelecionados = payload.documentosSelecionados || [];
   // getTipoProcessoLabel is imported from enums
 
   const formatDate = (iso?: string) => {
@@ -146,6 +153,63 @@ export default function NovoProcessoPreview({
                 )}
               </CardContent>
             </Card>
+
+            {/* Card de Documentos Sugeridos pela IA */}
+            {payload.documentosSugeridos && payload.documentosSugeridos.length > 0 && (
+              <Card className="border-2 border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Documentos Necessários (Sugeridos pela IA)
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Nossa IA analisou seu processo e sugere os seguintes documentos. <strong>Clique para selecionar</strong> quais deseja solicitar ao criar o processo.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {payload.documentosSugeridos.map((doc, index) => {
+                      const isSelected = documentosSelecionados.includes(doc);
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => onDocumentoToggle(doc)}
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-lg border transition-all text-left w-full",
+                            isSelected 
+                              ? "bg-primary/10 border-primary shadow-sm" 
+                              : "bg-background border-border hover:border-primary/50"
+                          )}
+                        >
+                          <div className={cn(
+                            "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                            isSelected 
+                              ? "bg-primary text-primary-foreground" 
+                              : "bg-muted text-muted-foreground"
+                          )}>
+                            <CheckCircle className={cn(
+                              "h-4 w-4 transition-all",
+                              isSelected ? "scale-100" : "scale-75 opacity-50"
+                            )} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(
+                              "text-sm font-medium truncate transition-colors",
+                              isSelected ? "text-primary" : "text-foreground"
+                            )}>{doc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                    <p className="text-xs text-blue-800 dark:text-blue-200">
+                      💡 <strong>Selecionados: {documentosSelecionados.length}</strong> de {payload.documentosSugeridos.length} documentos serão solicitados automaticamente ao criar o processo.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <div className="flex gap-4 pt-4">
               <Button

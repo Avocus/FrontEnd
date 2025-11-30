@@ -45,6 +45,7 @@ export default function NovoProcesso() {
 
   const {
     isLoading,
+    isLoadingIA,
     clienteSelecionado,
     setClienteSelecionado,
     advogadoSelecionado,
@@ -53,10 +54,22 @@ export default function NovoProcesso() {
     setShowClienteModal,
     showAdvogadoModal,
     setShowAdvogadoModal,
+    documentosSugeridos,
+    sugerirDocumentos,
     onSubmit,
   } = useNovoProcesso()
 
-  const handlePreview = (data: NovoProcessoFormData) => {
+  const handlePreview = async (data: NovoProcessoFormData) => {
+    // Sugerir documentos com IA antes de mostrar preview
+    const documentos = await sugerirDocumentos(data)
+    
+    // Inicialmente, todos os documentos são selecionados
+    const dataComDocumentos = {
+      ...data,
+      documentosSugeridos: documentos,
+      documentosSelecionados: documentos, // Todos selecionados por padrão
+    }
+    
     // Criar payload para preview
     const payload = {
       clienteNome: isAdvogado 
@@ -72,11 +85,13 @@ export default function NovoProcesso() {
       objetivos: data.objetivos,
       urgencia: data.urgencia,
       documentosDisponiveis: data.documentosDisponiveis,
+      documentosSugeridos: documentos,
+      documentosSelecionados: documentos, // Todos selecionados por padrão
       dataSolicitacao: new Date().toISOString(),
       status: StatusProcesso.RASCUNHO,
     }
     
-    setPreviewData(data)
+    setPreviewData(dataComDocumentos)
     setPreviewPayload(payload)
     try {
       localStorage.setItem("novoProcessoPreview", JSON.stringify(payload))
@@ -84,6 +99,34 @@ export default function NovoProcesso() {
       console.error("Erro ao salvar preview no localStorage:", err)
     }
     setShowPreview(true)
+  }
+
+  const handleDocumentoToggle = (documento: string) => {
+    if (!previewData || !previewPayload) return
+    
+    const currentSelected = previewPayload.documentosSelecionados || []
+    const newSelected = currentSelected.includes(documento)
+      ? currentSelected.filter((d: string) => d !== documento)
+      : [...currentSelected, documento]
+    
+    const updatedData = {
+      ...previewData,
+      documentosSelecionados: newSelected,
+    }
+    
+    const updatedPayload = {
+      ...previewPayload,
+      documentosSelecionados: newSelected,
+    }
+    
+    setPreviewData(updatedData)
+    setPreviewPayload(updatedPayload)
+    
+    try {
+      localStorage.setItem("novoProcessoPreview", JSON.stringify(updatedPayload))
+    } catch (err) {
+      console.error("Erro ao salvar preview no localStorage:", err)
+    }
   }
 
   const handleBackToForm = () => {
@@ -106,6 +149,7 @@ export default function NovoProcesso() {
         isAdvogado={isAdvogado}
         onBackToForm={handleBackToForm}
         onSubmit={handleSubmitFromPreview}
+        onDocumentoToggle={handleDocumentoToggle}
         isLoading={isLoading}
       />
     )
@@ -145,6 +189,7 @@ export default function NovoProcesso() {
           setShowClienteModal={setShowClienteModal}
           showAdvogadoModal={showAdvogadoModal}
           setShowAdvogadoModal={setShowAdvogadoModal}
+          isLoadingIA={isLoadingIA}
         />
       </div>
     </div>
