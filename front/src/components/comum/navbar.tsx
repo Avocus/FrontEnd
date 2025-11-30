@@ -30,9 +30,7 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
   const router = useRouter();
 
   const navItems: NavItem[] = isAuthenticated ? [
-    { label: "Home", href: "/home" },
     { label: "Agenda", href: "/agenda" },
-    { label: "Serviços", href: "#" },
     { label: "Chat", onClick: () => setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca" },
     { label: "Videoteca", href: "/videoteca" },
@@ -140,7 +138,7 @@ export const Navbar = memo(function Navbar({ showFullNavigation = true, showLogo
           <>
             
             {/* Botão de login */}
-            <Button onClick={() => router.push("/login")}>
+            <Button onClick={() => router.push("/login")} variant={"primary"}>
               Entrar
             </Button>
           </>

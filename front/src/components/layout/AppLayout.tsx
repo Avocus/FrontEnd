@@ -64,7 +64,7 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
     );
   }
 
-  if (isAuthenticated && config.showSidebar && !isMobile) {
+  if (isAuthenticated && config.showSidebar) {
     return (
       <div className="flex h-screen">
         {/* Sidebar */}

@@ -29,7 +29,7 @@ const MensagemInput: React.FC<MensagemInputProps> = ({ onSend, disabled }) => {
         className="flex-1"
         disabled={disabled}
       />
-      <Button type="submit" disabled={disabled || !conteudo.trim()}>
+      <Button variant={"primary"} type="submit" disabled={disabled || !conteudo.trim()}>
         Enviar
       </Button>
     </form>

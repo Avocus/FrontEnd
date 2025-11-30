@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { listarProcessos } from "@/services/processo/processoService";
 import { ProcessoDTO } from "@/types/entities/Processo";
-import { StatusProcesso, TipoProcesso } from "@/types/enums";
+import { getStatusProcessoLabel, StatusProcesso, TipoProcesso } from "@/types/enums";
 
 interface ModalBuscaProcessoProps {
   isOpen: boolean;
@@ -208,7 +208,7 @@ export function ModalBuscaProcesso({
                         )}
                         <div className="flex items-center gap-2 mt-1">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(processo.status)}`}>
-                            {processo.status}
+                            {getStatusProcessoLabel(processo.status)}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {getTipoProcessoLabel(processo.tipoProcesso)}

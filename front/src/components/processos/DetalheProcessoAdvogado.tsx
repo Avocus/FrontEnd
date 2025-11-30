@@ -4,10 +4,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from "@/hooks/useToast";
 import { useProcessoStore } from "@/store";
 import { ProcessoAdvogado } from "@/types/entities";
-import { StatusProcesso } from "@/types/enums";
+import { getStatusProcessoLabel, StatusProcesso } from "@/types/enums";
 import { FileText, Send } from "lucide-react";
 import Link from "next/link";
 
@@ -176,44 +178,56 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
   };
 
   const protocolarProcesso = () => {
+    // agora abrimos modal de seleção de status (implementado abaixo)
+    setStatusModalOpen(true);
+  };
+
+  // Modal e lógica para seleção de status
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<StatusProcesso | null>(null);
+
+  const possibleStatuses: StatusProcesso[] = Object.values(StatusProcesso).filter(
+    (s) => s !== processo?.status
+  ) as StatusProcesso[];
+
+  const performStatusChange = (newStatus: StatusProcesso) => {
     if (!processo) return;
 
     try {
-      // Atualizar o processo do cliente na store
       const timelineEntryCliente = addTimelineEntry(
         processo.status,
-        StatusProcesso.PROTOCOLADO,
-        `Processo protocolado no fórum`,
+        newStatus,
+        `Status alterado para ${getStatusProcessoLabel(newStatus)}`,
         "advogado",
-        `Advogado ${processo.advogado?.nome} protocolou o processo no fórum competente`
+        `Advogado ${processo.advogado?.nome} mudou o status para ${newStatus}`
       );
 
       atualizarProcessoCliente(processo.id, {
-        status: StatusProcesso.PROTOCOLADO,
+        status: newStatus,
         timeline: [...(processo.timeline || []), timelineEntryCliente]
       });
 
-      // Atualizar o processo do advogado na store
       const timelineEntryAdvogado = addTimelineEntry(
         processo.status,
-        StatusProcesso.PROTOCOLADO,
-        `Processo protocolado`,
+        newStatus,
+        `Status alterado para ${newStatus}`,
         "advogado",
-        `Processo foi protocolado no fórum competente`
+        `Status atualizado para ${newStatus}`
       );
 
       atualizarProcessoAdvogado(processo.id, {
-        status: StatusProcesso.PROTOCOLADO,
+        status: newStatus,
         timeline: [...(processo.timeline || []), timelineEntryAdvogado]
       });
 
-      // Atualizar o estado local
-      setProcesso({ ...processo, status: StatusProcesso.PROTOCOLADO });
+      setProcesso({ ...processo, status: newStatus });
+      setStatusModalOpen(false);
+      setSelectedStatus(null);
 
-      success("Processo protocolado com sucesso!");
+      success(`Status alterado para ${getStatusProcessoLabel(newStatus)} com sucesso!`);
     } catch (err) {
-      console.error("Erro ao protocolar processo:", err);
-      error("Erro ao protocolar processo. Tente novamente.");
+      console.error("Erro ao alterar status:", err);
+      error("Erro ao alterar status. Tente novamente.");
     }
   };
 
@@ -319,6 +333,15 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
             Pegar Caso
           </Button>
         )}
+
+        <Button
+          onClick={protocolarProcesso}
+          disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
+          variant="primary" size="sm" className="bg-primary hover:bg-secondary"
+        >
+          <Send className="h-4 w-4" />
+          Trocar Status do Processo
+        </Button>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
@@ -423,6 +446,41 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           </div>
         </TabsContent>
       </Tabs>
+      {/* Modal de seleção de status (avançar/mudar status do processo) */}
+      <Dialog open={statusModalOpen} onOpenChange={(open) => { setStatusModalOpen(open); if (open) setSelectedStatus(possibleStatuses[0] || null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Alterar status do processo</DialogTitle>
+            <DialogDescription>
+              Selecione o novo status para o processo. Isso criará um novo registro na timeline e notificará as partes conforme configurado.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">Status atual: <strong>{getStatusProcessoLabel(processo.status)}</strong></p>
+
+            <Select value={selectedStatus ?? undefined} onValueChange={(value) => setSelectedStatus(value as StatusProcesso)}>
+              <SelectTrigger>
+                <SelectValue>{selectedStatus ? getStatusProcessoLabel(selectedStatus) : 'Escolha um status'}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {possibleStatuses.map((s) => (
+                  <SelectItem key={s} value={s}>{getStatusProcessoLabel(s)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setStatusModalOpen(false); setSelectedStatus(null); }}>
+              Cancelar
+            </Button>
+            <Button variant={"primary"} onClick={() => selectedStatus && performStatusChange(selectedStatus)} disabled={!selectedStatus}>
+              Confirmar alteração
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal de Solicitação de Documentos */}
       <SolicitarDocumentoModal

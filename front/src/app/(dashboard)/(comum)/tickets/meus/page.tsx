@@ -10,6 +10,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ResponseContent } from '@/types/api/responses'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 interface Ticket {
   id: number
@@ -104,11 +105,8 @@ export default function MeusTicketsPage() {
               <CardContent>
                 <p className="text-muted-foreground mb-4">{ticket.descricao}</p>
                 <div className="flex justify-end">
-                  <Link
-                    href={`/tickets/${ticket.id}`}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Ver Detalhes
+                  <Link href={`/tickets/${ticket.id}`}>
+                    <Button variant={"primary"}>Ver Detalhes</Button>
                   </Link>
                 </div>
               </CardContent>

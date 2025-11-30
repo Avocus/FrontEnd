@@ -41,7 +41,7 @@ const AdvogadoTicketsList: React.FC = () => {
             <CardContent>
               <p className="mb-4">{ticket.descricao}</p>
               <Link href={`/tickets/${ticket.id}`}>
-                <Button>Ver Detalhes</Button>
+                <Button variant={"primary"}>Ver Detalhes</Button>
               </Link>
             </CardContent>
           </Card>

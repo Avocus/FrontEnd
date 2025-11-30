@@ -1,12 +1,11 @@
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useAuthStore, useProcessoStore } from "@/store"
+import { useAuthStore } from "@/store"
 import { useToast } from "@/hooks/useToast"
 import { analiseIAService } from "@/services/analiseIAService"
 import { criarProcesso, CriarProcessoRequest } from "@/services/processo/processoService"
 import { TipoProcesso, StatusProcesso } from "@/types/enums"
 import { ClienteLista } from "@/types/entities/Cliente"
-import { ProcessoCliente, ProcessoAdvogado } from '@/types/entities'
 import { useLayout } from "@/contexts/LayoutContext"
 
 export interface NovoProcessoFormData {

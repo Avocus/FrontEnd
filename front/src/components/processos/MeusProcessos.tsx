@@ -9,29 +9,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuthStore } from "@/store"
 import { useLayout } from "@/contexts/LayoutContext"
 import { TipoProcesso, StatusProcesso, getStatusProcessoLabel } from "@/types/enums"
-import { getStatusColor, getStatusIcon, getColumnColor } from "@/utils/processoUtils"
+import { getColumnColor } from "@/utils/processoUtils"
 
 import { 
   Briefcase, 
   Plus, 
-  Clock, 
   AlertCircle, 
-  CheckCircle2, 
   Eye,
   Calendar,
   FileText,
   Search,
-  Play,
-  HelpCircle,
   List,
-  Grid,
-  Pause,
-  X,
-  Check,
-  Send,
-  FileCheck,
-  Gavel,
-  Archive
+  Grid
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useProcessoStore } from "@/store"
@@ -155,20 +144,18 @@ export default function MeusProcessos() {
           <div className="flex gap-3">
             {/* Toggle de visualização */}
             <div className="flex border rounded-lg">
-              <Button
-                variant={viewMode === "list" ? "default" : "ghost"}
-                size="sm"
+              <Button 
+                variant={viewMode === "list" ? "primary" : "ghost"}
+                size="sm" className="hover:bg-secondary rounded-r-none"
                 onClick={() => setViewMode("list")}
-                className="rounded-r-none"
               >
                 <List className="h-4 w-4 mr-2" />
                 Lista
               </Button>
               <Button
-                variant={viewMode === "kanban" ? "default" : "ghost"}
-                size="sm"
+                variant={viewMode === "kanban" ? "primary" : "ghost"}
+                size="sm" className="hover:bg-secondary rounded-l-none"
                 onClick={() => setViewMode("kanban")}
-                className="rounded-l-none"
               >
                 <Grid className="h-4 w-4 mr-2" />
                 Kanban
@@ -212,6 +199,7 @@ export default function MeusProcessos() {
             )}
             <Button 
               onClick={handleNovoProcesso}
+              variant="primary" size="sm" className="bg-primary hover:bg-secondary"
             >
               <Plus className="h-4 w-4 mr-2" />
               Novo Processo

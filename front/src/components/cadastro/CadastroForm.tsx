@@ -16,12 +16,12 @@ import { cadastroSchema, type CadastroFormData } from '../../schemas/cadastroSch
 import { cadastrarUsuario } from '../../services/user/cadastroService';
 import { useRouter } from "next/navigation"
 import { getErrorMessage } from '@/utils/formValidation';
-import { ArrowLeft, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff, ChevronLeft, ChevronRight, User, Scale, Check } from "lucide-react"
 import { UserTypeSelector } from './UserTypeSelector';
 import { PasswordRequirements } from './PasswordRequirements';
 import { useToast } from '../../hooks/useToast';
 import { getFieldValidationClass } from '../../utils/formValidation';
-import { TIPOS_PROCESSO, TipoProcesso, ESPECIALIDADES, Especialidade } from '../../constants/processo';
+import { ESPECIALIDADES, Especialidade } from '../../constants/processo';
 import { getEspecialidadeLabel } from '../../types/enums';
 
 type InviteData = { isInvite: boolean; token: string } | null;
@@ -372,6 +372,38 @@ export function CadastroForm({
               {/* Step 2: Personal Information */}
               {currentStep === 2 && (
                 <div className="flex flex-col gap-6">
+                  {/* Indicador do tipo selecionado (compact) */}
+                  <div className="flex items-center gap-4">
+                    {selectedRole === 'cliente' && (
+                      <div className=" w-full relative border-2 rounded-lg p-3 flex items-center gap-3 transition-all duration-200 text-sm border-secondary bg-primary shadow-sm ring-1 ring-primary">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-secondary text-primary">
+                          <User className="h-4 w-4" />
+                        </div>
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-primary">
+                          <Check className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-xs text-foreground/70">Seu cadastro está sendo feito como</div>
+                          <div className="font-medium">Cliente</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRole === 'advogado' && (
+                      <div className=" w-full relative border-2 rounded-lg p-3 flex items-center gap-3 transition-all duration-200 text-sm border-secondary bg-primary shadow-sm ring-1 ring-primary">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-secondary text-primary">
+                          <Scale className="h-4 w-4" />
+                        </div>
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-primary">
+                          <Check className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-xs text-foreground/70">Seu cadastro está sendo feito como</div>
+                          <div className="font-medium">Advogado</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   {/* Campos adicionais: CPF, Data de Nascimento, Telefone */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
@@ -454,6 +486,23 @@ export function CadastroForm({
               {/* Step 3: Professional Information (only for advogado) */}
               {currentStep === 3 && selectedRole === 'advogado' && (
                 <div className="flex flex-col gap-6">
+                  {/* Indicador do tipo selecionado (compact) */}
+                  <div className="flex items-center gap-4">
+                    {selectedRole === 'advogado' && (
+                      <div className=" w-full relative border-2 rounded-lg p-3 flex items-center gap-3 transition-all duration-200 text-sm border-secondary bg-primary shadow-sm ring-1 ring-primary">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-secondary text-primary">
+                          <Scale className="h-4 w-4" />
+                        </div>
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center text-primary">
+                          <Check className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <div className="text-xs text-foreground/70">Seu cadastro está sendo feito como</div>
+                          <div className="font-medium">Advogado</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="oab">OAB</Label>
                     <Input id="oab" type="text" {...register("oab")} />
@@ -472,9 +521,9 @@ export function CadastroForm({
 
                   <div className="flex flex-col gap-2">
                     <Label>Especialidades</Label>
-                    <div className="flex flex-col gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {ESPECIALIDADES.map((tipo) => (
-                        <div key={tipo} className="flex items-center space-x-2">
+                        <div key={tipo} className="flex items-center space-x-2 px-2 py-1 rounded hover:bg-gray-50">
                           <input
                             type="checkbox"
                             id={`especialidade-${tipo}`}
@@ -482,7 +531,7 @@ export function CadastroForm({
                             onChange={(e) => handleEspecialidadeChange(tipo, e.target.checked)}
                             className="h-4 w-4"
                           />
-                          <Label htmlFor={`especialidade-${tipo}`}>{getEspecialidadeLabel(tipo)}</Label>
+                          <Label htmlFor={`especialidade-${tipo}`} className="!mb-0">{getEspecialidadeLabel(tipo)}</Label>
                         </div>
                       ))}
                     </div>
@@ -493,7 +542,7 @@ export function CadastroForm({
 
                   <div className="flex flex-col gap-4">
                     <Label>Dados de Contato</Label>
-                    <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       <div className="flex flex-col gap-2">
                         <Label htmlFor="dadosContato.site">Site</Label>
                         <Input id="dadosContato.site" type="url" {...register("dadosContato.site")} />
@@ -552,6 +601,7 @@ export function CadastroForm({
                   <Button 
                     type="button" 
                     onClick={handleNext}
+                    variant={"primary"}
                   >
                     Próximo
                     <ChevronRight className="h-4 w-4 ml-2" />
