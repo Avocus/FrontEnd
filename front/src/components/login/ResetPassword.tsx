@@ -47,7 +47,6 @@ export default function ResetPassword({ token }: { token: string }) {
         const isValid = await trigger();
 
         if (!isValid) {
-            console.log("Formulário inválido");
             return;
         }
         const { password } = getValues();

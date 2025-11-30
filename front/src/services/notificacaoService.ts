@@ -3,9 +3,7 @@ import { Notificacao, NotificacaoTipo } from '@/types';
 
 export const notificacaoService = {
   async listar(): Promise<{ data: Notificacao[] }> {
-    console.log('📡 Buscando notificações do backend...');
     const response = await api.get<{ data: any[] }>('/notificacao');
-    console.log('✅ Notificações recebidas:', response.data);
     
     // Mapear os dados do backend para o formato do frontend
     const notificacoes: Notificacao[] = response.data.data.map((n: any) => ({

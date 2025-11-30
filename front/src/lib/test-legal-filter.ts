@@ -24,16 +24,4 @@ const rejectedQuestions = [
   "Previsão do tempo"
 ];
 
-console.log("=== PERGUNTAS QUE DEVEM SER ACEITAS ===");
-testQuestions.forEach(question => {
-  const result = isLegalContext(question);
-  console.log(`${result ? '✅' : '❌'} "${question}"`);
-});
-
-console.log("\n=== PERGUNTAS QUE DEVEM SER REJEITADAS ===");
-rejectedQuestions.forEach(question => {
-  const result = isLegalContext(question);
-  console.log(`${!result ? '✅' : '❌'} "${question}"`);
-});
-
 export { testQuestions, rejectedQuestions };

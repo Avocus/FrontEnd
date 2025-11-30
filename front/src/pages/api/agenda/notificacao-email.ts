@@ -82,8 +82,6 @@ export default async function handler(
         });
       }
 
-      console.log('✅ E-mail enviado com sucesso:', data);
-
       return res.status(200).json({
         success: true,
         message: `E-mail de notificação enviado com sucesso para ${para}`

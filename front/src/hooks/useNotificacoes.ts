@@ -11,7 +11,6 @@ export function useNotificacoes() {
   const verificarNotificacoesCallback = useCallback(async () => {
     // Verificar eventos que precisam de notificação
     const eventosParaNotificar = getEventosParaNotificar();
-    console.log('Eventos para notificar:', eventosParaNotificar.length);
   }, [getEventosParaNotificar]);
 
   useEffect(() => {
@@ -34,7 +33,6 @@ export function useNotificacoes() {
    */
   const verificarNotificacoesManual = useCallback(async () => {
     const eventos = getEventosParaNotificar();
-    console.log('Verificação manual - eventos para notificar:', eventos.length);
     return eventos.length;
   }, [getEventosParaNotificar]);
 

@@ -5,24 +5,18 @@ import { getToken } from '@/utils/authUtils';
 let stompClient: Client | null = null;
 
 export const connect = (processId: string, onMessageReceived: (message: any) => void) => {
-  console.log('🔌 Connecting to WebSocket for processId:', processId);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-  console.log('WebSocket URL:', `${apiUrl}/ws`);
   const socket = new SockJS(`${apiUrl}/ws`);
   stompClient = new Client({
     webSocketFactory: () => socket,
-    debug: (str: string) => console.log(str),
     reconnectDelay: 5000,
     heartbeatIncoming: 4000,
     heartbeatOutgoing: 4000,
   });
 
   stompClient.onConnect = () => {
-    console.log('✅ WebSocket connected successfully');
-    console.log('Subscribing to topic:', `/topic/chat/${processId}`);
     stompClient?.subscribe(`/topic/chat/${processId}`, (message: IMessage) => {
       const receivedMessage = JSON.parse(message.body);
-      console.log('📨 Received message:', receivedMessage);
       onMessageReceived(receivedMessage);
     });
   };
@@ -39,12 +33,10 @@ export const connect = (processId: string, onMessageReceived: (message: any) => 
     stompClient.connectHeaders = {
       Authorization: `Bearer ${token}`
     };
-    console.log('Connect headers set:', stompClient.connectHeaders);
   } else {
     console.warn('No token found in cookies');
   }
 
-  console.log('Activating STOMP client for processId:', processId);
   stompClient.activate();
 };
 
@@ -58,18 +50,10 @@ export const disconnect = () => {
 export const sendMessage = (processId: string, message: any) => {
   if (stompClient && stompClient.connected) {
     const token = getToken();
-    console.log('Token from cookies:', token);
 
     const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-    console.log('Headers being sent:', headers);
 
     stompClient.publish({
-      destination: `/app/chat.sendMessage/${processId}`,
-      body: JSON.stringify(message),
-      headers: headers
-    });
-
-    console.log('Message sent:', {
       destination: `/app/chat.sendMessage/${processId}`,
       body: JSON.stringify(message),
       headers: headers

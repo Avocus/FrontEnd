@@ -19,7 +19,6 @@ export const resetPasswordRequest = async (email: string): Promise<void> => {
 
 export const resetPassword = async (params: ResetPasswordParams): Promise<void> => {
   try {
-        console.log("params service", params);
         await api.post('/user/resetar-senha', params);
     } catch (error) {
       console.error('Erro ao redefinir senha:', error);

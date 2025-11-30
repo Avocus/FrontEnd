@@ -40,7 +40,6 @@ export function useResponsive(options: UseResponsiveOptions = {}) {
     try {
       mediaQuery.addEventListener("change", handleMediaChange);
     } catch {
-      console.log('Erro ao adicionar listener para o mediaQuery');
       try {
         mediaQuery.addListener(handleMediaChange);
       } catch (error) {
