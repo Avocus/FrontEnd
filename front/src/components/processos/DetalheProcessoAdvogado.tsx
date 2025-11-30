@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/useToast";
 import { useProcessoStore } from "@/store";
 import { ProcessoAdvogado } from "@/types/entities";
@@ -32,6 +33,7 @@ import { StatusBadge } from "./shared/StatusBadge";
 
 // Utilitários
 import { getStatusLabel } from "@/utils/processoUtils";
+import { atualizarStatusProcesso } from "@/services/processo/processoService";
 
 interface DetalheProcessoAdvogadoProps {
   processoId: string;
@@ -185,44 +187,47 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
   // Modal e lógica para seleção de status
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<StatusProcesso | null>(null);
+  const [statusDescription, setStatusDescription] = useState("");
 
   const possibleStatuses: StatusProcesso[] = Object.values(StatusProcesso).filter(
     (s) => s !== processo?.status
   ) as StatusProcesso[];
 
-  const performStatusChange = (newStatus: StatusProcesso) => {
+  const performStatusChange = async (newStatus: StatusProcesso, description: string) => {
     if (!processo) return;
 
     try {
-      const timelineEntryCliente = addTimelineEntry(
-        processo.status,
-        newStatus,
-        `Status alterado para ${getStatusProcessoLabel(newStatus)}`,
-        "advogado",
-        `Advogado ${processo.advogado?.nome} mudou o status para ${newStatus}`
-      );
+      // Chamar API para atualizar status
+      const updatedProcesso = await atualizarStatusProcesso(processo.id.toString(), newStatus, description);
 
-      atualizarProcessoCliente(processo.id, {
-        status: newStatus,
-        timeline: [...(processo.timeline || []), timelineEntryCliente]
+      // Mapear o ProcessoDTO retornado para ProcessoAdvogado
+      const timelineMapeada = updatedProcesso.linhaDoTempo ? updatedProcesso.linhaDoTempo.map(update => ({
+        id: update.id.toString(),
+        data: update.dataAtualizacao,
+        statusAnterior: update.statusAnterior,
+        novoStatus: update.novoStatus,
+        descricao: update.descricao,
+        autor: "advogado" as const,
+        observacoes: undefined
+      })) : [];
+
+      // Atualizar o estado local com os dados mapeados corretamente
+      setProcesso({
+        ...processo,
+        status: updatedProcesso.status,
+        timeline: timelineMapeada
       });
 
-      const timelineEntryAdvogado = addTimelineEntry(
-        processo.status,
-        newStatus,
-        `Status alterado para ${newStatus}`,
-        "advogado",
-        `Status atualizado para ${newStatus}`
-      );
-
-      atualizarProcessoAdvogado(processo.id, {
+      // Atualizar a store
+      atualizarProcessoAdvogado(processo.id.toString(), {
         status: newStatus,
-        timeline: [...(processo.timeline || []), timelineEntryAdvogado]
+        timeline: timelineMapeada
       });
 
-      setProcesso({ ...processo, status: newStatus });
+      // Fechar modal e limpar estados
       setStatusModalOpen(false);
       setSelectedStatus(null);
+      setStatusDescription("");
 
       success(`Status alterado para ${getStatusProcessoLabel(newStatus)} com sucesso!`);
     } catch (err) {
@@ -312,15 +317,6 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
                 </Button>
               </>
             )}
-
-            <Button
-              onClick={protocolarProcesso}
-              disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-              className="flex items-center gap-2"
-            >
-              <Send className="h-4 w-4" />
-              Protocolar Processo
-            </Button>
           </>
         ) : (
           // Botão para aceitar processo disponível
@@ -447,7 +443,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
         </TabsContent>
       </Tabs>
       {/* Modal de seleção de status (avançar/mudar status do processo) */}
-      <Dialog open={statusModalOpen} onOpenChange={(open) => { setStatusModalOpen(open); if (open) setSelectedStatus(possibleStatuses[0] || null); }}>
+      <Dialog open={statusModalOpen} onOpenChange={(open) => { setStatusModalOpen(open); if (open) { setSelectedStatus(possibleStatuses[0] || null); setStatusDescription(""); } else { setSelectedStatus(null); setStatusDescription(""); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Alterar status do processo</DialogTitle>
@@ -469,13 +465,26 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
                 ))}
               </SelectContent>
             </Select>
+
+            <div>
+              <label htmlFor="status-description" className="block text-sm font-medium mb-2">
+                Descrição da alteração (opcional)
+              </label>
+              <Textarea
+                id="status-description"
+                placeholder="Descreva o motivo da alteração de status..."
+                value={statusDescription}
+                onChange={(e) => setStatusDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
           </div>
 
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => { setStatusModalOpen(false); setSelectedStatus(null); }}>
               Cancelar
             </Button>
-            <Button variant={"primary"} onClick={() => selectedStatus && performStatusChange(selectedStatus)} disabled={!selectedStatus}>
+            <Button variant={"primary"} onClick={() => selectedStatus && performStatusChange(selectedStatus, statusDescription)} disabled={!selectedStatus}>
               Confirmar alteração
             </Button>
           </DialogFooter>

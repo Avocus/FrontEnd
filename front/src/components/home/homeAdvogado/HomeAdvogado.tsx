@@ -19,33 +19,15 @@ import { useProcessosDisponiveis } from "@/hooks/useProcessosDisponiveis";
 
 function useProcessosDisponiveisCount() {
   const [totalDisponiveis, setTotalDisponiveis] = useState(0);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const { addNotification } = useNotificationStore();
   const { processos, fetchProcessosDisponiveis } = useProcessosDisponiveis();
 
-  const verificarProcessosDisponiveis = useCallback(() => {
-    if (!isInitialized) return;
-
-    try {
-      const disponiveis = processos.length;
-      setTotalDisponiveis(disponiveis);
-    } catch (error) {
-      console.error("Erro ao verificar processos disponíveis:", error);
-      setTotalDisponiveis(0);
-    }
-  }, [processos, addNotification, isInitialized]);
+  useEffect(() => {
+    fetchProcessosDisponiveis();
+  }, []);
 
   useEffect(() => {
-    const carregarDados = async () => {
-      await fetchProcessosDisponiveis();
-      setIsInitialized(true);
-    };
-    carregarDados();
-  }, [fetchProcessosDisponiveis]);
-
-  useEffect(() => {
-    verificarProcessosDisponiveis();
-  }, [verificarProcessosDisponiveis]);
+    setTotalDisponiveis(processos.length);
+  }, [processos]);
 
   return { totalDisponiveis };
 }

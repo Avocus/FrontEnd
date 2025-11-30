@@ -80,7 +80,7 @@ const useProcessoStoreBase = create<ProcessoState>()(
                 statusAnterior: update.statusAnterior,
                 novoStatus: update.novoStatus,
                 descricao: update.descricao,
-                autor: "sistema" as const, // Por enquanto, definir como sistema
+                autor: "advogado" as const, // Status updates são feitos pelo advogado
                 observacoes: undefined
               })) : [],
               // Campos que existem no frontend mas não no backend
@@ -162,7 +162,7 @@ const useProcessoStoreBase = create<ProcessoState>()(
                 statusAnterior: update.statusAnterior,
                 novoStatus: update.novoStatus,
                 descricao: update.descricao,
-                autor: "sistema" as const, // Por enquanto, definir como sistema
+                autor: "advogado" as const, // Status updates são feitos pelo advogado
                 observacoes: undefined
               })) : [],
               // Campos que existem no frontend mas não no backend

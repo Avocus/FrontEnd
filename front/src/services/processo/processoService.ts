@@ -23,6 +23,11 @@ export interface AtribuirAdvogadoRequest {
   advogadoId: string;
 }
 
+export interface AtualizarStatusRequest {
+  novoStatus: string;
+  descricao: string;
+}
+
 export const criarProcesso = async (processoData: CriarProcessoRequest): Promise<ProcessoDTO> => {
   try {
     const response = await api.post('/processo', processoData);
@@ -93,6 +98,25 @@ export const atribuirAdvogadoProcesso = async (processoId: string, advogadoId: s
     return responseData.data;
   } catch (error) {
     console.error('Erro ao atribuir advogado ao processo:', error);
+    throw error;
+  }
+};
+
+export const atualizarStatusProcesso = async (processoId: string, novoStatus: string, descricao: string): Promise<ProcessoDTO> => {
+  try {
+    const response = await api.put(`/processo/${processoId}/status`, {
+      novoStatus,
+      descricao
+    });
+    const responseData = response.data as { data?: ProcessoDTO };
+
+    if (!responseData.data) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    return responseData.data;
+  } catch (error) {
+    console.error('Erro ao atualizar status do processo:', error);
     throw error;
   }
 };
