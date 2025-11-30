@@ -56,4 +56,11 @@ export const TICKET_ROUTES = {
   MESSAGES: (id: string) => `${API_BASE_URL}/ticket/${id}/messages`,
 };
 
-// Adicione outras categorias de rotas conforme necessário 
+// Rotas de processos
+export const PROCESSO_ROUTES = {
+  LIST: `${API_BASE_URL}/processo`,
+  DETAIL: (id: string) => `${API_BASE_URL}/processo/${id}`,
+  CREATE: `${API_BASE_URL}/processo`,
+  DISPONIVEIS: `${API_BASE_URL}/processo/disponiveis`,
+  ASSIGN: (id: string) => `${API_BASE_URL}/processo/${id}/atribuir-advogado`,
+}; 

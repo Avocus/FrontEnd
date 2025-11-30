@@ -19,69 +19,63 @@ import {
     Timer,
     Activity,
 } from "lucide-react";
+import { useProcessosDisponiveis } from "@/hooks/useProcessosDisponiveis";
 
-function useProcessosPendentes() {
-  const [processosPendentes, setProcessosPendentes] = useState<ProcessoCliente[]>([]);
+function useProcessosDisponiveisCount() {
+  const [totalDisponiveis, setTotalDisponiveis] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
   const { addNotification } = useNotificationStore();
-  const { processosCliente, processosNotificados, marcarProcessoComoNotificado, carregarProcessosCliente } = useProcessoStore();
+  const { processos, fetchProcessosDisponiveis } = useProcessosDisponiveis();
 
-
-  const verificarCasosPendentes = useCallback(() => {
-    if (!isInitialized) return; // Aguardar inicialização completa
+  const verificarProcessosDisponiveis = useCallback(() => {
+    if (!isInitialized) return;
 
     try {
-      // Usar dados da store em vez de localStorage
-      const pendentes = processosCliente.filter((caso) => caso.status === StatusProcesso.PENDENTE);
+      const disponiveis = processos.length;
 
-      // Verificar se há processos novos que ainda não foram notificados
-      const processosNovos = pendentes.filter((caso) => !processosNotificados.has(caso.id));
-
-      if (processosNovos.length > 0) {
+      // Por enquanto, notificar sempre que há processos disponíveis
+      // TODO: Implementar sistema de notificações baseado em processos não notificados
+      if (disponiveis > 0) {
         const notificacao = {
-          titulo: "Novos processos disponíveis",
-          mensagem: `Você tem ${processosNovos.length} novo${processosNovos.length > 1 ? 's' : ''} caso${processosNovos.length > 1 ? 's' : ''} pendente${processosNovos.length > 1 ? 's' : ''} para análise`,
+          titulo: "Processos disponíveis",
+          mensagem: `Você tem ${disponiveis} processo${disponiveis > 1 ? 's' : ''} disponível${disponiveis > 1 ? 'is' : ''} para aceitar`,
           tipo: NotificacaoTipo.INFO,
-          link: "/processos"
+          link: "/processos/disponiveis"
         };
 
-        // Adicionar notificação
+        // Adicionar notificação (por enquanto sempre, depois implementar controle)
         addNotification(notificacao);
-
-        // Marcar os processos novos como notificados usando a store
-        processosNovos.forEach(processo => marcarProcessoComoNotificado(processo.id));
       }
 
-      setProcessosPendentes(pendentes);
+      setTotalDisponiveis(disponiveis);
     } catch (error) {
-      console.error("Erro ao verificar processos pendentes:", error);
-      setProcessosPendentes([]);
+      console.error("Erro ao verificar processos disponíveis:", error);
+      setTotalDisponiveis(0);
     }
-  }, [processosCliente, processosNotificados, marcarProcessoComoNotificado, addNotification, isInitialized]);
+  }, [processos, addNotification, isInitialized]);
 
   useEffect(() => {
-    // Carregar dados da store e inicializar
     const carregarDados = async () => {
-      await carregarProcessosCliente();
+      await fetchProcessosDisponiveis();
       setIsInitialized(true);
     };
     carregarDados();
-  }, [carregarProcessosCliente]);
+  }, [fetchProcessosDisponiveis]);
 
   useEffect(() => {
-    verificarCasosPendentes();
-  }, [verificarCasosPendentes]);
+    verificarProcessosDisponiveis();
+  }, [verificarProcessosDisponiveis]);
 
-  return { processosPendentes, totalPendentes: processosPendentes.length };
+  return { totalDisponiveis };
 }
 
 export function HomeAdvogado() {
-    const { totalPendentes } = useProcessosPendentes();
+    const { totalDisponiveis } = useProcessosDisponiveisCount();
 
-    return <DesktopView totalPendentes={totalPendentes} />;
+    return <DesktopView totalDisponiveis={totalDisponiveis} />;
 }
 
-function DesktopView({ totalPendentes }: { totalPendentes: number }) {
+function DesktopView({ totalDisponiveis }: { totalDisponiveis: number }) {
     const router = useRouter();
 
     return (
@@ -98,14 +92,14 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                             <Activity className="w-4 h-4 inline mr-1" />
                             Sistema Ativo
                         </div>
-                        {/* Indicador de processos pendentes */}
-                        {totalPendentes > 0 && (
+                        {/* Indicador de processos disponíveis */}
+                        {totalDisponiveis > 0 && (
                             <div 
                                 className="bg-dashboard-card-orange text-dashboard-orange px-3 py-1 rounded-full text-sm font-medium cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => router.push("/processos")}
+                                onClick={() => router.push("/processos/disponiveis")}
                             >
                                 <AlertTriangle className="w-4 h-4 inline mr-1" />
-                                {totalPendentes} caso{totalPendentes > 1 ? 's' : ''} pendente{totalPendentes > 1 ? 's' : ''}
+                                {totalDisponiveis} processo{totalDisponiveis > 1 ? 's' : ''} disponível{totalDisponiveis > 1 ? 'is' : ''}
                             </div>
                         )}
                     </div>
@@ -118,39 +112,39 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                 <section className="grid grid-cols-3 gap-6 mb-8">
                     <Card 
                         className={`border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1 ${
-                            totalPendentes > 0 
+                            totalDisponiveis > 0 
                                 ? 'bg-gradient-dashboard-orange' 
                                 : 'bg-gradient-dashboard-blue'
                         }`}
-                        onClick={() => router.push("/processos")}
+                        onClick={() => router.push(totalDisponiveis > 0 ? "/processos/disponiveis" : "/processos")}
                     >
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className={`text-sm font-medium ${
-                                        totalPendentes > 0 
+                                        totalDisponiveis > 0 
                                             ? 'text-dashboard-card-orange-light' 
                                             : 'text-dashboard-card-blue-light'
                                     }`}>
-                                        {totalPendentes > 0 ? 'Casos Pendentes' : 'Casos Ativos'}
+                                        {totalDisponiveis > 0 ? 'Processos Disponíveis' : 'Casos Ativos'}
                                     </p>
                                     <p className="text-3xl font-bold text-dashboard-card-primary">
-                                        {totalPendentes > 0 ? totalPendentes : '12'}
+                                        {totalDisponiveis > 0 ? totalDisponiveis : '12'}
                                     </p>
                                     <p className={`text-xs ${
-                                        totalPendentes > 0 
+                                        totalDisponiveis > 0 
                                             ? 'text-dashboard-card-orange-light' 
                                             : 'text-dashboard-card-blue-light'
                                     }`}>
-                                        {totalPendentes > 0 ? 'Aguardando análise' : '+2 este mês'}
+                                        {totalDisponiveis > 0 ? 'Aguardando atribuição' : '+2 este mês'}
                                     </p>
                                 </div>
                                 <div className={`p-3 rounded-full ${
-                                    totalPendentes > 0 
+                                    totalDisponiveis > 0 
                                         ? 'bg-white/20 dark:bg-orange-400/40' 
                                         : 'bg-white/20 dark:bg-blue-400/40'
                                 }`}>
-                                    {totalPendentes > 0 ? (
+                                    {totalDisponiveis > 0 ? (
                                         <AlertTriangle className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
                                     ) : (
                                         <Briefcase className="w-6 h-6 text-white dark:text-dashboard-card-primary" />
@@ -305,31 +299,31 @@ function DesktopView({ totalPendentes }: { totalPendentes: number }) {
                 <section className="grid grid-cols-4 gap-6">
                     <Card 
                         className={`cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 bg-card border-0 shadow-md relative ${
-                            totalPendentes > 0 ? 'ring-2 ring-dashboard-orange' : ''
+                            totalDisponiveis > 0 ? 'ring-2 ring-dashboard-orange' : ''
                         }`} 
-                        onClick={() => router.push("/processos")}
+                        onClick={() => router.push(totalDisponiveis > 0 ? "/processos/disponiveis" : "/processos")}
                     >
                         <CardContent className="p-6 flex flex-col items-center text-center">
-                            {totalPendentes > 0 && (
+                            {totalDisponiveis > 0 && (
                                 <div className="absolute -top-2 -right-2 bg-dashboard-orange text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
-                                    {totalPendentes > 9 ? '9+' : totalPendentes}
+                                    {totalDisponiveis > 9 ? '9+' : totalDisponiveis}
                                 </div>
                             )}
                             <div className={`p-4 rounded-full mb-4 ${
-                                totalPendentes > 0 
+                                totalDisponiveis > 0 
                                     ? 'bg-dashboard-orange-light' 
                                     : 'bg-dashboard-blue-light'
                             }`}>
-                                {totalPendentes > 0 ? (
+                                {totalDisponiveis > 0 ? (
                                     <AlertTriangle className="w-8 h-8 text-dashboard-orange" />
                                 ) : (
                                     <Briefcase className="w-8 h-8 text-dashboard-blue" />
                                 )}
                             </div>
-                            <h3 className="font-semibold mb-2 text-foreground">Casos</h3>
+                            <h3 className="font-semibold mb-2 text-foreground">Processos</h3>
                             <p className="text-sm text-muted-foreground">
-                                {totalPendentes > 0 
-                                    ? `${totalPendentes} pendente${totalPendentes > 1 ? 's' : ''}` 
+                                {totalDisponiveis > 0 
+                                    ? `${totalDisponiveis} disponível${totalDisponiveis > 1 ? 'is' : ''}` 
                                     : 'Gerenciar processos'
                                 }
                             </p>

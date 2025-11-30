@@ -14,6 +14,7 @@ import Link from "next/link";
 // Hooks customizados
 import { useProcessoDetalhes } from "@/hooks/useProcessoDetalhes";
 import { useTimeline } from "@/hooks/useTimeline";
+import { useProcessosDisponiveis } from "@/hooks/useProcessosDisponiveis";
 
 // Componentes compartilhados
 import { VisaoGeralComponent } from "./shared/VisaoGeralComponent";
@@ -44,6 +45,9 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
   // Hook para timeline
   const { addTimelineEntry } = useTimeline();
   const [modalSolicitarAberto, setModalSolicitarAberto] = useState(false);
+
+  // Hook para processos disponíveis
+  const { assignProcesso } = useProcessosDisponiveis();
 
   const solicitarDocumentos = () => {
     if (!processo) return;
@@ -213,6 +217,22 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     }
   };
 
+  const aceitarProcesso = async () => {
+    if (!processo) return;
+
+    try {
+      await assignProcesso(processo.id);
+      
+      // Após aceitar, recarregar os dados do processo
+      refetch();
+      
+      success("Processo aceito com sucesso!");
+    } catch (err) {
+      console.error("Erro ao aceitar processo:", err);
+      error("Erro ao aceitar processo. Tente novamente.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 text-center">
@@ -245,54 +265,73 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
 
       {/* Botões de ação */}
       <div className={`mb-6 flex gap-4 flex-wrap`}>
-        <Button
-          onClick={() => setModalSolicitarAberto(true)}
-          disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-          className="flex items-center gap-2"
-          variant="outline"
-        >
-          <FileText className="h-4 w-4" />
-          Solicitar Documentos
-        </Button>
-
-        {processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS && processo.documentosAnexados && processo.documentosAnexados.length > 0 && (
+        {processo.advogado ? (
+          // Botões para processos que já têm advogado atribuído
           <>
             <Button
-              onClick={aprovarDocumentos}
+              onClick={() => setModalSolicitarAberto(true)}
+              disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
               className="flex items-center gap-2"
-              variant="default"
+              variant="outline"
             >
-              <span className="text-sm">✅</span>
-              Aprovar Documentos
+              <FileText className="h-4 w-4" />
+              Solicitar Documentos
             </Button>
+
+            {processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS && processo.documentosAnexados && processo.documentosAnexados.length > 0 && (
+              <>
+                <Button
+                  onClick={aprovarDocumentos}
+                  className="flex items-center gap-2"
+                  variant="default"
+                >
+                  <span className="text-sm">✅</span>
+                  Aprovar Documentos
+                </Button>
+                <Button
+                  onClick={rejeitarDocumentos}
+                  className="flex items-center gap-2"
+                  variant="destructive"
+                >
+                  <span className="text-sm">❌</span>
+                  Rejeitar Documentos
+                </Button>
+              </>
+            )}
+
             <Button
-              onClick={rejeitarDocumentos}
+              onClick={protocolarProcesso}
+              disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
               className="flex items-center gap-2"
-              variant="destructive"
             >
-              <span className="text-sm">❌</span>
-              Rejeitar Documentos
+              <Send className="h-4 w-4" />
+              Protocolar Processo
             </Button>
           </>
+        ) : (
+          // Botão para aceitar processo disponível
+          <Button
+            onClick={aceitarProcesso}
+            className="flex items-center gap-2"
+            variant="default"
+          >
+            <span className="text-sm">🎯</span>
+            Pegar Caso
+          </Button>
         )}
-
-        <Button
-          onClick={protocolarProcesso}
-          disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-          className="flex items-center gap-2"
-        >
-          <Send className="h-4 w-4" />
-          Protocolar Processo
-        </Button>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className={`grid w-full ${processo.advogado ? 'grid-cols-6' : 'grid-cols-3'}`}>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
-          <TabsTrigger value="timeline">Andamentos</TabsTrigger>
-          <TabsTrigger value="eventos">Eventos</TabsTrigger>
-          <TabsTrigger value="chat">Chat</TabsTrigger>
+          {processo.advogado && (
+            <>
+              <TabsTrigger value="documents">Documentos</TabsTrigger>
+              <TabsTrigger value="timeline">Andamentos</TabsTrigger>
+              <TabsTrigger value="eventos">Eventos</TabsTrigger>
+              <TabsTrigger value="chat">Chat</TabsTrigger>
+            </>
+          )}
           <TabsTrigger value="client">Cliente</TabsTrigger>
         </TabsList>
 
@@ -300,61 +339,65 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
           <VisaoGeralComponent processo={processo} isAdvogado={true} />
         </TabsContent>
 
-        <TabsContent value="documents" className="space-y-6">
-          {/* Seção de Solicitações de Documentos */}
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Documentos Solicitados ao Cliente</h3>
-            </div>
-            <DadosRequisitadosList
-              processoId={processoId}
-              clienteId={processo.cliente.id}
-              isAdvogado={true}
-              onStatusChange={refetch}
-            />
-          </div>
+        {processo.advogado && (
+          <>
+            <TabsContent value="documents" className="space-y-6">
+              {/* Seção de Solicitações de Documentos */}
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Documentos Solicitados ao Cliente</h3>
+                </div>
+                <DadosRequisitadosList
+                  processoId={processoId}
+                  clienteId={processo.cliente.id}
+                  isAdvogado={true}
+                  onStatusChange={refetch}
+                />
+              </div>
 
-          {/* Seção de Todos os Documentos */}
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Todos os Documentos</h3>
-            </div>
-            <DocumentosList
-              processoId={processoId}
-              isAdvogado={true}
-              onStatusChange={refetch}
-            />
-          </div>
+              {/* Seção de Todos os Documentos */}
+              <div className="border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Todos os Documentos</h3>
+                </div>
+                <DocumentosList
+                  processoId={processoId}
+                  isAdvogado={true}
+                  onStatusChange={refetch}
+                />
+              </div>
 
-          {/* Seção de Upload Livre (Advogado) */}
-          <div className="border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Upload de Documento</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Envie documentos adicionais relacionados ao processo sem vinculá-los a uma solicitação específica.
-            </p>
-            <UploadDocumentoButton
-              processoId={processoId}
-              clienteId={processo.cliente.id}
-              enviadoPorAdvogado={true}
-              onUploadComplete={() => {
-                // Recarregar documentos após upload
-                window.location.reload();
-              }}
-            />
-          </div>
-        </TabsContent>
+              {/* Seção de Upload Livre (Advogado) */}
+              <div className="border rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-4">Upload de Documento</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Envie documentos adicionais relacionados ao processo sem vinculá-los a uma solicitação específica.
+                </p>
+                <UploadDocumentoButton
+                  processoId={processoId}
+                  clienteId={processo.cliente.id}
+                  enviadoPorAdvogado={true}
+                  onUploadComplete={() => {
+                    // Recarregar documentos após upload
+                    window.location.reload();
+                  }}
+                />
+              </div>
+            </TabsContent>
 
-        <TabsContent value="timeline" className="space-y-4">
-          <TimelineComponent timeline={processo.timeline || []} isAdvogado={true} />
-        </TabsContent>
+            <TabsContent value="timeline" className="space-y-4">
+              <TimelineComponent timeline={processo.timeline || []} isAdvogado={true} />
+            </TabsContent>
 
-        <TabsContent value="eventos" className="space-y-4">
-          <EventosComponent processo={processo} />
-        </TabsContent>
+            <TabsContent value="eventos" className="space-y-4">
+              <EventosComponent processo={processo} />
+            </TabsContent>
 
-        <TabsContent value="chat" className="space-y-4">
-          <Chat processoId={processoId} isAdvogado={true} />
-        </TabsContent>
+            <TabsContent value="chat" className="space-y-4">
+              <Chat processoId={processoId} isAdvogado={true} />
+            </TabsContent>
+          </>
+        )}
 
         <TabsContent value="client" className="space-y-4">
           <div className="border rounded-lg p-4">

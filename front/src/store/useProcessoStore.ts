@@ -146,11 +146,6 @@ const useProcessoStoreBase = create<ProcessoState>()(
           try {
             const processo = await buscarProcessoPorId(id);
 
-            // Verificar se o processo tem advogado
-            if (!processo.advogado) {
-              return null;
-            }
-
             // Mapeamento usando destructuring para campos compatíveis
             const processoAdvogado: ProcessoAdvogado = {
               ...processo,

@@ -104,6 +104,7 @@ export function Sidebar({
       { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> },
       { label: "Novo Ticket", href: "/tickets/criar", icon: <FilePlus className="h-5 w-5" /> },
     ] : [
+      { label: "Processos Disponíveis", href: "/processos/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
       { label: "Tickets Disponíveis", href: "/tickets/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
       { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> }
     ]),

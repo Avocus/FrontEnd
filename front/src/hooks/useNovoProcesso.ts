@@ -41,40 +41,36 @@ export function useNovoProcesso() {
     try {
       let finalData = data
 
-      if (!isAdvogado) {
-        try {
-          const aiResult = await analiseIAService({
-            clienteId: Number(user?.client) || 0,
-            titulo: data.titulo,
-            descricao: data.descricao,
-          })
+      try {
+        const aiResult = await analiseIAService({
+          clienteId: Number(user?.client) || 0,
+          titulo: data.titulo,
+          descricao: data.descricao,
+        })
 
-          if (!aiResult.success) {
-            showError(aiResult.message || "Não foi possível abrir o processo: informação insuficiente.")
-            return
-          }
-
-          if (aiResult.processo) {
-            finalData = {
-              ...data,
-              titulo: aiResult.processo.titulo || data.titulo,
-              descricao: aiResult.processo.descricao || data.descricao,
-              tipoProcesso: (aiResult.processo.tipoProcesso as TipoProcesso) || data.tipoProcesso,
-            }
-          }
-        } catch (err) {
-          console.error("Erro ao analisar com IA:", err)
-          showError("Erro ao analisar sua solicitação. Tente novamente mais tarde.")
+        if (!aiResult.success) {
+          showError(aiResult.message || "Não foi possível abrir o processo: informação insuficiente.")
           return
         }
+
+        if (aiResult.processo) {
+          finalData = {
+            ...data,
+            titulo: aiResult.processo.titulo || data.titulo,
+            descricao: aiResult.processo.descricao || data.descricao,
+            tipoProcesso: (aiResult.processo.tipoProcesso as TipoProcesso) || data.tipoProcesso,
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao analisar com IA:", err)
+        showError("Erro ao analisar sua solicitação. Tente novamente mais tarde.")
+        return
       }
 
       if(isAdvogado && (!clienteSelecionado || !clienteSelecionado.id)) {
         showError("Cliente não encontrado | Não definido corretamente")
         return;
       }
-
-      console.log(user, clienteSelecionado)
 
       const processoRequest = {
         clienteId: isAdvogado ? clienteSelecionado?.id?.toString() : user?.id,
