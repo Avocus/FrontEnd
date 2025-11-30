@@ -3,8 +3,9 @@ import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/store"
 import { useToast } from "@/hooks/useToast"
 import { analiseIAService } from "@/services/analiseIAService"
-import { criarProcesso, CriarProcessoRequest } from "@/services/processo/processoService"
-import { TipoProcesso, StatusProcesso } from "@/types/enums"
+import { criarProcesso, CriarProcessoRequest, DadoRequisitadoRequest } from "@/services/processo/processoService"
+import { sugerirDocumentosIA } from "@/services/gemini/geminiService"
+import { TipoProcesso, StatusProcesso, getTipoProcessoLabel } from "@/types/enums"
 import { ClienteLista } from "@/types/entities/Cliente"
 import { useLayout } from "@/contexts/LayoutContext"
 
@@ -16,6 +17,8 @@ export interface NovoProcessoFormData {
   objetivos: string
   urgencia: "BAIXA" | "MEDIA" | "ALTA"
   documentosDisponiveis?: string
+  documentosSugeridos?: string[]
+  documentosSelecionados?: string[]
 }
 
 export function useNovoProcesso() {
@@ -24,10 +27,32 @@ export function useNovoProcesso() {
   const { success, error: showError, status: showStatus } = useToast()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingIA, setIsLoadingIA] = useState(false)
   const [clienteSelecionado, setClienteSelecionado] = useState<ClienteLista | null>(null)
   const [advogadoSelecionado, setAdvogadoSelecionado] = useState<{ id: string; nome: string; email: string; especialidades?: string[]; experiencia?: string } | null>(null)
   const [showClienteModal, setShowClienteModal] = useState(false)
   const [showAdvogadoModal, setShowAdvogadoModal] = useState(false)
+  const [documentosSugeridos, setDocumentosSugeridos] = useState<string[]>([])
+
+  const sugerirDocumentos = useCallback(async (data: NovoProcessoFormData) => {
+    setIsLoadingIA(true)
+    try {
+      const documentos = await sugerirDocumentosIA({
+        titulo: data.titulo,
+        descricao: data.descricao,
+        tipoProcesso: getTipoProcessoLabel(data.tipoProcesso),
+        situacaoAtual: data.situacaoAtual,
+        objetivos: data.objetivos,
+      })
+      setDocumentosSugeridos(documentos)
+      return documentos
+    } catch (error) {
+      console.error("Erro ao sugerir documentos:", error)
+      return []
+    } finally {
+      setIsLoadingIA(false)
+    }
+  }, [])
 
   const onSubmit = useCallback(async (data: NovoProcessoFormData) => {
     if (!user) {
@@ -89,8 +114,25 @@ export function useNovoProcesso() {
         return
       }
 
+      // Adicionar apenas os documentos SELECIONADOS pelo usuário
+      const dadosRequisitados: DadoRequisitadoRequest[] = (data.documentosSelecionados || []).map(doc => ({
+        nomeDado: doc,
+        tipo: 'DOCUMENTO' as const,
+        responsavel: 'CLIENTE' as const,
+      }))
+
+      console.log('📄 Documentos selecionados para criar solicitações:', data.documentosSelecionados)
+      console.log('📋 Dados requisitados que serão enviados:', dadosRequisitados)
+
       // TODO - ao criar como cliente, rascunho, ao criar como advogado, pendente
-      await criarProcesso(processoRequest as CriarProcessoRequest)
+      const processoCompleto = {
+        ...processoRequest,
+        dadosRequisitados,
+      }
+
+      console.log('🚀 Payload completo sendo enviado para criar processo:', processoCompleto)
+
+      await criarProcesso(processoCompleto as CriarProcessoRequest)
 
       success(isAdvogado ? "Processo criado com sucesso!" : "Solicitação de processo enviada com sucesso!")
 
@@ -109,6 +151,7 @@ export function useNovoProcesso() {
 
   return {
     isLoading,
+    isLoadingIA,
     clienteSelecionado,
     setClienteSelecionado,
     advogadoSelecionado,
@@ -117,6 +160,8 @@ export function useNovoProcesso() {
     setShowClienteModal,
     showAdvogadoModal,
     setShowAdvogadoModal,
+    documentosSugeridos,
+    sugerirDocumentos,
     onSubmit,
   }
 }

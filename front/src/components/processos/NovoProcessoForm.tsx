@@ -56,6 +56,7 @@ interface NovoProcessoFormProps {
   setShowClienteModal: (show: boolean) => void
   showAdvogadoModal: boolean
   setShowAdvogadoModal: (show: boolean) => void
+  isLoadingIA?: boolean
 }
 
 export default function NovoProcessoForm({
@@ -69,6 +70,7 @@ export default function NovoProcessoForm({
   setShowClienteModal,
   showAdvogadoModal,
   setShowAdvogadoModal,
+  isLoadingIA = false,
 }: NovoProcessoFormProps) {
   const { user } = useAuthStore()
   const { isAdvogado } = useLayout()
@@ -515,11 +517,11 @@ export default function NovoProcessoForm({
         <div className="flex gap-3">
           <Button
             onClick={handlePreview}
-            disabled={!isValid}
+            disabled={!isValid || isLoadingIA}
             className="flex-1"
           >
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            Revisar Solicitação
+            {isLoadingIA ? "Analisando documentos necessários..." : "Revisar Solicitação"}
           </Button>
         </div>
       </div>
