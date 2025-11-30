@@ -3,12 +3,11 @@
 import ResetPassword from "@/components/login/ResetPassword";
 import { useSearchParams } from "next/navigation";
 import { useLayout } from "@/contexts/LayoutContext";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useAuthStore } from "@/store";
 import { useRouter } from 'next/navigation';
 
-
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
     const searchParams = useSearchParams();
     const token = searchParams?.get("token");
     const { updateConfig } = useLayout();
@@ -27,8 +26,6 @@ export default function ResetPasswordPage() {
     });
   }, [updateConfig, router, isAuthenticated]);
 
-
-
     return (
         <div className="w-full h-screen flex items-center justify-center p-4 absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(./bg-login.webp)' }}>
             {!token ? (
@@ -39,5 +36,13 @@ export default function ResetPasswordPage() {
                 <ResetPassword token={token} />
             )}
         </div>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ResetPasswordContent />
+        </Suspense>
     );
 }
