@@ -43,7 +43,6 @@ interface NovoProcessoPreviewProps {
 }
 
 export default function NovoProcessoPreview({
-  formData,
   payload,
   isAdvogado,
   onBackToForm,
@@ -223,7 +222,7 @@ export default function NovoProcessoPreview({
               <Button
                 onClick={onSubmit}
                 disabled={isLoading}
-                className="flex-1"
+                variant={"primary"}
               >
                 {isLoading ? "Enviando..." : "Solicitar Abertura de Processo"}
               </Button>

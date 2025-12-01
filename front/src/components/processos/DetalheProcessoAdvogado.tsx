@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/useToast";
 import { useProcessoStore } from "@/store";
 import { ProcessoAdvogado } from "@/types/entities";
-import { getStatusProcessoLabel, StatusProcesso } from "@/types/enums";
+import { getStatusProcessoLabel, getStatusUrgenciaLabel, StatusProcesso } from "@/types/enums";
 import { FileText, Send } from "lucide-react";
 import Link from "next/link";
 
@@ -238,17 +238,47 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
 
   const aceitarProcesso = async () => {
     if (!processo) return;
+    try {
+      // 1) Solicitar ao backend para atualizar o status para PENDENTE
+      await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.PENDENTE, 'Marcado como pendente antes da atribuição');
+
+      // Recarregar os dados do processo e forçar reload da página conforme solicitado
+      await refetch();
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
+
+      success('Processo marcado como pendente. Confirme sua escolha ou desista do processo.');
+    } catch (err) {
+      console.error("Erro ao aceitar processo:", err);
+      // Não tentar assign se houve erro na atualização de status ou na atribuição
+      error("Erro ao aceitar processo. Tente novamente.");
+    }
+  };
+
+  const confirmarEscolhaProcesso = async () => {
+    if (!processo) return;
 
     try {
       await assignProcesso(processo.id);
-      
-      // Após aceitar, recarregar os dados do processo
-      refetch();
-      
-      success("Processo aceito com sucesso!");
+      await refetch();
+      success('Processo atribuído com sucesso!');
     } catch (err) {
-      console.error("Erro ao aceitar processo:", err);
-      error("Erro ao aceitar processo. Tente novamente.");
+      console.error('Erro ao confirmar escolha do processo:', err);
+      error('Erro ao confirmar escolha do processo. Tente novamente.');
+    }
+  };
+
+  const desistirProcesso = async () => {
+    if (!processo) return;
+
+    try {
+      await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.RASCUNHO, 'Advogado desistiu do processo');
+      await refetch();
+      success('Você desistiu do processo. Status revertido para rascunho.');
+    } catch (err) {
+      console.error('Erro ao desistir do processo:', err);
+      error('Erro ao desistir do processo. Tente novamente.');
     }
   };
 
@@ -319,25 +349,49 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
             )}
           </>
         ) : (
-          // Botão para aceitar processo disponível
+          // Processo disponível: dependendo do status mostramos ações diferentes
+          (() => {
+            if (processo.status === StatusProcesso.PENDENTE) {
+              // Se já está pendente, oferecer confirmar ou desistir
+              return (
+                <div className="flex gap-2">
+                  <Button onClick={confirmarEscolhaProcesso} className="flex items-center gap-2" variant="primary">
+                    <span className="text-sm">✅</span>
+                    Confirmar escolha de caso
+                  </Button>
+                  <Button onClick={desistirProcesso} className="flex items-center gap-2" variant="secondary">
+                    <span className="text-sm">❌</span>
+                    Desistir do processo
+                  </Button>
+                </div>
+              );
+            }
+
+            // Botão padrão para marcar como pendente (inicia fluxo)
+            return (
+              <Button
+                onClick={aceitarProcesso}
+                className="flex items-center gap-2"
+                variant="primary"
+              >
+                <span className="text-sm">🎯</span>
+                Pegar Caso
+              </Button>
+            );
+          })()
+        )}
+
+        {processo.status !== StatusProcesso.RASCUNHO && processo.status !== StatusProcesso.PENDENTE &&(
           <Button
-            onClick={aceitarProcesso}
-            className="flex items-center gap-2"
-            variant="default"
+            onClick={protocolarProcesso}
+            disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
+            variant="primary" size="sm" className="bg-primary hover:bg-secondary"
           >
-            <span className="text-sm">🎯</span>
-            Pegar Caso
+            <Send className="h-4 w-4" />
+            Trocar Status do Processo
           </Button>
         )}
 
-        <Button
-          onClick={protocolarProcesso}
-          disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-          variant="primary" size="sm" className="bg-primary hover:bg-secondary"
-        >
-          <Send className="h-4 w-4" />
-          Trocar Status do Processo
-        </Button>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
@@ -436,7 +490,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
               </div>
               <div>
                 <p className="font-medium">Nível de Urgência</p>
-                <p className="text-muted-foreground capitalize">{processo.urgencia}</p>
+                <p className="text-muted-foreground capitalize">{getStatusUrgenciaLabel(processo.urgencia)}</p>
               </div>
             </div>
           </div>

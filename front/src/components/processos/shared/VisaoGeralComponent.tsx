@@ -1,5 +1,5 @@
 import { ProcessoCliente, ProcessoAdvogado } from "@/types/entities";
-import { getStatusProcessoLabel, StatusProcesso } from "@/types/enums";
+import { getStatusProcessoLabel, getStatusUrgenciaLabel, getTipoProcessoLabel, StatusProcesso } from "@/types/enums";
 
 interface VisaoGeralComponentProps {
   processo: ProcessoCliente | ProcessoAdvogado;
@@ -16,7 +16,17 @@ export function VisaoGeralComponent({ processo, isAdvogado }: VisaoGeralComponen
           <div className="space-y-2">
             {processo.status === StatusProcesso.RASCUNHO && (
               <p className="text-sm text-green-800 dark:text-green-200">
-                • <strong>Aguardando:</strong> Seu processo está na fila de análise. Um advogado irá avaliar e aceitar seu processo em breve.
+                • <strong>Aguardar:</strong> Seu processo está na fila de análise. Um advogado irá avaliar seu processo em breve.
+              </p>
+            )}
+            {processo.status === StatusProcesso.PENDENTE && (
+              <p className="text-sm text-green-800 dark:text-green-200">
+                • <strong>Aguardar:</strong> Seu processo está com a análise sendo finalizada e logo será atribuído a um advogado.
+              </p>
+            )}
+            {processo.status === StatusProcesso.ACEITO && (
+              <p className="text-sm text-green-800 dark:text-green-200">
+                • <strong>Aguardar:</strong> Seu processo está com a aceito pelo advogado. Em breve ele entrará em contato para os próximos passos.
               </p>
             )}
             {processo.status === StatusProcesso.EM_ANDAMENTO && (
@@ -91,8 +101,8 @@ export function VisaoGeralComponent({ processo, isAdvogado }: VisaoGeralComponen
             {isAdvogado && (processo as ProcessoAdvogado).dataAceite && (
               <p><span className="font-medium text-foreground">Data de Aceite:</span> {new Date((processo as ProcessoAdvogado).dataAceite).toLocaleDateString('pt-BR')}</p>
             )}
-            <p><span className="font-medium text-foreground">Tipo de Processo:</span> {processo.tipoProcesso}</p>
-            <p><span className="font-medium text-foreground">Urgência:</span> {processo.urgencia}</p>
+            <p><span className="font-medium text-foreground">Tipo de Processo:</span> {getTipoProcessoLabel(processo.tipoProcesso)}</p>
+            <p><span className="font-medium text-foreground">Urgência:</span> {getStatusUrgenciaLabel(processo.urgencia)}</p>
             <p><span className="font-medium text-foreground">Descrição:</span> {processo.descricao}</p>
           </div>
         </div>
@@ -101,8 +111,12 @@ export function VisaoGeralComponent({ processo, isAdvogado }: VisaoGeralComponen
           <h2 className="text-xl font-semibold mb-2">Situação Atual</h2>
           <p className="text-sm text-muted-foreground mb-4">{getStatusProcessoLabel(processo.situacaoAtual as StatusProcesso)}</p>
 
-          <h3 className="font-medium mb-2">Objetivos</h3>
-          <p className="text-sm text-muted-foreground mb-4">{processo.objetivos}</p>
+          {typeof processo.objetivos === "string" && processo.objetivos.trim() !== "" && (
+            <>
+              <h3 className="font-medium mb-2">Objetivos</h3>
+              <p className="text-sm text-muted-foreground mb-4">{processo.objetivos}</p>
+            </>
+          )}
 
           {(processo as ProcessoCliente).documentosDisponiveis && (
             <>

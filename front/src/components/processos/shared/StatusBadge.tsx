@@ -7,11 +7,11 @@ interface StatusBadgeProps {
   isAdvogado?: boolean;
 }
 
-export function StatusBadge({ status, isAdvogado = false }: StatusBadgeProps) {
+export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <Badge className={cn("flex items-center gap-1", getStatusColor(status))}>
       {getStatusIcon(status)}
-      {getStatusLabel(status, isAdvogado)}
+      {getStatusLabel(status)}
     </Badge>
   );
 }

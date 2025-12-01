@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { StatusBadge } from './shared/StatusBadge';
 
 interface DadosRequisitadosListProps {
   processoId: string;
@@ -139,15 +140,9 @@ export function DadosRequisitadosList({
 
                 <div className="flex-shrink-0">
                   {dado.enviado ? (
-                    <Badge variant="default" className="bg-green-500">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Enviado
-                    </Badge>
+                    <StatusBadge status={'DADOS_ENVIADOS'} />
                   ) : (
-                    <Badge variant="secondary">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Pendente
-                    </Badge>
+                    <StatusBadge status={'PENDENTE'} />
                   )}
                 </div>
               </div>
@@ -156,7 +151,7 @@ export function DadosRequisitadosList({
               {!isAdvogado && !dado.enviado && (
                 <div className="pt-3 border-t">
                   <Button
-                    variant="default"
+                    variant="primary"
                     size="sm"
                     onClick={() => setUploadingDadoId(String(dado.id))}
                     className="w-full"

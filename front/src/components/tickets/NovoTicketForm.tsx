@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -185,7 +184,8 @@ export default function NovoTicketForm() {
           <Button
             onClick={handleSubmit(handleSubmitForm)}
             disabled={!isValid || isLoading}
-            className="flex-1"
+            className="w-full"
+            variant={"primary"}
           >
             {isLoading ? "Criando..." : "Criar Ticket"}
           </Button>
