@@ -96,7 +96,7 @@ export default function TicketsPage() {
                   {ticket.status === 'PENDING' && (
                     <Button
                       onClick={() => handlePegarTicket(ticket.id)}
-                      className="bg-green-600 hover:bg-green-700"
+                      variant={"primary"}
                     >
                       Pegar Caso
                     </Button>

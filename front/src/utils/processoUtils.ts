@@ -18,41 +18,29 @@ import {
 } from "lucide-react";
 
 // Função utilitária para obter label do status
-export const getStatusLabel = (status: string, isAdvogado: boolean = false) => {
-  if (isAdvogado) {
-    const labels: Record<string, string> = {
-      [StatusProcesso.RASCUNHO]: "Rascunho",
-      [StatusProcesso.PENDENTE]: "Pendente",
-      [StatusProcesso.EM_ANALISE]: "Em Análise",
-      [StatusProcesso.ACEITO]: "Aceito",
-      [StatusProcesso.REJEITADO]: "Rejeitado",
-      [StatusProcesso.AGUARDANDO_DADOS]: "Aguardando Documentos",
-      [StatusProcesso.DADOS_ENVIADOS]: "Documentos Enviados",
-      [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "Aguardando Análise de Documentos",
-      [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
-      [StatusProcesso.PROTOCOLADO]: "Protocolado",
-      [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
-      [StatusProcesso.CONCLUIDO]: "Concluído",
-      [StatusProcesso.ARQUIVADO]: "Arquivado"
-    };
-    return labels[status] || status;
-  } else {
-    const labels: Record<string, string> = {
-      [StatusProcesso.RASCUNHO]: "Rascunho",
-      [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
-      [StatusProcesso.AGUARDANDO_DADOS]: "Aguardando Documentos",
-      [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
-      [StatusProcesso.CONCLUIDO]: "Concluído",
-      [StatusProcesso.ARQUIVADO]: "Arquivado"
-    };
-    return labels[status] || status;
-  }
+export const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    [StatusProcesso.RASCUNHO]: "Rascunho",
+    [StatusProcesso.PENDENTE]: "Pendente",
+    [StatusProcesso.EM_ANALISE]: "Em Análise",
+    [StatusProcesso.ACEITO]: "Aceito",
+    [StatusProcesso.REJEITADO]: "Rejeitado",
+    [StatusProcesso.AGUARDANDO_DADOS]: "Aguardando Documentos",
+    [StatusProcesso.DADOS_ENVIADOS]: "Documentos Enviados",
+    [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "Aguardando Análise de Documentos",
+    [StatusProcesso.EM_ANDAMENTO]: "Em Andamento",
+    [StatusProcesso.PROTOCOLADO]: "Protocolado",
+    [StatusProcesso.EM_JULGAMENTO]: "Em Julgamento",
+    [StatusProcesso.CONCLUIDO]: "Concluído",
+    [StatusProcesso.ARQUIVADO]: "Arquivado"        
+  };
+  return labels[status] || status;
 };
 
 // Função utilitária para obter variante do badge de status
 export const getStatusBadgeVariant = (status: string) => {
   const variants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
-    [StatusProcesso.RASCUNHO]: "outline",
+    [StatusProcesso.RASCUNHO] : "outline",
     [StatusProcesso.PENDENTE]: "secondary",
     [StatusProcesso.EM_ANALISE]: "default",
     [StatusProcesso.ACEITO]: "default",
@@ -72,21 +60,21 @@ export const getStatusBadgeVariant = (status: string) => {
 // Função utilitária para obter cor do status
 export const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
-    [StatusProcesso.RASCUNHO]: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700",
-    [StatusProcesso.PENDENTE]: "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600",
-    [StatusProcesso.EM_ANALISE]: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
-    [StatusProcesso.ACEITO]: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
-    [StatusProcesso.REJEITADO]: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700",
-    [StatusProcesso.AGUARDANDO_DADOS]: "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700",
-    [StatusProcesso.DADOS_ENVIADOS]: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700",
-    [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700",
-    [StatusProcesso.EM_ANDAMENTO]: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-700",
-    [StatusProcesso.PROTOCOLADO]: "bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900 dark:text-teal-200 dark:border-teal-700",
-    [StatusProcesso.EM_JULGAMENTO]: "bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:border-pink-700",
-    [StatusProcesso.CONCLUIDO]: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900 dark:text-emerald-200 dark:border-emerald-700",
-    [StatusProcesso.ARQUIVADO]: "bg-stone-100 text-stone-800 border-stone-200 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-600"
+    [StatusProcesso.RASCUNHO]: "bg-dashboard-yellow-light text-dashboard-yellow border-dashboard-yellow",
+    [StatusProcesso.PENDENTE]: "bg-dashboard-gray-light text-dashboard-gray border-dashboard-gray",
+    [StatusProcesso.EM_ANALISE]: "bg-dashboard-blue-light text-dashboard-blue border-dashboard-blue",
+    [StatusProcesso.ACEITO]: "bg-dashboard-green-light text-dashboard-green border-dashboard-green",
+    [StatusProcesso.REJEITADO]: "bg-dashboard-red-light text-dashboard-red border-dashboard-red",
+    [StatusProcesso.AGUARDANDO_DADOS]: "bg-dashboard-orange-light text-dashboard-orange border-dashboard-orange",
+    [StatusProcesso.DADOS_ENVIADOS]: "bg-dashboard-purple-light text-dashboard-purple border-dashboard-purple",
+    [StatusProcesso.AGUARDANDO_ANALISE_DADOS]: "bg-dashboard-blue-light text-dashboard-blue border-dashboard-blue",
+    [StatusProcesso.EM_ANDAMENTO]: "bg-dashboard-emerald-light text-dashboard-emerald border-dashboard-emerald",
+    [StatusProcesso.PROTOCOLADO]: "bg-dashboard-blue-light text-dashboard-blue border-dashboard-blue",
+    [StatusProcesso.EM_JULGAMENTO]: "bg-dashboard-yellow-light text-dashboard-yellow border-dashboard-yellow",
+    [StatusProcesso.CONCLUIDO]: "bg-dashboard-green-light text-dashboard-green border-dashboard-green",
+    [StatusProcesso.ARQUIVADO]: "bg-dashboard-gray-light text-dashboard-gray border-dashboard-gray"
   };
-  return colors[status] || "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600";
+  return colors[status] || "bg-dashboard-gray-light text-dashboard-gray border-dashboard-gray";
 };
 
 // Função utilitária para obter ícone do status

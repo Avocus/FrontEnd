@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import { ProcessoCliente } from "@/types/entities";
+import { getStatusUrgenciaLabel } from "@/types";
 
 interface ModalProcessoPendenteProps {
   processo: ProcessoCliente | null;
@@ -43,7 +44,7 @@ export function ModalProcessoPendente({ processo, isOpen, onClose, onAceitar, on
             </div>
             <div>
               <h4 className="font-medium">Urgência</h4>
-              <p className="text-sm text-muted-foreground capitalize">{processo.urgencia}</p>
+              <p className="text-sm text-muted-foreground capitalize">{getStatusUrgenciaLabel(processo.urgencia)}</p>
             </div>
           </div>
 

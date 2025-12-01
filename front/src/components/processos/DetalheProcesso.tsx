@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useProcessoStore } from "@/store";
 import { ProcessoCliente, ProcessoAdvogado, Evento, TimelineEntry } from "@/types/entities";
-import { StatusProcesso } from "@/types/enums";
+import { getStatusUrgenciaLabel, StatusProcesso } from "@/types/enums";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
@@ -174,7 +174,7 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
               </div>
               <div>
                 <p className="font-medium">Nível de Urgência</p>
-                <p className="text-muted-foreground capitalize">{processo.urgencia}</p>
+                <p className="text-muted-foreground capitalize">{getStatusUrgenciaLabel(processo.urgencia)}</p>
               </div>
               <div>
                 <p className="font-medium">Tipo de Processo</p>

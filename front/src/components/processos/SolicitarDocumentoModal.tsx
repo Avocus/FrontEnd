@@ -174,7 +174,7 @@ export function SolicitarDocumentoModal({
             <Button type="button" variant="outline" onClick={handleCancel}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading || !formData.descricao.trim()}>
+            <Button type="submit" disabled={isLoading || !formData.descricao.trim()} variant={"primary"}>
               {isLoading ? (
                 <>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent mr-2" />

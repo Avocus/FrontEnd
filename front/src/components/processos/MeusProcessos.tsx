@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/store"
 import { useLayout } from "@/contexts/LayoutContext"
-import { TipoProcesso, StatusProcesso, getStatusProcessoLabel } from "@/types/enums"
-import { getColumnColor } from "@/utils/processoUtils"
+import { TipoProcesso, StatusProcesso, getStatusProcessoLabel, getStatusUrgenciaLabel } from "@/types/enums"
+import { getColumnColor, getStatusBadgeVariant, getStatusLabel } from "@/utils/processoUtils"
 
 import { 
   Briefcase, 
@@ -249,6 +249,7 @@ export default function MeusProcessos() {
                   </p>
                   {!searchTerm && (
                     <Button 
+                      variant={"primary"}
                       onClick={handleNovoProcesso}                  
                     >
                       <Plus className="h-4 w-4 mr-2" />
@@ -278,7 +279,7 @@ export default function MeusProcessos() {
                             </div>
                             <div className={cn("flex items-center gap-1 font-medium", getUrgenciaStyles(processo.urgencia).text)}>
                               <AlertCircle className="h-4 w-4" />
-                              Urgência {processo.urgencia}
+                              Urgência {getStatusUrgenciaLabel(processo.urgencia)}
                             </div>
                           </div>
                         </div>
@@ -332,7 +333,7 @@ export default function MeusProcessos() {
                           </div>
                           <div className="flex items-center justify-between">
                             <div className={cn("text-xs font-medium", getUrgenciaStyles(processo.urgencia).text)}>
-                              {processo.urgencia}
+                              {getStatusUrgenciaLabel(processo.urgencia)}
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {formatarData(processo.dataSolicitacao)}

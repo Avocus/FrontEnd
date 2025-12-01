@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -518,7 +517,8 @@ export default function NovoProcessoForm({
           <Button
             onClick={handlePreview}
             disabled={!isValid || isLoadingIA}
-            className="flex-1"
+            variant={"primary"}
+            className="w-full"
           >
             <CheckCircle2 className="h-4 w-4 mr-2" />
             {isLoadingIA ? "Analisando documentos necessários..." : "Revisar Solicitação"}

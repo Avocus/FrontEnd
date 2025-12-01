@@ -73,6 +73,9 @@ export function LoginForm({
 
   const handleLoginEmail = useCallback(async (data: LoginFormData) => {
     try {
+      // Resetar último erro exibido para garantir que mensagens repetidas sejam mostradas novamente
+      setLastErrorShown(null);
+
       // Usar a função login do useAuthStore
       await login({
         email: data.email,
@@ -155,13 +158,12 @@ export function LoginForm({
               </Button>
               <div className="text-center text-sm">
                 Não possui conta?{" "}
-                <Link
-                  href="/cadastro"
-                  className="underline underline-offset-4"
+                <Button
+                variant={"primary"}
                   onClick={handleRegister}
                 >
                   Cadastrar
-                </Link>
+                </Button>
               </div>
             </div>
           </form>

@@ -319,7 +319,7 @@ const features = [
   {
     icon: FileText,
     title: "Documentos Seguros",
-    description: "Armazene e compartilhe documentos com criptografia de ponta a ponta."
+    description: "Armazene e compartilhe documentos com segurança."
   },
   {
     icon: MessageCircle,
@@ -344,8 +344,8 @@ const steps = [
     description: "Crie sua conta em menos de 2 minutos."
   },
   {
-    title: "Perfil",
-    description: "Complete seu perfil para melhor recomendação."
+    title: "Plataforma",
+    description: "Aproveite todos os recursos disponíveis."
   },
   {
     title: "Conexão",
@@ -407,7 +407,6 @@ const clientBenefits = [
     features: [
       "Notificações sobre prazos importantes",
       "Histórico completo das movimentações",
-      "Custos sempre claros e antecipados"
     ]
   }
 ];
@@ -425,11 +424,7 @@ const lawyerBenefits = [
       },
       {
         title: "Automatização de Rotinas",
-        description: "Petições automáticas, cálculos de prazos e alertas inteligentes"
-      },
-      {
-        title: "Relatórios Financeiros",
-        description: "Acompanhe receitas, despesas e honorários com gráficos detalhados"
+        description: "Petições automáticas, IA jurídica e alertas inteligentes"
       }
     ]
   },
@@ -443,12 +438,8 @@ const lawyerBenefits = [
         description: "Perfil profissional visível para potenciais clientes"
       },
       {
-        title: "Modelos de Documentos",
-        description: "Biblioteca com mais de 500 modelos de peças jurídicas"
-      },
-      {
         title: "Agenda Integrada",
-        description: "Sincronização com Google Calendar e lembretes automáticos"
+        description: "Agenda avançada para gerenciar audiências, prazos e compromissos"
       }
     ]
   }

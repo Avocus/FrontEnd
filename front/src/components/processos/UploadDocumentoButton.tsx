@@ -159,6 +159,7 @@ export function UploadDocumentoButton({
 
         <div className="flex gap-2">
           <Button
+            variant={"primary"}
             onClick={handleUpload}
             disabled={isUploading}
             className="flex-1"
@@ -220,7 +221,7 @@ export function UploadDocumentoButton({
       </div>
 
       <Button
-        variant={variant}
+        variant={"primary"}
         size={size}
         onClick={() => fileInputRef.current?.click()}
         className="w-full"

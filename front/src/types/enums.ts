@@ -103,3 +103,12 @@ export const getStatusTicketLabel = (status: string): string => {
   }
   return labels[status] || status
 }
+
+export const getStatusUrgenciaLabel = (status: string): string => {
+  const labels: Record<string, string> = {
+    'BAIXA': 'Baixa',
+    'MEDIA': 'Média',
+    'ALTA': 'Alta'
+  }
+  return labels[status] || status
+}

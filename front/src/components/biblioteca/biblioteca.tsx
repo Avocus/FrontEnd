@@ -55,7 +55,7 @@ export function Biblioteca() {
                         {categorias.map((categoria) => (
                             <Button
                                 key={categoria}
-                                variant={selectedCategory === categoria ? "default" : "outline"}
+                                variant={selectedCategory === categoria ? "primary" : "outline"}
                                 size="sm"
                                 onClick={() => setSelectedCategory(categoria)}
                                 className="h-8"
