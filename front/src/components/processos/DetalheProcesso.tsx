@@ -31,6 +31,7 @@ import { EventosComponent } from "./shared/EventosComponent";
 import Chat from "./shared/Chat";
 import { DadosRequisitadosList } from "./DadosRequisitadosList";
 import { DocumentosList } from "./DocumentosList";
+import { IAProcessoTab } from "./IAProcessoTab";
 
 // Utilitários
 import { getStatusLabel, getResponsavel } from "@/utils/processoUtils";
@@ -92,11 +93,12 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-6">
+      <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
           <TabsTrigger value="timeline">Andamentos</TabsTrigger>
           <TabsTrigger value="eventos">Eventos</TabsTrigger>
+          <TabsTrigger value="ia" className="text-purple-600">✨ IA</TabsTrigger>
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="status">Status</TabsTrigger>
         </TabsList>
@@ -139,6 +141,19 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
 
         <TabsContent value="eventos" className="space-y-4">
           <EventosComponent processo={processo} />
+        </TabsContent>
+
+        <TabsContent value="ia" className="space-y-4">
+          <IAProcessoTab 
+            processo={processo as ProcessoAdvogado}
+            documentos={(processo as ProcessoCliente).documentosPendentes?.map(doc => ({
+              id: doc.id,
+              titulo: doc.titulo || doc.tipo,
+              tipo: doc.tipo,
+              url: doc.url || '',
+              dataEnvio: doc.dataEnvio || new Date().toISOString(),
+            })) || []}
+          />
         </TabsContent>
 
         <TabsContent value="chat" className="space-y-4">

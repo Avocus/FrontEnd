@@ -11,7 +11,8 @@ import {
   Users, 
   ChevronLeft,
   ChevronRight,
-  Home
+  Home,
+  Sparkles
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -93,6 +94,7 @@ export function Sidebar({
   const mainItems: SidebarItemProps[] = [
     { label: "Home", href: "/home", icon: <Home className="h-5 w-5" /> },
     { label: "Agenda", href: "/agenda", icon: <Calendar className="h-5 w-5" /> },
+    { label: "IA Generativa", href: "/ia", icon: <Sparkles className="h-5 w-5 text-purple-500" /> },
     { label: "Chat", icon: <MessageCircle className="h-5 w-5" />, onClick: () => setChatOpen && setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca", icon: <BookOpen className="h-5 w-5" /> },
     { label: "Videoteca", href: "/videoteca", icon: <Video className="h-5 w-5" /> },

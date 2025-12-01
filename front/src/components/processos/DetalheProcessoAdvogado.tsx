@@ -30,6 +30,7 @@ import { DadosRequisitadosList } from "./DadosRequisitadosList";
 import { DocumentosList } from "./DocumentosList";
 import { UploadDocumentoButton } from "./UploadDocumentoButton";
 import { StatusBadge } from "./shared/StatusBadge";
+import { IAProcessoTab } from "./IAProcessoTab";
 
 // Utilitários
 import { getStatusLabel } from "@/utils/processoUtils";
@@ -341,13 +342,16 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className={`grid w-full ${processo.advogado ? 'grid-cols-6' : 'grid-cols-3'}`}>
+        <TabsList className={`grid w-full ${processo.advogado ? 'grid-cols-7' : 'grid-cols-3'}`}>
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           {processo.advogado && (
             <>
               <TabsTrigger value="documents">Documentos</TabsTrigger>
               <TabsTrigger value="timeline">Andamentos</TabsTrigger>
               <TabsTrigger value="eventos">Eventos</TabsTrigger>
+              <TabsTrigger value="ia" className="text-purple-600">
+                <span className="mr-1">✨</span> IA
+              </TabsTrigger>
               <TabsTrigger value="chat">Chat</TabsTrigger>
             </>
           )}
@@ -410,6 +414,18 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
 
             <TabsContent value="eventos" className="space-y-4">
               <EventosComponent processo={processo} />
+            </TabsContent>
+
+            <TabsContent value="ia" className="space-y-4">
+              <IAProcessoTab 
+                processo={processo}
+                documentos={processo.documentosAnexados?.map(doc => ({
+                  id: doc.id || '',
+                  nome: doc.nome || doc.nomeArquivo || 'Documento',
+                  url: doc.url || '',
+                  conteudo: undefined // TODO: Implementar extração de conteúdo do documento
+                })) || []}
+              />
             </TabsContent>
 
             <TabsContent value="chat" className="space-y-4">

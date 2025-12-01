@@ -365,37 +365,6 @@ export function DadosUsuario() {
         </Card>
     );
 
-    // Função para renderizar a tab de processos
-    const renderProcessosTab = () => (
-        <Card>
-            <CardHeader>
-                <CardTitle>Meus Processos</CardTitle>
-                <CardDescription>Acompanhe todos os seus processos</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-5">
-                    {profile && profile.processos && profile.processos.map((processo) => (
-                        <div key={processo.id} className="flex items-center justify-between p-4 rounded-lg border">
-                            <div>
-                                <h3 className="font-medium">{processo.titulo}</h3>
-                                <div className="flex items-center gap-1 mt-1">
-                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">{processo.dataInicio}</span>
-                                </div>
-                            </div>
-                            <Badge variant={processo.status === StatusProcesso.EM_ANDAMENTO ? "outline" : "default"}>
-                                {processo.status}
-                            </Badge>
-                        </div>
-                    ))}
-                </div>
-            </CardContent>
-            <CardFooter>
-                <Button variant="outline" className="w-full">Ver todos os processos</Button>
-            </CardFooter>
-        </Card>
-    );
-
     // Função para renderizar a tab de documentos
     const renderDocumentosTab = () => (
         <Card>
@@ -431,8 +400,6 @@ export function DadosUsuario() {
         switch (activeTab) {
             case "informacoes":
                 return renderInformacoesTab();
-            case "processos":
-                return renderProcessosTab();
             case "documentos":
                 return renderDocumentosTab();
             case "configuracoes":
