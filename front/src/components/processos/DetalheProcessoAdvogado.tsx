@@ -472,7 +472,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
 
             <TabsContent value="ia" className="space-y-4">
               <IAProcessoTab 
-                processo={processo}
+                processo={processo as ProcessoAdvogado}
                 documentos={processo.documentosAnexados?.map(doc => ({
                   id: doc.id || '',
                   nome: doc.nome || doc.nomeArquivo || 'Documento',

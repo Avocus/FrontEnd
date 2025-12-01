@@ -146,12 +146,11 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
         <TabsContent value="ia" className="space-y-4">
           <IAProcessoTab 
             processo={processo as ProcessoAdvogado}
-            documentos={(processo as ProcessoCliente).documentosPendentes?.map(doc => ({
-              id: doc.id,
-              titulo: doc.titulo || doc.tipo,
-              tipo: doc.tipo,
+            documentos={processo.documentosAnexados?.map(doc => ({
+              id: doc.id || '',
+              nome: doc.nome || doc.nomeArquivo || 'Documento',
               url: doc.url || '',
-              dataEnvio: doc.dataEnvio || new Date().toISOString(),
+              conteudo: undefined
             })) || []}
           />
         </TabsContent>
@@ -166,7 +165,7 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="font-medium">Status Atual</p>
-                <p className="text-muted-foreground">{getStatusLabel(processo.status, isAdvogado)}</p>
+                <p className="text-muted-foreground">{getStatusLabel(processo.status)}</p>
               </div>
               <div>
                 <p className="font-medium">{isAdvogado ? 'Cliente' : 'Advogado'} Responsável</p>

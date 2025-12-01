@@ -46,7 +46,7 @@ export function TimelineComponent({ timeline, isAdvogado = false }: TimelineComp
                   </div>
                   <p className="font-medium mb-1">{entry.descricao}</p>
                   <p className="text-sm text-muted-foreground">
-                    Status: {entry.statusAnterior ? `${getStatusLabel(entry.statusAnterior, isAdvogado)} → ` : ""}{getStatusLabel(entry.novoStatus, isAdvogado)}
+                    Status: {entry.statusAnterior ? `${getStatusLabel(entry.statusAnterior)} → ` : ""}{getStatusLabel(entry.novoStatus)}
                   </p>
                   {entry.observacoes && (
                     <p className="text-sm text-muted-foreground mt-1 italic">
