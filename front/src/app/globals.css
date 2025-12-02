@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Lugrasimo&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+/* Fontes carregadas via next/font/google em `src/app/layout.tsx` */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif; /* Corrige a fonte para Roboto */
+  font-family: var(--font-montserrat, 'Montserrat', Arial, Helvetica, sans-serif);
   /* Aplicar scrollbar fino em todo o corpo */
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -599,6 +599,6 @@ body {
 
 /* Exemplo de aplicação em uma tag específica */
 h1 {
-  font-family: 'Lugrasimo', cursive; /* Aplica a fonte Bytesized ao h1 */
+  font-family: var(--font-playfair, "Playfair Display"), serif;
   font-weight: 700; /* Define o peso da fonte */
 }

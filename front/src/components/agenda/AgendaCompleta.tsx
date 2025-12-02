@@ -455,7 +455,7 @@ export function AgendaCompleta() {
                 <h3 className="text-lg font-medium">
                   {format(date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 </h3>
-                <Badge variant={isToday(date) ? "default" : "outline"}>
+                <Badge variant={"outline"}>
                   {selectedDateEvents.length} eventos
                 </Badge>
               </div>
