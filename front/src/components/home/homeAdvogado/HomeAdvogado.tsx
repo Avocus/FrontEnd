@@ -281,7 +281,7 @@ function DesktopView({ totalDisponiveis }: { totalDisponiveis: number }) {
                                 <Users className="w-8 h-8 text-dashboard-purple" />
                             </div>
                             <h3 className="font-semibold mb-2 text-foreground">Clientes</h3>
-                            <p className="text-sm text-muted-foreground">Gerenciar clientes</p>
+                            <p className="text-sm text-muted-foreground">Ver Meus clientes</p>
                         </CardContent>
                     </Card>
                 </section>

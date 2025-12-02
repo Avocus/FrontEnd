@@ -360,7 +360,7 @@ export default function MeusProcessos() {
             <CardContent className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-muted-foreground">
                     {filteredProcessos.length}
                   </div>
                   <div className="text-sm text-muted-foreground">Total de Processos</div>
@@ -372,7 +372,7 @@ export default function MeusProcessos() {
                   <div className="text-sm text-muted-foreground">Rascunhos</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-muted-foreground">
                     {filteredProcessos.filter(c => c.status === StatusProcesso.EM_ANDAMENTO).length}
                   </div>
                   <div className="text-sm text-muted-foreground">Em Andamento</div>

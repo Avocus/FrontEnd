@@ -77,8 +77,8 @@ export default function ResumidorDocumento() {
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-3 bg-amber-500/10 rounded-lg">
-          <FileText className="h-6 w-6 text-amber-500" />
+        <div className="p-3 bg-dashboard-card-yellow rounded-lg">
+          <FileText className="h-6 w-6 text-dashboard-yellow-light" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">Resumidor de Documentos</h1>
@@ -97,8 +97,8 @@ export default function ResumidorDocumento() {
       )}
 
       {sucesso && (
-        <Alert className="border-green-500 bg-green-50 text-green-900">
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
+        <Alert className="border-dashboard-green bg-dashboard-card-green text-dashboard-green-light">
+          <CheckCircle2 className="h-4 w-4 text-dashboard-green-light" />
           <AlertDescription>{sucesso}</AlertDescription>
         </Alert>
       )}
@@ -122,7 +122,7 @@ export default function ResumidorDocumento() {
               />
               <label htmlFor="file-upload" className="cursor-pointer">
                 {loading ? (
-                  <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-primary" />
+                  <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-dashboard-blue-light" />
                 ) : (
                   <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                 )}
@@ -166,7 +166,7 @@ export default function ResumidorDocumento() {
           ) : loading ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
+                <Loader2 className="h-16 w-16 animate-spin text-dashboard-blue-light mb-4" />
                 <p className="text-lg font-medium">Analisando documento...</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   A IA está extraindo as informações
@@ -180,8 +180,8 @@ export default function ResumidorDocumento() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <FileText className="h-5 w-5 text-blue-600" />
+                      <div className="p-2 bg-dashboard-card-blue rounded-lg">
+                        <FileText className="h-5 w-5 text-dashboard-blue-light" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{resumo.pontosChave.length}</p>
@@ -194,8 +194,8 @@ export default function ResumidorDocumento() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-orange-100 rounded-lg">
-                        <Clock className="h-5 w-5 text-orange-600" />
+                      <div className="p-2 bg-dashboard-card-orange rounded-lg">
+                        <Clock className="h-5 w-5 text-dashboard-orange-light" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{resumo.prazosIdentificados.length}</p>
@@ -208,8 +208,8 @@ export default function ResumidorDocumento() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <Users className="h-5 w-5 text-green-600" />
+                      <div className="p-2 bg-dashboard-card-green rounded-lg">
+                        <Users className="h-5 w-5 text-dashboard-green-light" />
                       </div>
                       <div>
                         <p className="text-2xl font-bold">{resumo.partesEnvolvidas.length}</p>
@@ -222,8 +222,8 @@ export default function ResumidorDocumento() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <DollarSign className="h-5 w-5 text-purple-600" />
+                      <div className="p-2 bg-dashboard-card-purple rounded-lg">
+                        <DollarSign className="h-5 w-5 text-dashboard-purple-light" />
                       </div>
                       <div>
                         <p className="text-xl font-bold">
@@ -245,7 +245,7 @@ export default function ResumidorDocumento() {
                     <div>
                       <CardTitle>Resumo Executivo</CardTitle>
                       {resumo.tipoDocumento && (
-                        <Badge variant="outline" className="mt-2">
+                        <Badge variant="outline" className="mt-2 bg-dashboard-card-green text-dashboard-green-light border-dashboard-green">
                           {resumo.tipoDocumento}
                         </Badge>
                       )}
@@ -273,10 +273,10 @@ export default function ResumidorDocumento() {
 
               {/* Prazos */}
               {resumo.prazosIdentificados.length > 0 && (
-                <Card className="border-orange-200">
+                <Card className="border-dashboard-orange">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-orange-600" />
+                      <Clock className="h-5 w-5 text-dashboard-orange-light" />
                       Prazos Identificados
                     </CardTitle>
                   </CardHeader>
@@ -285,8 +285,8 @@ export default function ResumidorDocumento() {
                       {resumo.prazosIdentificados.map((prazo, index) => (
                         <div
                           key={index}
-                          className={`flex items-start justify-between p-3 rounded-lg border ${
-                            prazo.urgente ? "bg-red-50 border-red-200" : "bg-muted"
+                            className={`flex items-start justify-between p-3 rounded-lg border ${
+                            prazo.urgente ? "bg-dashboard-card-red border-dashboard-red" : "bg-muted"
                           }`}
                         >
                           <div className="flex-1">
@@ -318,7 +318,7 @@ export default function ResumidorDocumento() {
                     <ul className="space-y-2">
                       {resumo.pontosChave.map((ponto, index) => (
                         <li key={index} className="flex items-start gap-2 text-sm">
-                          <span className="text-primary font-bold mt-0.5">•</span>
+                          <span className="text-dashboard-blue-light font-bold mt-0.5">•</span>
                           <span>{ponto}</span>
                         </li>
                       ))}
@@ -334,7 +334,7 @@ export default function ResumidorDocumento() {
                     <ul className="space-y-2">
                       {resumo.acoesNecessarias.map((acao, index) => (
                         <li key={index} className="flex items-start gap-2 text-sm">
-                          <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <CheckCircle2 className="h-4 w-4 text-dashboard-green-light mt-0.5 flex-shrink-0" />
                           <span>{acao}</span>
                         </li>
                       ))}
@@ -364,9 +364,9 @@ export default function ResumidorDocumento() {
 
               {/* Observações */}
               {resumo.observacoes && resumo.observacoes.length > 0 && (
-                <Card className="border-yellow-200 bg-yellow-50/50">
+                <Card className="border-dashboard-yellow bg-dashboard-card-yellow">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-yellow-800">
+                    <CardTitle className="flex items-center gap-2 text-dashboard-yellow-light">
                       <AlertCircle className="h-5 w-5" />
                       Observações Importantes
                     </CardTitle>
@@ -375,7 +375,7 @@ export default function ResumidorDocumento() {
                     <ul className="space-y-2">
                       {resumo.observacoes.map((obs, index) => (
                         <li key={index} className="flex items-start gap-2 text-sm">
-                          <span className="text-yellow-600 font-bold mt-0.5">⚠</span>
+                          <span className="text-dashboard-yellow-light font-bold mt-0.5">⚠</span>
                           <span>{obs}</span>
                         </li>
                       ))}

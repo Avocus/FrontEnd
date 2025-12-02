@@ -11,7 +11,7 @@ import { Sparkles, TrendingUp, FileText, Edit3, Zap } from "lucide-react";
 
 export default function IAPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br">
       <div className="container mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -21,7 +21,7 @@ export default function IAPage() {
             </div>
           </div>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-            AVOCUSS IA
+            AVOCUSS IA+
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Ferramentas de Inteligência Artificial para otimizar seu trabalho jurídico
@@ -30,7 +30,7 @@ export default function IAPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="peticao" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-3 mb-8 h-auto p-1">
             <TabsTrigger value="peticao" className="flex flex-col items-center gap-2 py-3">
               <Sparkles className="h-5 w-5" />
               <div className="text-center">
@@ -52,13 +52,13 @@ export default function IAPage() {
                 <div className="text-xs text-muted-foreground">Extraia informações</div>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="corretor" className="flex flex-col items-center gap-2 py-3">
+            {/* <TabsTrigger value="corretor" className="flex flex-col items-center gap-2 py-3">
               <Edit3 className="h-5 w-5" />
               <div className="text-center">
                 <div className="font-semibold">Corretor</div>
                 <div className="text-xs text-muted-foreground">Melhore textos</div>
               </div>
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="peticao" className="mt-0">
@@ -96,10 +96,10 @@ export default function IAPage() {
               <strong>• Resumidor de Documentos:</strong> Extrai automaticamente informações
               importantes como prazos, partes envolvidas, valores e ações necessárias.
             </p>
-            <p>
+            {/* <p>
               <strong>• Corretor Jurídico:</strong> Identifica e corrige erros de gramática,
               terminologia jurídica, clareza e formatação em textos legais.
-            </p>
+            </p> */}
             <p className="pt-2 border-t">
               ⚠️ <strong>Importante:</strong> Todas as ferramentas usam IA e seus resultados devem
               ser revisados por um profissional antes do uso. Não substituem a análise jurídica

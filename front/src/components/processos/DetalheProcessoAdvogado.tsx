@@ -380,7 +380,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
             <Button
               onClick={protocolarProcesso}
               disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-              variant="primary" size="sm" className="bg-primary hover:bg-secondary"
+              variant="primary" size="sm"
             >
               <Send className="h-4 w-4" />
               Trocar Status do Processo

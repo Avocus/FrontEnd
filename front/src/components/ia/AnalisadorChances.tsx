@@ -69,10 +69,10 @@ export default function AnalisadorChances() {
 
   const getClassificacaoConfig = (classificacao: AnaliseChances['classificacao']) => {
     const configs: Record<AnaliseChances['classificacao'], { color: string; textColor: string; bgColor: string; label: string; emoji: string }> = {
-      MUITO_BAIXA: { color: "bg-red-500", textColor: "text-red-700", bgColor: "bg-red-50", label: "Muito Baixa", emoji: "🔴" },
-      BAIXA: { color: "bg-orange-500", textColor: "text-orange-700", bgColor: "bg-orange-50", label: "Baixa", emoji: "🟠" },
-      MEDIA: { color: "bg-yellow-500", textColor: "text-yellow-700", bgColor: "bg-yellow-50", label: "Média", emoji: "🟡" },
-      ALTA: { color: "bg-green-500", textColor: "text-green-700", bgColor: "bg-green-50", label: "Alta", emoji: "🟢" },
+      MUITO_BAIXA: { color: "text-dashboard-red", textColor: "text-dashboard-red", bgColor: "bg-dashboard-card-red", label: "Muito Baixa", emoji: "🔴" },
+      BAIXA: { color: "text-dashboard-orange", textColor: "text-dashboard-orange", bgColor: "bg-dashboard-card-orange", label: "Baixa", emoji: "🟠" },
+      MEDIA: { color: "text-dashboard-yellow", textColor: "text-dashboard-yellow", bgColor: "bg-dashboard-card-yellow", label: "Média", emoji: "🟡" },
+      ALTA: { color: "text-dashboard-green", textColor: "text-dashboard-green", bgColor: "bg-dashboard-card-green", label: "Alta", emoji: "🟢" },
     };
     return configs[classificacao];
   };
@@ -81,8 +81,8 @@ export default function AnalisadorChances() {
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-3 bg-green-500/10 rounded-lg">
-          <TrendingUp className="h-6 w-6 text-green-500" />
+        <div className="p-3 bg-dashboard-card-green rounded-lg">
+          <TrendingUp className="h-6 w-6 text-dashboard-green-light" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">Análise Preditiva de Chances</h1>
@@ -160,7 +160,7 @@ export default function AnalisadorChances() {
           ) : loading ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
+                <Loader2 className="h-16 w-16 animate-spin text-dashboard-blue-light mb-4" />
                 <p className="text-lg font-medium">Analisando o caso...</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   A IA está processando as informações
@@ -193,7 +193,7 @@ export default function AnalisadorChances() {
                             stroke="currentColor"
                             strokeWidth="12"
                             fill="none"
-                            className="text-gray-200"
+                            className="text-muted-foreground"
                           />
                           <circle
                             cx="64"
@@ -239,9 +239,9 @@ export default function AnalisadorChances() {
               {/* Pontos Fortes e Fracos */}
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Pontos Fortes */}
-                <Card className="border-green-200 bg-green-50/50">
+                <Card className="border-dashboard-green bg-dashboard-card-green">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-green-700">
+                    <CardTitle className="flex items-center gap-2 text-dashboard-green-light">
                       <CheckCircle2 className="h-5 w-5" />
                       Pontos Fortes
                     </CardTitle>
@@ -253,7 +253,7 @@ export default function AnalisadorChances() {
                       <ul className="space-y-2">
                         {analise.pontosFortes.map((ponto, index) => (
                           <li key={index} className="flex items-start gap-2 text-sm">
-                            <span className="text-green-600 font-bold mt-0.5">+</span>
+                            <span className="text-dashboard-green-light font-bold mt-0.5">+</span>
                             <span>{ponto}</span>
                           </li>
                         ))}
@@ -263,9 +263,9 @@ export default function AnalisadorChances() {
                 </Card>
 
                 {/* Pontos Fracos */}
-                <Card className="border-red-200 bg-red-50/50">
+                <Card className="border-dashboard-red bg-dashboard-card-red">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-red-700">
+                    <CardTitle className="flex items-center gap-2 text-dashboard-red-light">
                       <XCircle className="h-5 w-5" />
                       Pontos Fracos
                     </CardTitle>
@@ -277,7 +277,7 @@ export default function AnalisadorChances() {
                       <ul className="space-y-2">
                         {analise.pontosFracos.map((ponto, index) => (
                           <li key={index} className="flex items-start gap-2 text-sm">
-                            <span className="text-red-600 font-bold mt-0.5">−</span>
+                            <span className="text-dashboard-red-light font-bold mt-0.5">−</span>
                             <span>{ponto}</span>
                           </li>
                         ))}
@@ -288,9 +288,9 @@ export default function AnalisadorChances() {
               </div>
 
               {/* Recomendações */}
-              <Card className="border-blue-200 bg-blue-50/50">
+              <Card className="border-dashboard-blue bg-dashboard-card-blue">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-blue-700">
+                  <CardTitle className="flex items-center gap-2 text-dashboard-blue-light">
                     <Lightbulb className="h-5 w-5" />
                     Recomendações
                   </CardTitle>
@@ -315,9 +315,9 @@ export default function AnalisadorChances() {
               </Card>
 
               {/* Riscos */}
-              <Card className="border-orange-200 bg-orange-50/50">
+              <Card className="border-dashboard-orange bg-dashboard-card-orange">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-orange-700">
+                  <CardTitle className="flex items-center gap-2 text-dashboard-orange-light">
                     <AlertTriangle className="h-5 w-5" />
                     Riscos Identificados
                   </CardTitle>
@@ -330,7 +330,7 @@ export default function AnalisadorChances() {
                     <ul className="space-y-2">
                       {analise.riscos.map((risco, index) => (
                         <li key={index} className="flex items-start gap-2 text-sm">
-                          <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                          <AlertTriangle className="h-4 w-4 text-dashboard-orange-light mt-0.5 flex-shrink-0" />
                           <span>{risco}</span>
                         </li>
                       ))}
@@ -349,7 +349,7 @@ export default function AnalisadorChances() {
                   <CardContent>
                     <ul className="space-y-2">
                       {analise.provasNecessarias.map((prova: string, index: number) => (
-                        <li key={index} className="text-sm border-l-2 border-primary pl-3 py-1">
+                        <li key={index} className="text-sm border-l-2 border-dashboard-blue pl-3 py-1">
                           {prova}
                         </li>
                       ))}

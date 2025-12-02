@@ -124,9 +124,9 @@ export default function CorretorJuridico() {
 
   const getGravidadeBadge = (gravidade: Correcao['gravidade']) => {
     const configs = {
-      CRITICA: { color: "bg-red-100 text-red-700 border-red-300", icon: "🔴" },
-      IMPORTANTE: { color: "bg-yellow-100 text-yellow-700 border-yellow-300", icon: "🟡" },
-      SUGESTAO: { color: "bg-blue-100 text-blue-700 border-blue-300", icon: "🔵" },
+      CRITICA: { color: "bg-dashboard-card-red text-dashboard-red border-dashboard-red-light", icon: "🔴" },
+      IMPORTANTE: { color: "bg-dashboard-card-yellow text-dashboard-yellow border-dashboard-yellow-light", icon: "🟡" },
+      SUGESTAO: { color: "bg-dashboard-card-blue text-dashboard-blue border-dashboard-blue-light", icon: "🔵" },
     };
     return configs[gravidade];
   };
@@ -135,8 +135,8 @@ export default function CorretorJuridico() {
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-3 bg-purple-500/10 rounded-lg">
-          <Sparkles className="h-6 w-6 text-purple-500" />
+        <div className="p-3 bg-dashboard-card-purple rounded-lg">
+          <Sparkles className="h-6 w-6 text-dashboard-purple-light" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">Corretor de Linguagem Jurídica</h1>
@@ -155,8 +155,8 @@ export default function CorretorJuridico() {
       )}
 
       {sucesso && (
-        <Alert className="border-green-500 bg-green-50 text-green-900">
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
+        <Alert className="border-dashboard-green bg-dashboard-card-green text-dashboard-green-light">
+          <CheckCircle2 className="h-4 w-4 text-dashboard-green-light" />
           <AlertDescription>{sucesso}</AlertDescription>
         </Alert>
       )}
@@ -223,13 +223,13 @@ export default function CorretorJuridico() {
               <CardContent className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
                 <FileText className="h-20 w-20 mb-4 opacity-20" />
                 <p className="text-lg font-medium">Aguardando texto</p>
-                <p className="text-sm mt-2">Digite ou cole um texto e clique em "Corrigir"</p>
+                <p className="text-sm mt-2">Digite ou cole um texto e clique em &quot;Corrigir&quot;</p>
               </CardContent>
             </Card>
           ) : loading ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
+                <Loader2 className="h-16 w-16 animate-spin text-dashboard-blue-light mb-4" />
                 <p className="text-lg font-medium">Analisando texto...</p>
               </CardContent>
             </Card>
@@ -258,12 +258,12 @@ export default function CorretorJuridico() {
                       <p className="text-sm text-muted-foreground">Score de Qualidade</p>
                       <div className="flex items-center gap-4 mt-2">
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-red-600">{resultado.score.original}</p>
+                          <p className="text-2xl font-bold text-dashboard-red-light">{resultado.score.original}</p>
                           <p className="text-xs text-muted-foreground">Original</p>
                         </div>
                         <ArrowLeftRight className="h-5 w-5 text-muted-foreground" />
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-green-600">{resultado.score.corrigido}</p>
+                          <p className="text-2xl font-bold text-dashboard-green-light">{resultado.score.corrigido}</p>
                           <p className="text-xs text-muted-foreground">Corrigido</p>
                         </div>
                         <Badge variant="outline" className="ml-4">
@@ -304,16 +304,16 @@ export default function CorretorJuridico() {
                   {visualizacao === "lado-a-lado" ? (
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-semibold mb-2 text-red-700">Original</h4>
-                        <div className="border rounded-lg p-4 bg-red-50/30 max-h-[400px] overflow-y-auto">
+                        <h4 className="font-semibold mb-2 text-dashboard-red-light">Original</h4>
+                        <div className="border rounded-lg p-4 bg-dashboard-card-red max-h-[400px] overflow-y-auto">
                           <pre className="whitespace-pre-wrap text-sm font-mono">
                             {resultado.textoOriginal}
                           </pre>
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-semibold mb-2 text-green-700">Corrigido</h4>
-                        <div className="border rounded-lg p-4 bg-green-50/30 max-h-[400px] overflow-y-auto">
+                        <h4 className="font-semibold mb-2 text-dashboard-green-light">Corrigido</h4>
+                        <div className="border rounded-lg p-4 bg-dashboard-card-green max-h-[400px] overflow-y-auto">
                           <pre className="whitespace-pre-wrap text-sm font-mono">
                             {resultado.textoCorrigido}
                           </pre>
@@ -322,8 +322,8 @@ export default function CorretorJuridico() {
                     </div>
                   ) : (
                     <div>
-                      <h4 className="font-semibold mb-2 text-green-700">Texto Corrigido</h4>
-                      <div className="border rounded-lg p-4 bg-green-50/30 max-h-[400px] overflow-y-auto">
+                      <h4 className="font-semibold mb-2 text-dashboard-green-light">Texto Corrigido</h4>
+                        <div className="border rounded-lg p-4 bg-dashboard-card-green max-h-[400px] overflow-y-auto">
                         <pre className="whitespace-pre-wrap text-sm font-mono">
                           {resultado.textoCorrigido}
                         </pre>
@@ -408,18 +408,18 @@ export default function CorretorJuridico() {
                           </div>
 
                           <div className="grid md:grid-cols-2 gap-4 mt-3">
-                            <div className="bg-red-50 border border-red-200 rounded p-3">
-                              <p className="text-xs font-semibold text-red-700 mb-1">Original:</p>
+                            <div className="bg-dashboard-card-red border border-dashboard-red rounded p-3">
+                              <p className="text-xs font-semibold text-dashboard-red-light mb-1">Original:</p>
                               <p className="text-sm font-mono">{correcao.original}</p>
                             </div>
-                            <div className="bg-green-50 border border-green-200 rounded p-3">
-                              <p className="text-xs font-semibold text-green-700 mb-1">Corrigido:</p>
+                            <div className="bg-dashboard-card-green border border-dashboard-green rounded p-3">
+                              <p className="text-xs font-semibold text-dashboard-green-light mb-1">Corrigido:</p>
                               <p className="text-sm font-mono">{correcao.corrigido}</p>
                             </div>
                           </div>
 
-                          <div className="bg-blue-50 border border-blue-200 rounded p-3 mt-2">
-                            <p className="text-xs font-semibold text-blue-700 mb-1">💡 Explicação:</p>
+                          <div className="bg-dashboard-card-blue border border-dashboard-blue rounded p-3 mt-2">
+                            <p className="text-xs font-semibold text-dashboard-blue-light mb-1">💡 Explicação:</p>
                             <p className="text-sm">{correcao.explicacao}</p>
                           </div>
                         </div>
@@ -432,9 +432,9 @@ export default function CorretorJuridico() {
               {/* Sugestões e Melhorias */}
               <div className="grid md:grid-cols-2 gap-6">
                 {resultado.sugestoes.length > 0 && (
-                  <Card className="border-blue-200">
+                  <Card className="border-dashboard-blue">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-blue-700">
+                      <CardTitle className="flex items-center gap-2 text-dashboard-blue-light">
                         <Sparkles className="h-5 w-5" />
                         Sugestões Gerais
                       </CardTitle>
@@ -443,7 +443,7 @@ export default function CorretorJuridico() {
                       <ul className="space-y-2">
                         {resultado.sugestoes.map((sug, index) => (
                           <li key={index} className="flex items-start gap-2 text-sm">
-                            <span className="text-blue-600 mt-0.5">💡</span>
+                            <span className="text-dashboard-blue-light mt-0.5">💡</span>
                             <span>{sug}</span>
                           </li>
                         ))}
@@ -453,9 +453,9 @@ export default function CorretorJuridico() {
                 )}
 
                 {resultado.melhorias.length > 0 && (
-                  <Card className="border-green-200">
+                  <Card className="border-dashboard-green">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-700">
+                      <CardTitle className="flex items-center gap-2 text-dashboard-green-light">
                         <CheckCircle2 className="h-5 w-5" />
                         Melhorias Aplicadas
                       </CardTitle>
@@ -464,7 +464,7 @@ export default function CorretorJuridico() {
                       <ul className="space-y-2">
                         {resultado.melhorias.map((mel, index) => (
                           <li key={index} className="flex items-start gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <CheckCircle2 className="h-4 w-4 text-dashboard-green-light mt-0.5 flex-shrink-0" />
                             <span>{mel}</span>
                           </li>
                         ))}

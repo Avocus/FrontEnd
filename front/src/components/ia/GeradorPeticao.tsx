@@ -125,8 +125,8 @@ export default function GeradorPeticao() {
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-3 bg-violet-500/10 rounded-lg">
-          <Sparkles className="h-6 w-6 text-violet-500" />
+        <div className="p-3 bg-dashboard-card-purple rounded-lg">
+          <Sparkles className="h-6 w-6 text-dashboard-purple-light" />
         </div>
         <div>
           <h1 className="text-3xl font-bold">Gerador de Petições com IA</h1>
@@ -145,8 +145,8 @@ export default function GeradorPeticao() {
       )}
 
       {sucesso && (
-        <Alert className="border-green-500 bg-green-50 text-green-900">
-          <CheckCircle2 className="h-4 w-4 text-green-500" />
+        <Alert className="border-dashboard-green bg-dashboard-card-green text-dashboard-green-light">
+          <CheckCircle2 className="h-4 w-4 text-dashboard-green-light" />
           <AlertDescription>{sucesso}</AlertDescription>
         </Alert>
       )}
@@ -180,8 +180,8 @@ export default function GeradorPeticao() {
             </div>
 
             {/* Dados do Autor */}
-            <div className="space-y-4 border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-blue-700">Autor (Cliente)</h3>
+            <div className="space-y-4 border-l-4 border-dashboard-blue pl-4">
+              <h3 className="font-semibold text-dashboard-blue-light">Autor (Cliente)</h3>
               <div className="space-y-2">
                 <Label htmlFor="autorNome">Nome Completo *</Label>
                 <Input
@@ -191,17 +191,6 @@ export default function GeradorPeticao() {
                     setDados({ ...dados, partes: { ...dados.partes, autor: e.target.value } })
                   }
                   placeholder="Nome completo do autor"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="autorCpf">CPF/CNPJ *</Label>
-                <Input
-                  id="autorCpf"
-                  value={dados.partes.autorQualificacao.split(',')[0] || ''}
-                  onChange={(e) =>
-                    setDados({ ...dados, partes: { ...dados.partes, autorQualificacao: e.target.value } })
-                  }
-                  placeholder="CPF/CNPJ, endereço completo, profissão"
                 />
               </div>
               <div className="space-y-2">
@@ -219,8 +208,8 @@ export default function GeradorPeticao() {
             </div>
 
             {/* Dados do Réu */}
-            <div className="space-y-4 border-l-4 border-red-500 pl-4">
-              <h3 className="font-semibold text-red-700">Réu</h3>
+            <div className="space-y-4 border-l-4 border-dashboard-red pl-4">
+              <h3 className="font-semibold text-dashboard-red-light">Réu</h3>
               <div className="space-y-2">
                 <Label htmlFor="reuNome">Nome/Razão Social *</Label>
                 <Input
@@ -345,7 +334,7 @@ export default function GeradorPeticao() {
             <Button variant={"primary"} onClick={handleGerarPeticao} disabled={loading} className="w-full" size="lg">
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin text-dashboard-blue-light" />
                   Gerando Petição...
                 </>
               ) : (
@@ -368,8 +357,8 @@ export default function GeradorPeticao() {
                   {peticaoGerada ? "Petição gerada com sucesso" : "Aguardando geração..."}
                 </CardDescription>
               </div>
-              {peticaoGerada && (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                {peticaoGerada && (
+                <Badge variant="outline" className="bg-dashboard-card-green text-dashboard-green-light border-dashboard-green">
                   <CheckCircle2 className="mr-1 h-3 w-3" />
                   Pronto
                 </Badge>

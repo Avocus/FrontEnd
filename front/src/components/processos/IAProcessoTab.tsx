@@ -165,7 +165,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="font-medium text-muted-foreground mb-1">Tipo:</p>
             <p className="text-foreground font-medium">{getTipoProcessoLabel(processo.tipoProcesso)}</p>
@@ -178,10 +178,10 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
             <p className="font-medium text-muted-foreground mb-1">Urgência:</p>
             <Badge variant="outline" className="capitalize">{getStatusUrgenciaLabel(processo.urgencia)}</Badge>
           </div>
-          <div>
+          {/* <div>
             <p className="font-medium text-muted-foreground mb-1">Documentos:</p>
             <p className="text-foreground font-medium">{documentos.length} arquivo(s)</p>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -195,7 +195,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
 
       {/* Tabs de Ferramentas */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="peticao">
             <Sparkles className="h-4 w-4 mr-2" />
             Petição
@@ -204,14 +204,14 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
             <TrendingUp className="h-4 w-4 mr-2" />
             Análise
           </TabsTrigger>
-          <TabsTrigger value="resumo">
+          {/* <TabsTrigger value="resumo">
             <FileText className="h-4 w-4 mr-2" />
             Resumo
-          </TabsTrigger>
-          <TabsTrigger value="corretor">
+          </TabsTrigger> */}
+          {/* <TabsTrigger value="corretor">
             <Edit3 className="h-4 w-4 mr-2" />
             Corretor
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         {/* ABA: Gerador de Petição */}
@@ -240,10 +240,10 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                     <span className="font-medium text-muted-foreground">Fatos:</span>
                     <p className="text-foreground line-clamp-2">{dadosPeticao.fatos}</p>
                   </div>
-                  <div>
+                  {/* <div>
                     <span className="font-medium text-muted-foreground">Documentos:</span>
                     <p className="text-foreground">{dadosPeticao.documentos?.length || 0} anexos</p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -320,10 +320,10 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                     <span className="font-medium text-muted-foreground">Descrição:</span>
                     <p className="text-foreground line-clamp-2">{dadosAnalise.descricao}</p>
                   </div>
-                  <div>
+                  {/* <div>
                     <span className="font-medium text-muted-foreground">Provas:</span>
                     <p className="text-foreground">{dadosAnalise.provas.length} documento(s)</p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -425,7 +425,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
         </TabsContent>
 
         {/* ABA: Resumo de Documentos */}
-        <TabsContent value="resumo" className="space-y-4">
+        {/* <TabsContent value="resumo" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Resumir Documentos do Processo</CardTitle>
@@ -510,10 +510,10 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
 
         {/* ABA: Corretor */}
-        <TabsContent value="corretor" className="space-y-4">
+        {/* <TabsContent value="corretor" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Corretor de Linguagem Jurídica</CardTitle>
@@ -531,7 +531,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
               </Alert>
             </CardContent>
           </Card>
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
 
       {/* Footer com Aviso */}

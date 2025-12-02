@@ -88,7 +88,7 @@ export function Biblioteca() {
                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                 />
                                 <div className="absolute top-2 right-2">
-                                    <Badge variant="secondary" className="categoria-badge">{content.categoria}</Badge>
+                                    <Badge className="bg-primary text-primary-foreground">{content.categoria}</Badge>
                                 </div>
                             </div>
                             <CardHeader className="pb-2">
