@@ -264,7 +264,7 @@ export function DadosUsuario() {
                                         <FormLabel>Especialidades</FormLabel>
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {(profile as AdvogadoProfile).especialidades?.map((esp, index) => (
-                                                <Badge key={index} variant="secondary">{getEspecialidadeLabel(esp)}</Badge>
+                                                <Badge key={index} variant="outline">{getEspecialidadeLabel(esp)}</Badge>
                                             )) || <p className="text-muted-foreground">Nenhuma especialidade informada</p>}
                                         </div>
                                     </div>
@@ -365,43 +365,11 @@ export function DadosUsuario() {
         </Card>
     );
 
-    // Função para renderizar a tab de documentos
-    const renderDocumentosTab = () => (
-        <Card>
-            <CardHeader>
-                <CardTitle>Meus Documentos</CardTitle>
-                <CardDescription>Todos os documentos enviados</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    {profile?.documentos?.map((documento) => (
-                        <div key={documento.id} className="flex items-center justify-between p-4 rounded-lg border">
-                            <div className="flex items-center gap-3">
-                                <FileIcon className="h-8 w-8 text-secondary" />
-                                <div>
-                                    <h3 className="font-medium">{documento.nome}</h3>
-                                    <p className="text-sm text-muted-foreground">Enviado via aplicativo</p>
-                                </div>
-                            </div>
-                            <Button variant="ghost" size="sm">Visualizar</Button>
-                        </div>
-                    ))}
-                </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-                <Button variant="outline">Enviar novo documento</Button>
-                <Button variant="ghost">Ver todos</Button>
-            </CardFooter>
-        </Card>
-    );
-
     // Função que seleciona a tab correta
     const renderTabContent = () => {
         switch (activeTab) {
             case "informacoes":
                 return renderInformacoesTab();
-            case "documentos":
-                return renderDocumentosTab();
             case "configuracoes":
                 return renderConfiguracoesTab();
             default:
@@ -490,14 +458,6 @@ export function DadosUsuario() {
                     : "text-muted-foreground hover:text-foreground"}`}
             >
                 Processos
-            </button>
-            <button
-                onClick={() => setActiveTab("documentos")}
-                className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "documentos" 
-                    ? "border-b-2 border-primary text-secondary" 
-                    : "text-muted-foreground hover:text-foreground"}`}
-            >
-                Documentos
             </button>
             <button
                 onClick={() => setActiveTab("configuracoes")}

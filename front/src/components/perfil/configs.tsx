@@ -54,7 +54,7 @@ export function Configs() {
           {/* Sair */}
           <div className="space-y-2">
             <Label className="text-lg">Conta</Label>
-            <Button variant="secondary" className="w-full text-primary hover:bg-destructive" onClick={handleLogout}>
+            <Button variant="outline" className="w-full hover:bg-destructive" onClick={handleLogout}>
               Sair
             </Button>
           </div>
