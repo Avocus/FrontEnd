@@ -127,3 +127,27 @@ export const atualizarStatusProcesso = async (processoId: string, novoStatus: st
     throw error;
   }
 };
+
+export const desistirProcesso = async (processoId: string): Promise<void> => {
+  try {
+    await api.put(`/processo/${processoId}/desistir-processo`);
+  } catch (error) {
+    console.error('Erro ao desistir do processo:', error);
+    throw error;
+  }
+};
+
+export const pegarProcesso = async (processoId: string): Promise<ProcessoDTO> => {
+  try {
+    const response = await api.post(`/processo/${processoId}/pegar-processo`);
+    const responseData = response.data as { data?: ProcessoDTO };
+    if (!responseData.data) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    return responseData.data;
+  } catch (error) {
+    console.error('Erro ao pegar processo:', error);
+    throw error;
+  }
+};

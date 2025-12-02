@@ -200,7 +200,7 @@ export default function CorretorJuridico() {
               </p>
             </div>
 
-            <Button onClick={handleCorrigir} disabled={loading} className="w-full" size="lg">
+            <Button variant={"primary"} onClick={handleCorrigir} disabled={loading} className="w-full" size="lg">
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

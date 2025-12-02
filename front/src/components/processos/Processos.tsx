@@ -13,7 +13,7 @@ export function DetalheProcessoWrapper({ processoId }: { processoId: string | st
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Processo não encontrado</h1>
         <p className="text-muted-foreground mb-4">O processo solicitado não foi encontrado ou o identificador é inválido.</p>
-        <Link href="/processos" className="text-primary underline">Voltar para lista de processos</Link>
+        <Link href="/processos" className="text-primary-foreground underline">Voltar para lista de processos</Link>
       </div>
     );
   }

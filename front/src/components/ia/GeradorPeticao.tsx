@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, FileText, Download, Copy, Save, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, FileText, Download, Copy, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   gerarPeticaoInicial, 
@@ -342,7 +342,7 @@ export default function GeradorPeticao() {
             </div>
 
             {/* Botão Gerar */}
-            <Button onClick={handleGerarPeticao} disabled={loading} className="w-full" size="lg">
+            <Button variant={"primary"} onClick={handleGerarPeticao} disabled={loading} className="w-full" size="lg">
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -380,7 +380,7 @@ export default function GeradorPeticao() {
             {!peticaoGerada ? (
               <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                 <FileText className="h-16 w-16 mb-4 opacity-20" />
-                <p>Preencha o formulário e clique em "Gerar Petição"</p>
+                <p>Preencha o formulário e clique em &quot;Gerar Petição&quot;</p>
                 <p className="text-sm mt-2">A IA criará uma petição inicial completa</p>
               </div>
             ) : (

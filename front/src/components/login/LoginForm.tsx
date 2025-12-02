@@ -158,12 +158,10 @@ export function LoginForm({
               </Button>
               <div className="text-center text-sm">
                 Não possui conta?{" "}
-                <Button
-                variant={"primary"}
-                  onClick={handleRegister}
-                >
+                <Link
+                  onClick={handleRegister} href={"/cadastro"}>
                   Cadastrar
-                </Button>
+                </Link>
               </div>
             </div>
           </form>

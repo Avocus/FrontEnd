@@ -123,7 +123,7 @@ export default function AnalisadorChances() {
               </p>
             </div>
 
-            <Button onClick={handleAnalisar} disabled={loading} className="w-full" size="lg">
+            <Button variant={"primary"} onClick={handleAnalisar} disabled={loading} className="w-full" size="lg">
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

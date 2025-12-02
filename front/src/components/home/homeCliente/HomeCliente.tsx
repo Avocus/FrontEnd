@@ -15,6 +15,8 @@ import { getEventosFuturos } from "@/services/eventoService";
 import { listarProcessos } from "@/services/processo/processoService";
 import { Evento, ProcessoDTO } from "@/types/entities";
 import { getStatusProcessoLabel, StatusProcesso } from "@/types";
+import { getNumeroDocumentosPendentes } from "@/services/cliente/clienteService";
+import { se } from "date-fns/locale";
 
 export function HomeCliente() {
 
@@ -26,7 +28,8 @@ function DesktopView() {
 
     const [eventos, setEventos] = useState<Evento[]>([]);
     const [processos, setProcessos] = useState<ProcessoDTO[]>([]);
-
+    const [documentosPendentes, setDocumentosPendentes] = useState<number>(0);
+    
     // Contagem de processos ativos (exclui os status listados)
     const activeCount = processos.filter(p => {
         const excluded = [
@@ -59,6 +62,15 @@ function DesktopView() {
             } catch (err) {
                 console.error('Erro carregando processos:', err);
                 setProcessos([]);
+            }
+
+            try {
+                const documentosPendentesResp = await getNumeroDocumentosPendentes();
+                if (!mounted) return;
+                setDocumentosPendentes(documentosPendentesResp);
+            } catch (error) {
+                setDocumentosPendentes(0);
+                console.error('Erro ao carregar documentos pendentes:', error);
             }
         };
 
@@ -117,7 +129,7 @@ function DesktopView() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-dashboard-card-yellow-light text-sm font-medium">Documentos Pendentes</p>
-                                    <p className="text-3xl font-bold text-dashboard-card-primary">3</p>
+                                    <p className="text-3xl font-bold text-dashboard-card-primary">{documentosPendentes}</p>
                                     <p className="text-dashboard-card-yellow-light text-xs">Para enviar</p>
                                 </div>
                                 <div className="bg-white/20 dark:bg-orange-400/40 p-3 rounded-full">

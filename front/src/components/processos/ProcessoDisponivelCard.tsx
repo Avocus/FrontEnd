@@ -61,13 +61,6 @@ const ProcessoDisponivelCard: React.FC<ProcessoDisponivelCardProps> = ({
           >
             Ver Detalhes
           </Link>
-          <Button
-            onClick={() => onPegarCaso(processo.id.toString())}
-            disabled={isLoading}
-            variant={"primary"}
-          >
-            {isLoading ? 'Atribuindo...' : 'Pegar Caso'}
-          </Button>
         </div>
       </CardContent>
     </Card>

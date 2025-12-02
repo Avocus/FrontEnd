@@ -348,7 +348,7 @@ export function DadosUsuario() {
                                         <X className="h-4 w-4 mr-2" />
                                         Cancelar
                                     </Button>
-                                    <Button type="submit">
+                                    <Button type="submit"variant={"primary"}>
                                         <Save className="h-4 w-4 mr-2" />
                                         Salvar
                                     </Button>

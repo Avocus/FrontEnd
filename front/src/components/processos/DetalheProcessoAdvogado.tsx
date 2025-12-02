@@ -34,7 +34,7 @@ import { IAProcessoTab } from "./IAProcessoTab";
 
 // Utilitários
 import { getStatusLabel } from "@/utils/processoUtils";
-import { atualizarStatusProcesso } from "@/services/processo/processoService";
+import { atualizarStatusProcesso, desistirProcesso, pegarProcesso } from "@/services/processo/processoService";
 
 interface DetalheProcessoAdvogadoProps {
   processoId: string;
@@ -241,7 +241,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     if (!processo) return;
     try {
       // 1) Solicitar ao backend para atualizar o status para PENDENTE
-      await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.PENDENTE, 'Marcado como pendente antes da atribuição');
+      await pegarProcesso(processo.id.toString());
 
       // Recarregar os dados do processo e forçar reload da página conforme solicitado
       await refetch();
@@ -261,7 +261,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     if (!processo) return;
 
     try {
-      await assignProcesso(processo.id);
+      await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.ACEITO, "Processo marcado como aceito pelo advogado.");
       await refetch();
       success('Processo atribuído com sucesso!');
     } catch (err) {
@@ -270,11 +270,11 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     }
   };
 
-  const desistirProcesso = async () => {
+  const desistir = async () => {
     if (!processo) return;
 
     try {
-      await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.RASCUNHO, 'Advogado desistiu do processo');
+      await desistirProcesso(processo.id);
       await refetch();
       success('Você desistiu do processo. Status revertido para rascunho.');
     } catch (err) {
@@ -297,7 +297,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Processo não encontrado</h1>
         <p className="text-muted-foreground mb-4">Não foi possível encontrar o processo solicitado.</p>
-        <Link href="/processos" className="text-primary underline">Voltar para lista de processos</Link>
+        <Link href="/processos" className="text-primary-foreground underline">Voltar para lista de processos</Link>
       </div>
     );
   }
@@ -315,19 +315,38 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
 
       {/* Botões de ação */}
       <div className={`mb-6 flex gap-4 flex-wrap`}>
-        {processo.advogado ? (
-          // Botões para processos que já têm advogado atribuído
-          <>
-            <Button
-              onClick={() => setModalSolicitarAberto(true)}
-              disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-              className="flex items-center gap-2"
-              variant="outline"
-            >
-              <FileText className="h-4 w-4" />
-              Solicitar Documentos
-            </Button>
+        {processo.status === StatusProcesso.RASCUNHO ? (
+          <Button
+            onClick={aceitarProcesso}
+            className="flex items-center gap-2"
+            variant="primary"
+          >
+            <span className="text-sm">🎯</span>
+            Pegar Caso
+          </Button>
+        ) : (
+          // Processo disponível: dependendo do status mostramos ações diferentes
+          (() => {
+            if (processo.status === StatusProcesso.PENDENTE) {
+              // Se já está pendente, oferecer confirmar ou desistir
+              return (
+                <div className="flex gap-2">
+                  <Button onClick={confirmarEscolhaProcesso} className="flex items-center gap-2" variant="primary">
+                    <span className="text-sm">✅</span>
+                    Confirmar escolha de caso
+                  </Button>
+                  <Button onClick={desistir} className="flex items-center gap-2" variant="secondary">
+                    <span className="text-sm">❌</span>
+                    Desistir do processo
+                  </Button>
+                </div>
+              );
+            }
+          })()
+        )}
 
+        {processo.status !== StatusProcesso.RASCUNHO && processo.status !== StatusProcesso.PENDENTE &&(
+          <>
             {processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS && processo.documentosAnexados && processo.documentosAnexados.length > 0 && (
               <>
                 <Button
@@ -348,49 +367,25 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
                 </Button>
               </>
             )}
+
+            <Button
+              onClick={() => setModalSolicitarAberto(true)}
+              disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <FileText className="h-4 w-4" />
+              Solicitar Documentos
+            </Button>
+            <Button
+              onClick={protocolarProcesso}
+              disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
+              variant="primary" size="sm" className="bg-primary hover:bg-secondary"
+            >
+              <Send className="h-4 w-4" />
+              Trocar Status do Processo
+            </Button>
           </>
-        ) : (
-          // Processo disponível: dependendo do status mostramos ações diferentes
-          (() => {
-            if (processo.status === StatusProcesso.PENDENTE) {
-              // Se já está pendente, oferecer confirmar ou desistir
-              return (
-                <div className="flex gap-2">
-                  <Button onClick={confirmarEscolhaProcesso} className="flex items-center gap-2" variant="primary">
-                    <span className="text-sm">✅</span>
-                    Confirmar escolha de caso
-                  </Button>
-                  <Button onClick={desistirProcesso} className="flex items-center gap-2" variant="secondary">
-                    <span className="text-sm">❌</span>
-                    Desistir do processo
-                  </Button>
-                </div>
-              );
-            }
-
-            // Botão padrão para marcar como pendente (inicia fluxo)
-            return (
-              <Button
-                onClick={aceitarProcesso}
-                className="flex items-center gap-2"
-                variant="primary"
-              >
-                <span className="text-sm">🎯</span>
-                Pegar Caso
-              </Button>
-            );
-          })()
-        )}
-
-        {processo.status !== StatusProcesso.RASCUNHO && processo.status !== StatusProcesso.PENDENTE &&(
-          <Button
-            onClick={protocolarProcesso}
-            disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
-            variant="primary" size="sm" className="bg-primary hover:bg-secondary"
-          >
-            <Send className="h-4 w-4" />
-            Trocar Status do Processo
-          </Button>
         )}
 
       </div>
@@ -403,7 +398,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
               <TabsTrigger value="documents">Documentos</TabsTrigger>
               <TabsTrigger value="timeline">Andamentos</TabsTrigger>
               <TabsTrigger value="eventos">Eventos</TabsTrigger>
-              <TabsTrigger value="ia" className="text-purple-600">
+              <TabsTrigger value="ia" className="text-dashboard-orange">
                 <span className="mr-1">✨</span> IA
               </TabsTrigger>
               <TabsTrigger value="chat">Chat</TabsTrigger>

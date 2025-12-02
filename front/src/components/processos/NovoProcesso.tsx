@@ -172,10 +172,6 @@ export default function NovoProcesso() {
               <p className="text-muted-foreground">Preencha os detalhes do seu processo jurídico</p>
             </div>
           </div>
-          <Badge variant="secondary" className="px-3 py-1">
-            <FileText className="h-3 w-3 mr-1" />
-            Solicitação
-          </Badge>
         </div>
 
         <NovoProcessoForm

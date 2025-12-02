@@ -94,7 +94,6 @@ export function Sidebar({
   const mainItems: SidebarItemProps[] = [
     { label: "Home", href: "/home", icon: <Home className="h-5 w-5" /> },
     { label: "Agenda", href: "/agenda", icon: <Calendar className="h-5 w-5" /> },
-    { label: "IA Generativa", href: "/ia", icon: <Sparkles className="h-5 w-5 text-purple-500" /> },
     { label: "Chat", icon: <MessageCircle className="h-5 w-5" />, onClick: () => setChatOpen && setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca", icon: <BookOpen className="h-5 w-5" /> },
     { label: "Videoteca", href: "/videoteca", icon: <Video className="h-5 w-5" /> },
@@ -108,7 +107,8 @@ export function Sidebar({
     ] : [
       { label: "Processos Disponíveis", href: "/processos/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
       { label: "Tickets Disponíveis", href: "/tickets/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
-      { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> }
+      { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> },
+      { label: "IA Generativa", href: "/ia", icon: <Sparkles className="h-5 w-5 text-dashboard-purple" /> },
     ]),
     ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}]: [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}]),
   ];

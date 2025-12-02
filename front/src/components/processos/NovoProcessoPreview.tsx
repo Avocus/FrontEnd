@@ -176,15 +176,15 @@ export default function NovoProcessoPreview({
                           className={cn(
                             "flex items-center gap-3 p-3 rounded-lg border transition-all text-left w-full",
                             isSelected 
-                              ? "bg-primary/10 border-primary shadow-sm" 
-                              : "bg-background border-border hover:border-primary/50"
+                              ? "bg-primary border-border hover:border-secondary" 
+                              : "bg-background border-primary shadow-sm"
                           )}
                         >
                           <div className={cn(
                             "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
                             isSelected 
-                              ? "bg-primary text-primary-foreground" 
-                              : "bg-muted text-muted-foreground"
+                             ? "bg-muted text-muted-foreground"
+                            : "bg-primary text-primary-foreground" 
                           )}>
                             <CheckCircle className={cn(
                               "h-4 w-4 transition-all",
@@ -194,7 +194,7 @@ export default function NovoProcessoPreview({
                           <div className="flex-1 min-w-0">
                             <p className={cn(
                               "text-sm font-medium truncate transition-colors",
-                              isSelected ? "text-primary" : "text-foreground"
+                              isSelected ? "text-foreground" : "text-muted-foreground"
                             )}>{doc}</p>
                           </div>
                         </button>

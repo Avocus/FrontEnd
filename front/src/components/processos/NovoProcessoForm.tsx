@@ -167,7 +167,7 @@ export default function NovoProcessoForm({
                   <div className="text-center py-8">
                     <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground mb-4">Selecione o cliente para este processo</p>
-                    <Button onClick={() => setShowClienteModal(true)}>
+                    <Button onClick={() => setShowClienteModal(true)} variant={"primary"}>
                       <Search className="h-4 w-4 mr-2" />
                       Buscar Cliente
                     </Button>

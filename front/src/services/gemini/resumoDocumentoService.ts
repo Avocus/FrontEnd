@@ -110,7 +110,7 @@ Forneça um resumo estruturado contendo:
 3. **Ações Necessárias**: O que precisa ser feito baseado no documento
 4. **Prazos**: Identifique TODOS os prazos mencionados
 5. **Partes Envolvidas**: Liste pessoas/empresas mencionadas
-6. **Valor da Causa**: Se houver valor monetário mencionado
+6. **Valor da Causa**: Se houver valor monetário mencionado por mês ou total
 7. **Tipo de Documento**: Classifique o documento (petição, sentença, contrato, etc)
 8. **Observações**: Pontos de atenção especiais
 

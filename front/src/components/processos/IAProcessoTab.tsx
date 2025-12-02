@@ -34,6 +34,8 @@ import {
   corrigirTextoJuridico,
   type CorrecaoTexto
 } from "@/services/gemini/corretorJuridicoService";
+import { getStatusProcessoLabel, getStatusUrgenciaLabel, getTipoProcessoLabel, TipoProcesso } from "@/types";
+import { a } from "node_modules/framer-motion/dist/types.d-6pKw1mTI";
 
 interface IAProcessoTabProps {
   processo: ProcessoAdvogado;
@@ -74,7 +76,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
     provas: documentos.map(d => d.nome),
     testemunhas: 0,
     jurisprudenciasFavoraveis: false,
-    contextoAdicional: `Status: ${processo.status}, Urgência: ${processo.urgencia}`,
+    contextoAdicional: `Status: ${processo.status}, Urgência: ${getStatusUrgenciaLabel(processo.urgencia)}`,
   };
 
   // Função para gerar petição usando dados do processo
@@ -166,7 +168,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <p className="font-medium text-muted-foreground mb-1">Tipo:</p>
-            <p className="text-foreground font-medium">{processo.tipoProcesso}</p>
+            <p className="text-foreground font-medium">{getTipoProcessoLabel(processo.tipoProcesso)}</p>
           </div>
           <div>
             <p className="font-medium text-muted-foreground mb-1">Cliente:</p>
@@ -174,7 +176,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
           </div>
           <div>
             <p className="font-medium text-muted-foreground mb-1">Urgência:</p>
-            <Badge variant="outline" className="capitalize">{processo.urgencia}</Badge>
+            <Badge variant="outline" className="capitalize">{getStatusUrgenciaLabel(processo.urgencia)}</Badge>
           </div>
           <div>
             <p className="font-medium text-muted-foreground mb-1">Documentos:</p>
@@ -228,7 +230,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <span className="font-medium text-muted-foreground">Tipo:</span>
-                    <p className="text-foreground">{dadosPeticao.tipoProcesso}</p>
+                    <p className="text-foreground">{getTipoProcessoLabel(dadosPeticao.tipoProcesso as TipoProcesso)}</p>
                   </div>
                   <div>
                     <span className="font-medium text-muted-foreground">Cliente:</span>
@@ -249,6 +251,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                 onClick={handleGerarPeticao} 
                 disabled={loading}
                 className="w-full"
+                variant={"primary"}
               >
                 {loading ? (
                   <>
@@ -307,11 +310,11 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <span className="font-medium text-muted-foreground">Tipo:</span>
-                    <p className="text-foreground">{dadosAnalise.tipoProcesso}</p>
+                    <p className="text-foreground">{getTipoProcessoLabel(dadosAnalise.tipoProcesso as TipoProcesso)}</p>
                   </div>
                   <div>
                     <span className="font-medium text-muted-foreground">Status:</span>
-                    <p className="text-foreground">{processo.status}</p>
+                    <p className="text-foreground">{getStatusProcessoLabel(processo.status)}</p>
                   </div>
                   <div className="col-span-2">
                     <span className="font-medium text-muted-foreground">Descrição:</span>
@@ -328,6 +331,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                 onClick={handleAnalisarChances} 
                 disabled={loading}
                 className="w-full"
+                variant={"primary"}
               >
                 {loading ? (
                   <>
@@ -365,6 +369,9 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                         Pontos Fortes
                       </h4>
                       <ul className="space-y-2 text-sm">
+                        {analiseGerada.pontosFortes && analiseGerada.pontosFortes.length === 0 && (
+                          <li className="text-muted-foreground">Nenhum ponto forte identificado.</li>
+                        )}
                         {analiseGerada.pontosFortes.map((p, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <span className="text-green-500 mt-0.5">•</span>
@@ -380,6 +387,9 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                         Pontos Fracos
                       </h4>
                       <ul className="space-y-2 text-sm">
+                        {analiseGerada.pontosFracos && analiseGerada.pontosFracos.length === 0 && (
+                          <li className="text-muted-foreground">Nenhum ponto fraco identificado.</li>
+                        )}
                         {analiseGerada.pontosFracos.map((p, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <span className="text-red-500 mt-0.5">•</span>
@@ -397,6 +407,9 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                       Recomendações
                     </h4>
                     <ul className="space-y-3 text-sm">
+                      {analiseGerada.recomendacoes.length === 0 && (
+                        <li className="text-muted-foreground">Nenhuma recomendação identificada.</li>
+                      )}
                       {analiseGerada.recomendacoes.map((r, i) => (
                         <li key={i} className="flex items-start gap-2">
                           <span className="font-semibold text-amber-600 dark:text-amber-500 min-w-[1.5rem]">{i + 1}.</span>
@@ -425,7 +438,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Nenhum documento disponível neste processo. Faça upload na aba "Documentos".
+                    Nenhum documento disponível neste processo. Faça upload na aba &quot;Documentos&quot;.
                   </AlertDescription>
                 </Alert>
               ) : (
@@ -505,7 +518,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
             <CardHeader>
               <CardTitle>Corretor de Linguagem Jurídica</CardTitle>
               <CardDescription>
-                Para usar o corretor, acesse a ferramenta completa no menu "IA Generativa"
+                Para usar o corretor, acesse a ferramenta completa no menu &quot;IA Generativa&quot;
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -513,7 +526,7 @@ export function IAProcessoTab({ processo, documentos = [] }: IAProcessoTabProps)
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   O corretor jurídico está disponível como ferramenta standalone.
-                  Copie seu texto, vá em "IA Generativa" no menu e cole na aba "Corretor".
+                  Copie seu texto, vá em &quot;IA Generativa&quot; no menu e cole na aba &quot;Corretor&quot;.
                 </AlertDescription>
               </Alert>
             </CardContent>

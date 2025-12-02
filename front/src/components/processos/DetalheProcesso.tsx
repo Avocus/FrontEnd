@@ -75,7 +75,7 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Processo não encontrado</h1>
         <p className="text-muted-foreground mb-4">Não foi possível encontrar o processo solicitado.</p>
-        <Link href="/processos" className="text-primary underline">Voltar para lista de processos</Link>
+        <Link href="/processos" className="text-primary-foreground underline">Voltar para lista de processos</Link>
       </div>
     );
   }
@@ -97,8 +97,7 @@ export function DetalheProcesso({ processoId }: { processoId: string }) {
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="documents">Documentos</TabsTrigger>
           <TabsTrigger value="timeline">Andamentos</TabsTrigger>
-          <TabsTrigger value="eventos">Eventos</TabsTrigger>
-          <TabsTrigger value="ia" className="text-purple-600">✨ IA</TabsTrigger>
+          <TabsTrigger value="eventos">Eventos</TabsTrigger>          
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="status">Status</TabsTrigger>
         </TabsList>

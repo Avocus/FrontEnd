@@ -26,12 +26,6 @@ export default function IAPage() {
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Ferramentas de Inteligência Artificial para otimizar seu trabalho jurídico
           </p>
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <Zap className="h-4 w-4 text-amber-500" />
-            <span className="text-sm text-muted-foreground">
-              Powered by Google Gemini 2.0 Flash
-            </span>
-          </div>
         </div>
 
         {/* Tabs */}

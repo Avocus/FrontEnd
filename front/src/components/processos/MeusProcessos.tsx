@@ -146,7 +146,7 @@ export default function MeusProcessos() {
             <div className="flex border rounded-lg">
               <Button 
                 variant={viewMode === "list" ? "primary" : "ghost"}
-                size="sm" className="hover:bg-secondary rounded-r-none"
+                size="sm" className="rounded-r-none"
                 onClick={() => setViewMode("list")}
               >
                 <List className="h-4 w-4 mr-2" />
@@ -154,7 +154,7 @@ export default function MeusProcessos() {
               </Button>
               <Button
                 variant={viewMode === "kanban" ? "primary" : "ghost"}
-                size="sm" className="hover:bg-secondary rounded-l-none"
+                size="sm" className="rounded-l-none"
                 onClick={() => setViewMode("kanban")}
               >
                 <Grid className="h-4 w-4 mr-2" />
@@ -199,7 +199,7 @@ export default function MeusProcessos() {
             )}
             <Button 
               onClick={handleNovoProcesso}
-              variant="primary" size="sm" className="bg-primary hover:bg-secondary"
+              variant="primary" size="sm"
             >
               <Plus className="h-4 w-4 mr-2" />
               Novo Processo

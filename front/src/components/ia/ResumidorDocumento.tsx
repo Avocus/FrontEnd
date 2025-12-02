@@ -228,7 +228,7 @@ export default function ResumidorDocumento() {
                       <div>
                         <p className="text-xl font-bold">
                           {resumo.valorCausa
-                            ? `R$ ${(resumo.valorCausa / 1000).toFixed(0)}k`
+                            ? `R$ ${(resumo.valorCausa).toFixed(2)}`
                             : "N/A"}
                         </p>
                         <p className="text-xs text-muted-foreground">Valor da Causa</p>
