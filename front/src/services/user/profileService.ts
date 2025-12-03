@@ -2,6 +2,7 @@ import api from '@/lib/api';
 import { Especialidade } from '@/types';
 import { PerfilCliente } from '@/types/entities/Cliente';
 import { AdvogadoProfile } from '@/types/entities/Profile';
+import { ProfileFormData } from '@/schemas/profileSchema';
 
 export interface UserDadosDTO {
   nome: string;
@@ -10,6 +11,7 @@ export interface UserDadosDTO {
   cpf?: string;
   dataNascimento?: string;
   endereco?: {
+    rua?: string;
     numero?: string;
     complemento?: string;
     bairro?: string;
@@ -53,13 +55,40 @@ export const getProfileData = async (): Promise<UserDadosDTO> => {
   }
 };
 
-export const updateProfileData = async (data: Partial<PerfilCliente>): Promise<PerfilCliente> => {
+export const updateProfileData = async (data: ProfileFormData): Promise<PerfilCliente> => {
   try {
-    const response = await api.put('/user/dados-gerais', data);
+    let response;
+    if(data.isAdvogado){
+      response = await api.put('/advogado/dados-gerais', data);
+    }else{
+      response = await api.put('/cliente/dados-gerais', data);
+    }
     const responseData = response.data as { data: PerfilCliente };
     return responseData.data;
   } catch (error) {
     console.error('Erro ao atualizar dados do perfil:', error);
     throw new Error('Não foi possível atualizar os dados do perfil');
   }
-}; 
+};
+
+export const updateAdvogado = async (data: ProfileFormData): Promise<AdvogadoProfile> => {
+  try {
+    const response = await api.put('/advogado/dados-gerais', data);
+    const responseData = response.data as { data: AdvogadoProfile };
+    return responseData.data;
+  } catch (error) {
+    console.error('Erro ao atualizar dados do advogado:', error);
+    throw new Error('Não foi possível atualizar os dados do advogado');
+  }
+};
+
+export const updateCliente = async (data: ProfileFormData): Promise<PerfilCliente> => {
+  try {
+    const response = await api.put('/cliente/dados-gerais', data);
+    const responseData = response.data as { data: PerfilCliente };
+    return responseData.data;
+  } catch (error) {
+    console.error('Erro ao atualizar dados do cliente:', error);
+    throw new Error('Não foi possível atualizar os dados do cliente');
+  }
+};

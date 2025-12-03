@@ -19,6 +19,8 @@ import { useProfileStore, useAuthStore } from "@/store";
 import { ClienteProfile, AdvogadoProfile } from "@/types/entities/Profile";
 import { StatusProcesso, getEspecialidadeLabel } from "@/types/enums";
 import { Configs } from "@/components/perfil/configs";
+import { updateClienteProfile } from "@/services/cliente/clienteService";
+import { updateAdvogadoProfile } from "@/services/advogado/advogadoService";
 
 export function DadosUsuario() {
     const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
@@ -35,7 +37,6 @@ export function DadosUsuario() {
     const fetchProfile = async () => {
         try {
             const perfilData: UserDadosDTO = await getProfileData();
-            
             if (perfilData.advogado) {
                 // É advogado
                 const advogadoProfile: AdvogadoProfile = {
@@ -46,9 +47,13 @@ export function DadosUsuario() {
                     telefone: perfilData.advogado.telefone,
                     cpf: perfilData.advogado.cpf,
                     dataNascimento: perfilData.advogado.dataNascimento,
-                    endereco: perfilData.endereco ? `${perfilData.endereco.numero || ''} ${perfilData.endereco.complemento || ''} ${perfilData.endereco.bairro || ''}`.trim() : undefined,
+                    rua: perfilData.endereco?.rua,
+                    numero: perfilData.endereco?.numero,
+                    complemento: perfilData.endereco?.complemento,
+                    bairro: perfilData.endereco?.bairro,
                     cidade: perfilData.endereco?.cidade,
                     estado: perfilData.endereco?.estado,
+                    cep: perfilData.endereco?.cep,
                     foto: undefined, // TODO: add fotoPerfil if available
                     oab: perfilData.advogado.oab,
                     bio: perfilData.advogado.bio,
@@ -58,14 +63,19 @@ export function DadosUsuario() {
                 updateProfileStore(advogadoProfile);
 
                 form.reset({
+                    id: advogadoProfile.id || "",
                     nome: advogadoProfile.nome || "",
                     email: advogadoProfile.email || "",
                     telefone: advogadoProfile.telefone || "",
                     cpf: advogadoProfile.cpf || "",
                     dataNascimento: advogadoProfile.dataNascimento || "",
-                    endereco: advogadoProfile.endereco || "",
+                    rua: advogadoProfile.rua || "",
+                    numero: advogadoProfile.numero || "",
+                    complemento: advogadoProfile.complemento || "",
+                    bairro: advogadoProfile.bairro || "",
                     cidade: advogadoProfile.cidade || "",
                     estado: advogadoProfile.estado || "",
+                    cep: advogadoProfile.cep || "",
                     fotoPerfil: undefined
                 });
             } else {
@@ -78,9 +88,13 @@ export function DadosUsuario() {
                     telefone: perfilData.telefone,
                     cpf: perfilData.cpf,
                     dataNascimento: perfilData.dataNascimento,
-                    endereco: perfilData.endereco ? `${perfilData.endereco.numero || ''} ${perfilData.endereco.complemento || ''} ${perfilData.endereco.bairro || ''}`.trim() : undefined,
+                    rua: perfilData.endereco?.rua,
+                    numero: perfilData.endereco?.numero,
+                    complemento: perfilData.endereco?.complemento,
+                    bairro: perfilData.endereco?.bairro,
                     cidade: perfilData.endereco?.cidade,
                     estado: perfilData.endereco?.estado,
+                    cep: perfilData.endereco?.cep,
                     foto: undefined, // TODO: add fotoPerfil if available
                 };
                 
@@ -88,6 +102,7 @@ export function DadosUsuario() {
                 
                 // Reset form with cliente data
                 const formData = {
+                    id: clienteProfile.id,
                     nome: perfilData.nome,
                     email: perfilData.email,
                     telefone: perfilData.telefone,
@@ -110,32 +125,110 @@ export function DadosUsuario() {
         fetchProfile();
     }, [updateProfileStore, form, user]);
 
+    async function updateCliente(data: ProfileFormData) {
+        const payload = {
+            id: data.id ?? "",
+            nome: data.nome,
+            telefone: data.telefone ?? "",
+            cpf: data.cpf ?? "",
+            dataNascimento: data.dataNascimento ?? "",
+            endereco: {
+                rua: data.rua ?? "",
+                numero: data.numero ?? "",
+                complemento: data.complemento ?? "",
+                bairro: data.bairro ?? "",
+                cidade: data.cidade ?? "",
+                estado: data.estado ?? "",
+                cep: data.cep ?? ""
+            }
+        };
+
+        await updateClienteProfile(payload);
+        return payload;
+    }
+
+    async function updateAdvogado(data: ProfileFormData) {
+        const payload = {
+            id: data.id ?? "",
+            nome: data.nome ?? "",
+            cpf: data.cpf ?? "",
+            email: data.email ?? "",
+            endereco: {
+                rua: data.rua ?? "",
+                numero: data.numero ?? "",
+                complemento: data.complemento ?? "",
+                bairro: data.bairro ?? "",
+                cidade: data.cidade ?? "",
+                estado: data.estado ?? "",
+                cep: data.cep ?? ""
+            },
+            dadosContato: {
+                telefone: data.telefone ?? ""
+            },
+            dataNascimento: data.dataNascimento ?? ""
+        };
+
+        await updateAdvogadoProfile(payload);
+        return payload;
+    }
+
+
     const onSubmit = async (data: ProfileFormData) => {
-        try {
-            const updatedProfileData = await updateProfileData(data);
+    try {
+        let updatedProfileData;
+
+        if (isAdvogado) {
+
+            updatedProfileData = await updateAdvogado(data);
+
+            const updatedProfile: AdvogadoProfile = {
+                ...(profile as AdvogadoProfile),
+                nome: updatedProfileData.nome,
+                email: updatedProfileData.email,
+                telefone: updatedProfileData.dadosContato.telefone,
+                cpf: updatedProfileData.cpf,
+                dataNascimento: updatedProfileData.dataNascimento,
+                rua: updatedProfileData.endereco.rua,
+                numero: updatedProfileData.endereco.numero,
+                complemento: updatedProfileData.endereco.complemento,
+                bairro: updatedProfileData.endereco.bairro,
+                cidade: updatedProfileData.endereco.cidade,
+                estado: updatedProfileData.endereco.estado,
+                cep: updatedProfileData.endereco.cep
+            };
+
+            updateProfileStore(updatedProfile);
+
+        } else {
+            updatedProfileData = await updateCliente(data);
 
             const updatedProfile: ClienteProfile = {
                 id: user?.id || '',
                 userId: user?.id || '',
                 nome: updatedProfileData.nome,
-                email: updatedProfileData.email,
+                email: '',
                 telefone: updatedProfileData.telefone,
                 cpf: updatedProfileData.cpf,
                 dataNascimento: updatedProfileData.dataNascimento,
-                endereco: updatedProfileData.endereco,
-                cidade: updatedProfileData.cidade,
-                estado: updatedProfileData.estado,
-                foto: updatedProfileData.fotoPerfil,
+                rua: updatedProfileData.endereco.rua,
+                numero: updatedProfileData.endereco.numero,
+                complemento: updatedProfileData.endereco.complemento,
+                bairro: updatedProfileData.endereco.bairro,
+                cidade: updatedProfileData.endereco.cidade,
+                estado: updatedProfileData.endereco.estado,
+                cep: updatedProfileData.endereco.cep
             };
-            
+
             updateProfileStore(updatedProfile);
-            setIsEditing(false);
-            toast.success('Perfil atualizado com sucesso!');
-        } catch (error) {
-            toast.error('Erro ao atualizar perfil');
-            console.error(error);
         }
-    };
+
+        setIsEditing(false);
+        toast.success("Perfil atualizado com sucesso!");
+    } catch (error) {
+        console.error(error);
+        toast.error("Erro ao atualizar perfil");
+    }
+};
 
     if (profileLoading) {
         return (
@@ -279,66 +372,146 @@ export function DadosUsuario() {
                             </div>
                         )}
 
-                        <div className="pt-4 border-t">
-                            <h3 className="text-lg font-medium mb-4">Endereço</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <FormField
-                                    control={form.control}
-                                    name="endereco"
-                                    render={({ field }) => (
-                                        <FormItem className="md:col-span-2">
-                                            <FormLabel>Endereço</FormLabel>
-                                            <FormControl>
-                                                {isEditing ? (
-                                                    <Input {...field} />
-                                                ) : (
-                                                    <div className="flex items-start gap-3">
-                                                        <MapPinIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                                                        <p className="text-muted-foreground">{field.value || "Não informado"}</p>
-                                                    </div>
-                                                )}
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        <div className="pt-6 border-t">
+                        <h3 className="text-lg font-medium mb-4">Endereço</h3>
 
-                                <FormField
-                                    control={form.control}
-                                    name="cidade"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Cidade</FormLabel>
-                                            <FormControl>
-                                                {isEditing ? (
-                                                    <Input {...field} />
-                                                ) : (
-                                                    <p className="text-muted-foreground">{field.value || "Não informada"}</p>
-                                                )}
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        {/* GRID PRINCIPAL */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                                <FormField
-                                    control={form.control}
-                                    name="estado"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Estado</FormLabel>
-                                            <FormControl>
-                                                {isEditing ? (
-                                                    <Input {...field} />
-                                                ) : (
-                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
-                                                )}
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
+                            {/* CEP */}
+                            <FormField
+                            control={form.control}
+                            name="cep"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>CEP</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
                                     )}
-                                />
-                            </div>
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Estado */}
+                            <FormField
+                            control={form.control}
+                            name="estado"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Estado</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Cidade */}
+                            <FormField
+                            control={form.control}
+                            name="cidade"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Cidade</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informada"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Bairro */}
+                            <FormField
+                            control={form.control}
+                            name="bairro"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Bairro</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Rua — ocupa 2 colunas */}
+                            <FormField
+                            control={form.control}
+                            name="rua"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Rua</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informada"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Número */}
+                            <FormField
+                            control={form.control}
+                            name="numero"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Número</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Complemento */}
+                            <FormField
+                            control={form.control}
+                            name="complemento"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Complemento</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "—"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                        </div>
                         </div>
 
                         <CardFooter className="flex justify-end gap-2 p-0">
@@ -403,12 +576,6 @@ export function DadosUsuario() {
                     </Avatar>
                     <h2 className="mt-3 text-2xl font-bold">{profile?.nome || 'Usuário'}</h2>
                     <p className="text-muted-foreground">{isAdvogado ? 'Advogado' : 'Cliente'}</p>
-
-                    <div className="flex gap-3 mt-4">
-                        <Button size="sm" variant="outline" asChild>
-                            <Link href="/perfil/editar">Editar Perfil</Link>
-                        </Button>
-                    </div>
                 </div>
             </CardContent>
         </Card>

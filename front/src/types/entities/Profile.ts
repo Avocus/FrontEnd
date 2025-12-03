@@ -13,7 +13,10 @@ export interface BaseProfile {
   telefone?: string;
   cpf?: string;
   dataNascimento?: string;
-  endereco?: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
   cidade?: string;
   estado?: string;
   cep?: string;

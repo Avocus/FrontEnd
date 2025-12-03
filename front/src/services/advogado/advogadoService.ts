@@ -1,10 +1,35 @@
 import api from '@/lib/api';
+import { ProfileFormData } from '@/schemas/profileSchema';
 import { ClienteLista } from '@/types/entities/Cliente';
 
 interface ValidationResult {
   valido: boolean;
   erro?: string;
 }
+interface EnderecoDTO {
+  rua: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+}
+
+interface DadosContatoDTO {
+  telefone: string;
+}
+
+interface UpdateAdvogadoDTO {
+  nome: string;
+  cpf: string;
+  email: string;
+  endereco: EnderecoDTO;
+  dadosContato: DadosContatoDTO;
+  dataNascimento: string;
+}
+
+
 
 export const getAdvogadoProfile = async (): Promise<unknown> => {
   try {
@@ -68,3 +93,14 @@ export const validarTokenConvite = async (token: string): Promise<ValidationResu
     throw error;
   }
 };
+
+export const updateAdvogadoProfile = async (advogadoData: UpdateAdvogadoDTO) => {
+  try {
+    const response = await api.put('/advogado/informacoes-pessoais', advogadoData);
+    return response.data;
+  }
+  catch (error) {
+    console.error('Erro ao atualizar perfil do advogado:', error);
+    throw error;
+  }
+}
