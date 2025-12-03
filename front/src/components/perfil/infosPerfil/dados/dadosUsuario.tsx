@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User, Save, X } from "lucide-react";
+import { CalendarIcon,  MapPinIcon, MailIcon, PhoneIcon, User, Save, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -15,7 +15,7 @@ import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import toast from "react-hot-toast";
-import { useProfileStore, useAuthStore } from "@/store";
+import { useProfileStore, useAuthStore, useProcessoStore } from "@/store";
 import { ClienteProfile, AdvogadoProfile } from "@/types/entities/Profile";
 import { StatusProcesso, getEspecialidadeLabel } from "@/types/enums";
 import { Configs } from "@/components/perfil/configs";
@@ -31,6 +31,12 @@ export function DadosUsuario() {
         resolver: zodResolver(profileSchema),
         defaultValues: profile as unknown as ClienteProfile
     });
+
+    const isAdvogado = profile && 'oab' in profile;
+
+    // processos da store (declarar antes de qualquer return condicional)
+    const { processosCliente, processosAdvogado, carregarProcessosCliente, carregarProcessosAdvogado } = useProcessoStore();
+
 
     const fetchProfile = async () => {
         try {
@@ -110,6 +116,24 @@ export function DadosUsuario() {
         fetchProfile();
     }, [updateProfileStore, form, user]);
 
+    // Carregar processos quando o componente monta ou quando o tipo de perfil/usuário muda
+    useEffect(() => {
+        const carregar = async () => {
+            if (!user) return;
+            try {
+                if (isAdvogado) {
+                    await carregarProcessosAdvogado();
+                } else {
+                    await carregarProcessosCliente();
+                }
+            } catch (err) {
+                console.error('Erro ao carregar processos na tela de perfil:', err);
+            }
+        };
+
+        carregar();
+    }, [user, isAdvogado, carregarProcessosCliente, carregarProcessosAdvogado]);
+
     const onSubmit = async (data: ProfileFormData) => {
         try {
             const updatedProfileData = await updateProfileData(data);
@@ -145,7 +169,6 @@ export function DadosUsuario() {
         );
     }
 
-    const isAdvogado = profile && 'oab' in profile;
 
     const renderInformacoesTab = () => (
         <Card>
@@ -418,19 +441,27 @@ export function DadosUsuario() {
     const renderEstastisticas = () => (
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>Estatísticas</CardTitle>
+                <CardTitle>Estatísticas de Processos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-primary/10">
-                        <h3 className="font-medium text-muted-foreground">Processos Ativos</h3>
-                        <p className="text-3xl font-bold">{profile?.processosAtivos?.length || 0}</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-primary/10">
-                        <h3 className="font-medium text-muted-foreground">Finalizados</h3>
-                        <p className="text-3xl font-bold">{profile?.processosFinalizados?.length || 0}</p>
-                    </div>
-                </div>
+                {(() => {
+                    const processos = isAdvogado ? processosAdvogado : processosCliente;
+                    const total = processos?.length || 0;
+                    const finalizados = (processos || []).filter(p => p.status === StatusProcesso.CONCLUIDO).length;
+
+                    return (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg bg-primary/10">
+                                <h3 className="font-medium text-muted-foreground">Total</h3>
+                                <p className="text-3xl font-bold">{total}</p>
+                            </div>
+                            <div className="p-4 rounded-lg bg-primary/10">
+                                <h3 className="font-medium text-muted-foreground">Finalizados</h3>
+                                <p className="text-3xl font-bold">{finalizados}</p>
+                            </div>
+                        </div>
+                    );
+                })()}
             </CardContent>
         </Card>
     );
@@ -451,14 +482,14 @@ export function DadosUsuario() {
             >
                 Informações
             </button>
-            <button
+            {/* <button
                 onClick={() => setActiveTab("processos")}
                 className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "processos" 
                     ? "border-b-2 border-primary text-secondary" 
                     : "text-muted-foreground hover:text-foreground"}`}
             >
                 Processos
-            </button>
+            </button> */}
             <button
                 onClick={() => setActiveTab("configuracoes")}
                 className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "configuracoes" 
