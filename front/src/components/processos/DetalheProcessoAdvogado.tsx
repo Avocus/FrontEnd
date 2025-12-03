@@ -190,8 +190,15 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
   const [selectedStatus, setSelectedStatus] = useState<StatusProcesso | null>(null);
   const [statusDescription, setStatusDescription] = useState("");
 
+  const statusBloqueadoParaProcessoEmAndamento: StatusProcesso[] = [
+    StatusProcesso.RASCUNHO,
+    // StatusProcesso.PENDENTE,
+    StatusProcesso.REJEITADO,
+    StatusProcesso.ACEITO
+  ];
+
   const possibleStatuses: StatusProcesso[] = Object.values(StatusProcesso).filter(
-    (s) => s !== processo?.status
+    (s) => s !== processo?.status && !statusBloqueadoParaProcessoEmAndamento.includes(s)
   ) as StatusProcesso[];
 
   const performStatusChange = async (newStatus: StatusProcesso, description: string) => {
@@ -261,7 +268,11 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
     if (!processo) return;
 
     try {
-      await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.ACEITO, "Processo marcado como aceito pelo advogado.");
+      if ((processo as any).dadosRequisitados && (processo as any).dadosRequisitados.length > 0) {
+        await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.AGUARDANDO_DADOS, "Processo marcado como aceito pelo advogado.");
+      } else {
+        await atualizarStatusProcesso(processo.id.toString(), StatusProcesso.ACEITO, "Processo marcado como aceito pelo advogado.");
+      }
       await refetch();
       success('Processo atribuído com sucesso!');
     } catch (err) {
@@ -370,7 +381,7 @@ export function DetalheProcessoAdvogado({ processoId }: DetalheProcessoAdvogadoP
 
             <Button
               onClick={() => setModalSolicitarAberto(true)}
-              disabled={processo.status === StatusProcesso.AGUARDANDO_DADOS || processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.AGUARDANDO_ANALISE_DADOS}
+              disabled={processo.status === StatusProcesso.PROTOCOLADO || processo.status === StatusProcesso.CONCLUIDO}
               className="flex items-center gap-2"
               variant="outline"
             >
