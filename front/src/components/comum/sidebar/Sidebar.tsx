@@ -108,7 +108,7 @@ export function Sidebar({
       { label: "Processos Disponíveis", href: "/processos/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
       { label: "Tickets Disponíveis", href: "/tickets/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
       { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> },
-      { label: "IA Generativa", href: "/ia", icon: <Sparkles className="h-5 w-5 text-dashboard-purple" /> },
+      { label: "Avocuss IA+", href: "/ia", icon: <Sparkles className="h-5 w-5 text-dashboard-purple" /> },
     ]),
     ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}]: [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}]),
   ];

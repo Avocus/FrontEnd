@@ -29,7 +29,7 @@ export interface ClienteLista {
   email: string;
   telefone?: string;
   cpf?: string;
-  ativo: boolean;
+  status: boolean;
   dataNascimento: string;
   processosAtivos?: number;
 } 
