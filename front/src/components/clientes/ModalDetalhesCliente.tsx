@@ -73,8 +73,8 @@ export function ModalDetalhesClientes({ open, onClose, cliente }: ModalDetalhesC
           {/* Status */}
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Status</p>
-            <Badge className={`${cliente.status ? "bg-green-500" : "bg-red-500"} text-white`}>
-              {cliente.status ? "Ativo" : "Inativo"}
+            <Badge className={`${cliente.ativo ? "bg-green-500" : "bg-red-500"} text-white`}>
+              {cliente.ativo ? "Ativo" : "Inativo"}
             </Badge>
           </div>
 
