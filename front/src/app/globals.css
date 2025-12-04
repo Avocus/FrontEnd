@@ -4,6 +4,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Sobrescrever estilo do autofill do navegador (Chrome/Edge) =====
+   Usa box-shadow inset para forçar a cor de fundo do input e
+   -webkit-text-fill-color para a cor do texto. Define uma variável
+   --input-bg para facilitar suporte a dark mode; ajuste conforme
+   necessário no seu tema/global. */
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill,
+input:-webkit-autofill:hover,
+textarea:-webkit-autofill:hover,
+select:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: inherit !important;
+  color: inherit !important;
+  background: #ffffff00 !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg, #ffffff00) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg, #ffffff00) inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Algumas versões do Chromium usam um pseudo interno; sobrescrevemos também */
+input:-internal-autofill-selected {
+  appearance: none !important;
+  background-image: none !important;
+  -webkit-text-fill-color: inherit !important;
+  color: inherit !important;
+}
+
+/* Dica: para suportar dark mode, defina a variável em seu CSS global:
+   :root { --input-bg: #fff; }
+   .dark { --input-bg: #0b1220; } */
+
 body {
   font-family: var(--font-montserrat, 'Montserrat', Arial, Helvetica, sans-serif);
   /* Aplicar scrollbar fino em todo o corpo */
