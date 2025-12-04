@@ -274,7 +274,7 @@ export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
       history: messages.slice(-6).map((message) => ({ // Reduzindo histórico para respostas mais focadas
         role: message.sender === "user" ? "user" : "model",
         parts: [{ text: message.text }],
-      })),
+      })).slice(1),
     });
 
     const result = await chatSession.sendMessage(enhancedPrompt);
