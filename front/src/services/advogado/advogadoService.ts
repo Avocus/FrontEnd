@@ -1,8 +1,37 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from '@/lib/api';
+import { ProfileFormData } from '@/schemas/profileSchema';
 import { ClienteLista } from '@/types/entities/Cliente';
 
-export const getAdvogadoProfile = async (): Promise<any> => {
+interface ValidationResult {
+  valido: boolean;
+  erro?: string;
+}
+interface EnderecoDTO {
+  rua: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+}
+
+interface DadosContatoDTO {
+  telefone: string;
+}
+
+interface UpdateAdvogadoDTO {
+  nome: string;
+  cpf: string;
+  email: string;
+  endereco: EnderecoDTO;
+  dadosContato: DadosContatoDTO;
+  dataNascimento: string;
+}
+
+
+
+export const getAdvogadoProfile = async (): Promise<unknown> => {
   try {
     const response = await api.get('/user/profile');
     return response.data;
@@ -13,7 +42,6 @@ export const getAdvogadoProfile = async (): Promise<any> => {
 };
 
 export const getMeusClientes = async (): Promise<ClienteLista[]> => {
-  // TODO - impedir de bater diretamente no backend
   try {
     const response = await api.get('/advogado/meus-clientes');
     const responseData = response.data as { data?: ClienteLista[] };
@@ -48,12 +76,16 @@ export const gerarLinkConvite = async (): Promise<string> => {
   }
 };
 
-export const validarTokenConvite = async (token: string): Promise<any> => {
+export const validarTokenConvite = async (token: string): Promise<ValidationResult> => {
   try {
     const response = await api.post('/advogado/validar-token-convite', null, {
       params: { token }
     });
-    const responseData = response.data as { data?: any };
+    const responseData = response.data as { data?: ValidationResult };
+
+    if (!responseData.data) {
+      throw new Error('Dados de validação não encontrados');
+    }
 
     return responseData.data;
   } catch (error) {
@@ -61,3 +93,14 @@ export const validarTokenConvite = async (token: string): Promise<any> => {
     throw error;
   }
 };
+
+export const updateAdvogadoProfile = async (advogadoData: UpdateAdvogadoDTO) => {
+  try {
+    const response = await api.put('/advogado/informacoes-pessoais', advogadoData);
+    return response.data;
+  }
+  catch (error) {
+    console.error('Erro ao atualizar perfil do advogado:', error);
+    throw error;
+  }
+}

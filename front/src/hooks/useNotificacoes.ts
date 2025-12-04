@@ -1,61 +1,42 @@
-import { useEffect } from 'react';
-import { notificacaoService } from '@/services/notificacaoService';
+import { useEffect, useCallback } from 'react';
 import { useAgendaStore } from '@/store/useAgendaStore';
 
 /**
- * Hook para inicializar e gerenciar o serviço de notificações
+ * Hook para inicializar e gerenciar o serviço de notificações de agenda
+ * Note: Este hook é específico para notificações de eventos da agenda
  */
 export function useNotificacoes() {
   const { getEventosParaNotificar } = useAgendaStore();
 
+  const verificarNotificacoesCallback = useCallback(async () => {
+    // Verificar eventos que precisam de notificação
+    const eventosParaNotificar = getEventosParaNotificar();
+  }, [getEventosParaNotificar]);
+
   useEffect(() => {
-    // Iniciar o serviço quando o componente montar
-    notificacaoService.iniciarServico();
+    // Verificar imediatamente na inicialização
+    verificarNotificacoesCallback();
+
+    // Verificar a cada hora se há eventos para notificar
+    const intervalId = setInterval(() => {
+      verificarNotificacoesCallback();
+    }, 60 * 60 * 1000); // 1 hora
 
     // Cleanup ao desmontar
     return () => {
-      notificacaoService.pararServico();
+      clearInterval(intervalId);
     };
-  }, []);
+  }, [verificarNotificacoesCallback]);
 
   /**
    * Força uma verificação manual de notificações
    */
-  const verificarNotificacoes = async () => {
-    const eventosParaNotificar = getEventosParaNotificar();
-    
-    for (const evento of eventosParaNotificar) {
-      // Aqui você deve obter o email do usuário logado do contexto de autenticação
-      const emailUsuario = 'mateus.asfonseca@gmail.com'; // Placeholder
-      
-      const sucesso = await notificacaoService.enviarNotificacaoManual(evento, emailUsuario);
-      
-      if (sucesso) {
-        console.log(`✅ Notificação enviada para: ${evento.titulo}`);
-      } else {
-        console.error(`❌ Falha ao enviar notificação para: ${evento.titulo}`);
-      }
-    }
-
-    return eventosParaNotificar.length;
-  };
-
-  /**
-   * Envia uma notificação manual para um evento específico
-   */
-  const enviarNotificacaoManual = async (eventoId: string, email: string) => {
-    const { eventos } = useAgendaStore.getState();
-    const evento = eventos.find(e => e.id === eventoId);
-    
-    if (!evento) {
-      throw new Error('Evento não encontrado');
-    }
-
-    return await notificacaoService.enviarNotificacaoManual(evento, email);
-  };
+  const verificarNotificacoesManual = useCallback(async () => {
+    const eventos = getEventosParaNotificar();
+    return eventos.length;
+  }, [getEventosParaNotificar]);
 
   return {
-    verificarNotificacoes,
-    enviarNotificacaoManual,
+    verificarNotificacoes: verificarNotificacoesManual,
   };
 }

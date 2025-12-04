@@ -3,16 +3,20 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Mail, Phone, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Mail, Phone, Loader2, Search } from "lucide-react";
 import { ClienteLista } from "@/types/entities/Cliente";
 import { getMeusClientes } from "@/services/advogado/advogadoService";
 import { useToast } from "@/hooks/useToast";
+import { ModalDetalhesClientes } from "./ModalDetalhesCliente";
 
 export function ListaClientes() {
   const [clientes, setClientes] = useState<ClienteLista[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [clienteSelecionado, setClienteSelecionado] = useState<ClienteLista | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { error: showError } = useToast();
 
   useEffect(() => {
@@ -31,6 +35,11 @@ export function ListaClientes() {
     loadClientes();
   }, []);
 
+  function abrirModalDetalhes(cliente: ClienteLista) {
+    setClienteSelecionado(cliente);
+    setIsModalOpen(true);
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -40,16 +49,30 @@ export function ListaClientes() {
     );
   }
 
+  const filteredClientes = clientes.filter(cliente =>
+    cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-4">
-      {clientes.length === 0 ? (
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          placeholder="Buscar clientes por nome ou email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+      {filteredClientes.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          Nenhum cliente cadastrado ainda.
+          {clientes.length === 0 ? "Nenhum cliente cadastrado ainda." : "Nenhum cliente encontrado."}
         </div>
       ) : (
-        clientes.map((cliente) => (
+        filteredClientes.map((cliente) => (
           <Card key={cliente.id}>
-            <CardContent className="p-6">
+            <CardContent className="p-6 text-primary-foreground hover:bg-primary-foreground transition-colors hover:text-primary cursor-pointer rounded-lg" onClick={() => abrirModalDetalhes(cliente)}>
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
                   <h3 className="text-lg font-semibold">{cliente.nome}</h3>
@@ -66,21 +89,16 @@ export function ListaClientes() {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant={cliente.status === "ativo" ? "default" : "secondary"}
-                  >
-                    {cliente.status === "ativo" ? "Ativo" : cliente.status === "pendente" ? "Pendente" : "Inativo"}
-                  </Badge>
-                  <Button variant="outline" size="sm">
-                    Ver Detalhes
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
         ))
       )}
+      <ModalDetalhesClientes
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        cliente={clienteSelecionado}
+      />
     </div>
   );
 }

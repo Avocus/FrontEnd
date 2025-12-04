@@ -9,11 +9,10 @@ import {
   MessageCircle, 
   FileText, 
   Users, 
-  BarChart,
-  Clock,
-  Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Home,
+  Sparkles
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -93,6 +92,7 @@ export function Sidebar({
   };
 
   const mainItems: SidebarItemProps[] = [
+    { label: "Home", href: "/home", icon: <Home className="h-5 w-5" /> },
     { label: "Agenda", href: "/agenda", icon: <Calendar className="h-5 w-5" /> },
     { label: "Chat", icon: <MessageCircle className="h-5 w-5" />, onClick: () => setChatOpen && setChatOpen(true) },
     { label: "Biblioteca", href: "/biblioteca", icon: <BookOpen className="h-5 w-5" /> },
@@ -100,16 +100,17 @@ export function Sidebar({
   ];
 
   const casosItems: SidebarItemProps[] = [
-    { label: "Meus Casos", href: "/casos", icon: <Briefcase className="h-5 w-5" /> },
-    ...(isClient ? [{ label: "Novo Caso", href: "/casos/new", icon: <FilePlus className="h-5 w-5" /> }] : []),
-    { label: "Documentos", href: "/documentos", icon: <FileText className="h-5 w-5" /> , disabled: true },
-    ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}] : [{ label: "Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}])
-  ];
-
-  const gerencialItems: SidebarItemProps[] = [
-    { label: "Estatísticas", href: "/estatisticas", icon: <BarChart className="h-5 w-5" />, disabled: true  },
-    { label: "Prazos", href: "/prazos", icon: <Clock className="h-5 w-5" /> , disabled: true },
-    { label: "Configurações", href: "/configuracoes", icon: <Settings className="h-5 w-5" /> , disabled: false },
+    { label: "Meus Processos", href: "/processos", icon: <Briefcase className="h-5 w-5" /> },
+    ...(isClient ? [
+      { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> },
+      { label: "Novo Ticket", href: "/tickets/criar", icon: <FilePlus className="h-5 w-5" /> },
+    ] : [
+      { label: "Processos Disponíveis", href: "/processos/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
+      { label: "Tickets Disponíveis", href: "/tickets/disponiveis", icon: <FilePlus className="h-5 w-5" /> },
+      { label: "Meus Tickets", href: "/tickets/meus", icon: <FileText className="h-5 w-5" /> },
+      { label: "Avocuss IA+", href: "/ia", icon: <Sparkles className="h-5 w-5 text-dashboard-purple" /> },
+    ]),
+    ...(isClient ? [{ label: "Meus Advogados", href: "/advogados", icon: <Users className="h-5 w-5" />}]: [{ label: "Meus Clientes", href: "/clientes", icon: <Users className="h-5 w-5" />}]),
   ];
 
   return (
@@ -151,22 +152,6 @@ export function Sidebar({
             )}
             <div className={cn("space-y-1", collapsed ? "mt-4" : "")}>
               {casosItems.map((item) => (
-                <SidebarItem 
-                  key={item.label} 
-                  {...item} 
-                  active={activePath === item.href}
-                  collapsed={collapsed}
-                />
-              ))}
-            </div>
-
-            {!collapsed && (
-              <div className="mt-6">
-                <h3 className="mb-2 px-4 text-sm font-semibold text-muted-foreground">Gerencial</h3>
-              </div>
-            )}
-            <div className={cn("space-y-1", collapsed ? "mt-4" : "")}>
-              {gerencialItems.map((item) => (
                 <SidebarItem 
                   key={item.label} 
                   {...item} 

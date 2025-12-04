@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { useRouter } from "next/navigation";
 import { PrivacyPolicy } from "@/components/login/PrivacyPolicy";
 import { ServiceTerms } from "@/components/login/ServiceTerms";
-import { ModeToggle } from "../ui/modeToggle";
 import { useAuthStore } from "@/store";
 
 export function Configs() {
@@ -32,12 +31,6 @@ export function Configs() {
         </CardHeader>
         <CardContent className="space-y-6">
 
-          {/* Mudar Tema */}
-          <div className="space-y-2 flex justify-start items-center">
-            <Label className="text-lg mr-10">Tema</Label>
-            <ModeToggle />
-          </div>
-
           {/* Redefinir Senha */}
           <div className="space-y-2">
             <Label className="text-lg">Redefinir Senha</Label>
@@ -58,11 +51,11 @@ export function Configs() {
             </div>
           </div>
 
-          {/* Sair do App */}
+          {/* Sair */}
           <div className="space-y-2">
             <Label className="text-lg">Conta</Label>
-            <Button variant="secondary" className="w-full text-primary hover:bg-destructive" onClick={handleLogout}>
-              Sair do App
+            <Button variant="outline" className="w-full hover:bg-destructive" onClick={handleLogout}>
+              Sair
             </Button>
           </div>
         </CardContent>

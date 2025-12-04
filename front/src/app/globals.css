@@ -1,11 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Lugrasimo&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+/* Fontes carregadas via next/font/google em `src/app/layout.tsx` */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Sobrescrever estilo do autofill do navegador (Chrome/Edge) =====
+   Usa box-shadow inset para forçar a cor de fundo do input e
+   -webkit-text-fill-color para a cor do texto. Define uma variável
+   --input-bg para facilitar suporte a dark mode; ajuste conforme
+   necessário no seu tema/global. */
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill,
+input:-webkit-autofill:hover,
+textarea:-webkit-autofill:hover,
+select:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: inherit !important;
+  color: inherit !important;
+  background: #ffffff00 !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg, #ffffff00) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg, #ffffff00) inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Algumas versões do Chromium usam um pseudo interno; sobrescrevemos também */
+input:-internal-autofill-selected {
+  appearance: none !important;
+  background-image: none !important;
+  -webkit-text-fill-color: inherit !important;
+  color: inherit !important;
+}
+
+/* Dica: para suportar dark mode, defina a variável em seu CSS global:
+   :root { --input-bg: #fff; }
+   .dark { --input-bg: #0b1220; } */
+
 body {
-  font-family: 'Montserrat', Arial, Helvetica, sans-serif; /* Corrige a fonte para Roboto */
+  font-family: var(--font-montserrat, 'Montserrat', Arial, Helvetica, sans-serif);
   /* Aplicar scrollbar fino em todo o corpo */
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -265,6 +300,30 @@ body {
   
   .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Estilo específico para chat de mensagens */
+  .chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .chat-messages::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .chat-messages::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 3px;
+  }
+  
+  .chat-messages::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.7);
+  }
+  
+  .chat-messages {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.5) hsl(var(--muted) / 0.3);
   }
 
   /* Classes utilitárias para cores do dashboard */
@@ -575,6 +634,6 @@ body {
 
 /* Exemplo de aplicação em uma tag específica */
 h1 {
-  font-family: 'Lugrasimo', cursive; /* Aplica a fonte Bytesized ao h1 */
+  font-family: var(--font-playfair, "Playfair Display"), serif;
   font-weight: 700; /* Define o peso da fonte */
 }

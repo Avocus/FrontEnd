@@ -1,28 +1,92 @@
-/**
- * Interface que representa um evento de agenda
- */
+import { TipoProcesso } from '@/types/enums';
+import { ProcessoStatus } from './Processo';
+
 export interface Evento {
-  id: string;
+  id: number;
   titulo: string;
-  descricao?: string;
-  dataInicio: string;
-  dataFim?: string;
+  descricao: string;
   tipo: EventoTipo;
-  status?: EventoStatus;
-  cor: EventoCor;
-  localizacao?: string;
-  processoId?: string;
-  advogadoId?: string;
-  clienteId?: string;
-  convidados?: string[];
-  notificarPorEmail?: boolean;
-  emailNotificado?: boolean;
-  lembrarAntes?: number; // minutos antes para lembrar
+  status: EventoStatus;
+  cor: string;
+  dataInicio: string;
+  dataFim: string;
+  local: string;
+  diasLembrarAntes: number;
+  notificarPorEmail: boolean;
+  cliente?: ClienteBasico;
+  processo?: ProcessoBasico;
+  advogado?: AdvogadoBasico;
+  processoId: number | undefined;
+  clienteId: number | undefined;
+}
+
+export interface ClienteBasico {
+  id: number;
+  nome: string;
+  email: string;
+  telefone: string;
+  cpf: string;
+}
+
+export interface ProcessoBasico {
+  id: number;
+  titulo: string;
+  descricao: string;
+  status: ProcessoStatus;
+  tipoProcesso: TipoProcesso;
+  cliente?: ClienteBasico;
+  advogado?: AdvogadoBasico;
+}
+
+export interface AdvogadoBasico {
+  id: number;
+  nome: string;
+  cpf: string;
+  oab: string;
+  email: string;
+}
+
+export interface CreateEventoPayload {
+  titulo: string;
+  descricao: string;
+  tipo: EventoTipo;
+  status: EventoStatus;
+  cor: string;
+  dataInicio: string;
+  dataFim: string;
+  local: string;
+  diasLembrarAntes: number;
+  notificarPorEmail: boolean;
+}
+
+export interface UpdateEventoPayload extends CreateEventoPayload {
+  clienteId?: number;
+  processoId?: number;
+}
+
+export type ValidatedUpdateEventoPayload =
+  | (UpdateEventoPayload & { processoId?: undefined; clienteId?: number })
+  | (UpdateEventoPayload & { processoId: number; clienteId: number });
+
+export interface EventosResponse {
+  data: Evento[];
+  message: string;
+  status: number;
+  params: Record<string, any>;
+  error: Record<string, any>;
 }
 
 /**
- * Enum com os tipos de evento
+ * Resposta da API para evento único
  */
+export interface EventoResponse {
+  data: Evento;
+  message: string;
+  status: number;
+  params: Record<string, any>;
+  error: Record<string, any>;
+}
+
 export enum EventoTipo {
   AUDIENCIA = 'AUDIENCIA',
   REUNIAO = 'REUNIAO',
@@ -30,19 +94,12 @@ export enum EventoTipo {
   OUTRO = 'OUTRO'
 }
 
-/**
- * Enum com os status de evento
- */
 export enum EventoStatus {
   PENDENTE = 'PENDENTE',
   CONFIRMADO = 'CONFIRMADO',
-  CONCLUIDO = 'CONCLUIDO',
   CANCELADO = 'CANCELADO'
 }
 
-/**
- * Enum com as cores disponíveis para eventos
- */
 export enum EventoCor {
   AZUL = '#3B82F6',
   VERDE = '#10B981',
@@ -57,29 +114,6 @@ export enum EventoCor {
 }
 
 /**
- * Interface para filtros de eventos
- */
-export interface EventoFiltro {
-  tipo?: EventoTipo[];
-  status?: EventoStatus[];
-  cor?: EventoCor[];
-  dataInicio?: Date;
-  dataFim?: Date;
-}
-
-/**
- * Interface para notificação de evento
- */
-export interface EventoNotificacao {
-  eventoId: string;
-  email: string;
-  titulo: string;
-  dataEvento: Date;
-  enviado: boolean;
-  dataEnvio?: Date;
-}
-
-/**
  * Interface para o estado da agenda
  */
 export interface AgendaState {
@@ -87,19 +121,15 @@ export interface AgendaState {
   eventoSelecionado: Evento | null;
   isLoading: boolean;
   error: string | null;
-  filtros: EventoFiltro;
-  
+
   loadEventos: () => Promise<void>;
-  selectEvento: (id: string) => void;
-  addEvento: (evento: Omit<Evento, 'id'>) => Promise<Evento>;
-  updateEvento: (id: string, eventoAtualizado: Partial<Evento>) => Promise<void>;
-  removeEvento: (id: string) => Promise<void>;
+  selectEvento: (id: number) => void;
+  addEvento: (evento: ValidatedUpdateEventoPayload) => Promise<Evento>;
+  updateEvento: (id: number, eventoAtualizado: Partial<Evento>) => Promise<void>;
+  removeEvento: (id: number) => Promise<void>;
   clearSelection: () => void;
   getEventosByDate: (date: Date) => Evento[];
   getEventosProximos: (dias?: number) => Evento[];
   getEventosPassados: (dias?: number) => Evento[];
-  setFiltros: (filtros: Partial<EventoFiltro>) => void;
-  clearFiltros: () => void;
-  marcarEmailNotificado: (eventoId: string) => void;
   getEventosParaNotificar: () => Evento[];
 } 

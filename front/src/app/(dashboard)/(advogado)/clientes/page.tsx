@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { ListaClientes } from "@/components/clientes/ListaClientes";
 import { ModalAdicionarCliente } from "@/components/clientes/ModalAdicionarCliente";
@@ -36,21 +35,14 @@ export default function ClientesPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Meus Clientes</h1>
         <div className="flex gap-2">
-          <Button onClick={() => setIsModalOpen(true)} className="border border-gray-300">
+          <Button onClick={() => setIsModalOpen(true)} variant={"primary"}>
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Cliente
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Clientes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ListaClientes key={refreshKey} />
-        </CardContent>
-      </Card>
+      <ListaClientes key={refreshKey} />
 
       <ModalAdicionarCliente
         isOpen={isModalOpen}

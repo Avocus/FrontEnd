@@ -1,10 +1,10 @@
 import React, { ReactNode, useState, useEffect } from 'react';
-import { NavbarWeb } from '../comum/navbarWeb';
 import { Sidebar } from '../comum/sidebar/Sidebar';
 import { useLayout } from '@/contexts/LayoutContext';
 import { ChatAvocuss } from '../comum/chatAvocuss';
 import { ProfileAlertBanner } from '../ui/profile-alert-banner';
 import { useAuthStore, useProfileStore } from '@/store';
+import { useNotificationStore } from '@/store/useNotificationStore';
 import { Navbar } from '../comum/navbar';
 import { usePathname } from 'next/navigation';
 
@@ -16,8 +16,9 @@ interface AppLayoutProps {
 export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
   const { config, isMobile, toggleSidebar, isCliente } = useLayout();
   const [ chatOpen, setChatOpen ] = React.useState(false);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { pendente } = useProfileStore();
+  const { connectWebSocket, disconnectWebSocket, loadNotifications } = useNotificationStore();
   const pathname = usePathname() || '';
   const [isMounted, setIsMounted] = useState(false);
 
@@ -25,10 +26,21 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
     setIsMounted(true);
   }, []);
 
-  // Determinamos qual componente de navbar mostrar
-  const NavbarComponent = isMobile ? Navbar : NavbarWeb;
+  // Conectar WebSocket e carregar notificações quando usuário estiver autenticado
+  useEffect(() => {
+    
+    if (isAuthenticated && user?.id) {
+      
+      // Conectar WebSocket para notificações em tempo real
+      connectWebSocket(user.id.toString());
 
-  // Se o componente não está montado no cliente, renderizamos um layout simplificado
+      return () => {
+        disconnectWebSocket();
+      };
+    }
+  }, [isAuthenticated, user?.id, loadNotifications, connectWebSocket, disconnectWebSocket]);
+
+
   if (!isMounted) {
     return (
       <div className="flex h-screen bg-background">
@@ -42,7 +54,7 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
     );
   }
 
-  if (isAuthenticated && config.showSidebar && !isMobile) {
+  if (isAuthenticated && config.showSidebar) {
     return (
       <div className="flex h-screen">
         {/* Sidebar */}
@@ -61,7 +73,7 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Navbar */}
           {config.showNavbar && !hideNavbar && (
-            <NavbarWeb 
+            <Navbar 
               showFullNavigation={false} 
               showLogo={config.sidebarCollapsed}
             />
@@ -85,7 +97,7 @@ export function AppLayout({ children, hideNavbar = false }: AppLayoutProps) {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Navbar */}
-      {config.showNavbar && !hideNavbar && <NavbarComponent showFullNavigation={true} showLogo={true} />}
+      {config.showNavbar && !hideNavbar && <Navbar showFullNavigation={true} showLogo={true} />}
 
       {/* Alert Banner */}
       {isAuthenticated && pendente && <ProfileAlertBanner />}

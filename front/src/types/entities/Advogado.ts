@@ -1,3 +1,5 @@
+import { Especialidade } from "../enums";
+
 export interface PerfilAdvogado {
   nome: string;
   email: string;
@@ -20,8 +22,7 @@ export interface AdvogadoLista {
   email: string;
   telefone?: string;
   oab?: string;
-  status: 'ativo' | 'pendente' | 'inativo';
-  dataCadastro: string;
-  especialidades?: string[];
-  avaliacao?: number;
+  ativo: boolean;
+  dataNascimento: string;
+  especialidades?: Especialidade[];
 }

@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ListaAdvogados } from "@/components/advogados/ListaAdvogados";
 
 export default function AdvogadosPage() {
@@ -26,14 +25,7 @@ export default function AdvogadosPage() {
         <h1 className="text-3xl font-bold">Meus Advogados</h1>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Advogados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ListaAdvogados />
-        </CardContent>
-      </Card>
+      <ListaAdvogados />
     </div>
   );
 }

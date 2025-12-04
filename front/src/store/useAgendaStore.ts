@@ -1,11 +1,11 @@
+import { createEvento, deleteEvento, getEventos, updateEvento } from '@/services/eventoService';
+import { AgendaState, Evento, ValidatedUpdateEventoPayload } from '@/types';
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import { Evento, AgendaState, EventoTipo, EventoStatus, EventoCor, EventoFiltro } from '@/types';
+import { devtools } from 'zustand/middleware';
 
 export const useAgendaStore = create<AgendaState>()(
   devtools(
-    persist(
-      (set, get) => ({
+    (set, get) => ({
         eventos: [],
         eventoSelecionado: null,
         isLoading: false,
@@ -14,136 +14,105 @@ export const useAgendaStore = create<AgendaState>()(
 
         // Carregar eventos
         loadEventos: async () => {
-          set({ isLoading: true });
+          set({ isLoading: true, error: null });
           try {
-            // Simulação de uma chamada API
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const dataAtual = new Date();
-            const amanha = new Date(dataAtual);
-            amanha.setDate(dataAtual.getDate() + 1);
-            
-            // Simulando dados
-            const eventos: Evento[] = [
-              {
-                id: '1',
-                titulo: 'Audiência - Caso Silva',
-                descricao: 'Audiência de conciliação',
-                dataInicio: dataAtual.toISOString(),
-                dataFim: new Date(dataAtual.getTime() + 2 * 60 * 60 * 1000).toISOString(),
-                tipo: EventoTipo.AUDIENCIA,
-                processoId: '123',
-                status: EventoStatus.PENDENTE,
-                localizacao: 'Fórum Central',
-                cor: EventoCor.AZUL,
-                notificarPorEmail: true,
-                lembrarAntes: 1440 // 24 horas antes
-              },
-              {
-                id: '2',
-                titulo: 'Prazo - Entrega de documentos',
-                descricao: 'Prazo para entrega de documentos do caso Oliveira',
-                dataInicio: amanha.toISOString(),
-                tipo: EventoTipo.PRAZO,
-                processoId: '456',
-                status: EventoStatus.PENDENTE,
-                cor: EventoCor.VERMELHO,
-                notificarPorEmail: true,
-                lembrarAntes: 1440
-              }
-            ];
-            
+            const eventos = await getEventos();
             set({ eventos, isLoading: false });
           } catch (error) {
-            set({ 
+            set({
               error: error instanceof Error ? error.message : 'Erro ao carregar eventos',
-              isLoading: false 
+              isLoading: false
             });
           }
         },
 
         // Selecionar evento
-        selectEvento: (id: string) => {
+        selectEvento: (id: number) => {
           const evento = get().eventos.find(e => e.id === id) || null;
           set({ eventoSelecionado: evento });
         },
 
         // Adicionar evento
-        addEvento: async (evento: Omit<Evento, 'id'>) => {
-          set({ isLoading: true });
+        addEvento: async (evento: ValidatedUpdateEventoPayload) => {
+          set({ isLoading: true, error: null });
           try {
-            // Simulação de uma chamada API
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            const novoEvento: Evento = {
-              ...evento,
-              id: crypto.randomUUID(),
-              cor: evento.cor || EventoCor.AZUL,
-              notificarPorEmail: evento.notificarPorEmail ?? true,
-              lembrarAntes: evento.lembrarAntes ?? 1440
-            };
-            
-            set(state => ({ 
+
+            const novoEvento = await createEvento(evento);
+
+            set(state => ({
               eventos: [...state.eventos, novoEvento],
-              isLoading: false 
+              isLoading: false
             }));
-            
+
             return novoEvento;
           } catch (error) {
-            set({ 
+            set({
               error: error instanceof Error ? error.message : 'Erro ao adicionar evento',
-              isLoading: false 
+              isLoading: false
             });
             throw error;
           }
         },
 
         // Atualizar evento
-        updateEvento: async (id: string, eventoAtualizado: Partial<Evento>) => {
-          set({ isLoading: true });
+        updateEvento: async (id: number, eventoAtualizado: Partial<Evento>) => {
+          set({ isLoading: true, error: null });
           try {
-            // Simulação de uma chamada API
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
+            const payload = {
+              titulo: eventoAtualizado.titulo,
+              descricao: eventoAtualizado.descricao,
+              tipo: eventoAtualizado.tipo,
+              status: eventoAtualizado.status,
+              cor: eventoAtualizado.cor,
+              dataInicio: eventoAtualizado.dataInicio,
+              dataFim: eventoAtualizado.dataFim,
+              local: eventoAtualizado.local,
+              diasLembrarAntes: eventoAtualizado.diasLembrarAntes,
+              notificarPorEmail: eventoAtualizado.notificarPorEmail,
+              clienteId: eventoAtualizado.cliente?.id,
+              processoId: eventoAtualizado.processo?.id
+            };
+
+            const eventoAtualizadoResult = await updateEvento(id, payload);
+
             set(state => {
-              const eventos = state.eventos.map(e => 
-                e.id === id ? { ...e, ...eventoAtualizado } : e
+              const eventos = state.eventos.map(e =>
+                e.id === id ? eventoAtualizadoResult : e
               );
-              
+
               const eventoSelecionado = state.eventoSelecionado?.id === id
-                ? { ...state.eventoSelecionado, ...eventoAtualizado }
+                ? eventoAtualizadoResult
                 : state.eventoSelecionado;
-              
+
               return { eventos, eventoSelecionado, isLoading: false };
             });
           } catch (error) {
-            set({ 
+            set({
               error: error instanceof Error ? error.message : 'Erro ao atualizar evento',
-              isLoading: false 
+              isLoading: false
             });
             throw error;
           }
         },
 
         // Remover evento
-        removeEvento: async (id: string) => {
-          set({ isLoading: true });
+        removeEvento: async (id: number) => {
+          set({ isLoading: true, error: null });
           try {
-            // Simulação de uma chamada API
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
+            await deleteEvento(id);
+
             set(state => {
               const eventos = state.eventos.filter(e => e.id !== id);
               const eventoSelecionado = state.eventoSelecionado?.id === id
                 ? null
                 : state.eventoSelecionado;
-              
+
               return { eventos, eventoSelecionado, isLoading: false };
             });
           } catch (error) {
-            set({ 
+            set({
               error: error instanceof Error ? error.message : 'Erro ao remover evento',
-              isLoading: false 
+              isLoading: false
             });
             throw error;
           }
@@ -188,7 +157,7 @@ export const useAgendaStore = create<AgendaState>()(
           const agora = new Date();
           const limite = new Date();
           limite.setDate(agora.getDate() - dias);
-          
+
           return eventos
             .filter(evento => {
               const dataEvento = new Date(evento.dataInicio);
@@ -197,56 +166,22 @@ export const useAgendaStore = create<AgendaState>()(
             .sort((a, b) => new Date(b.dataInicio).getTime() - new Date(a.dataInicio).getTime());
         },
 
-        // Definir filtros
-        setFiltros: (filtros: Partial<EventoFiltro>) => {
-          set(state => ({
-            filtros: { ...state.filtros, ...filtros }
-          }));
-        },
-
-        // Limpar filtros
-        clearFiltros: () => {
-          set({ filtros: {} });
-        },
-
-        // Marcar email como notificado
-        marcarEmailNotificado: (eventoId: string) => {
-          set(state => ({
-            eventos: state.eventos.map(evento =>
-              evento.id === eventoId
-                ? { ...evento, emailNotificado: true }
-                : evento
-            )
-          }));
-        },
-
-        // Obter eventos para notificar
+        // Obter eventos que precisam de notificação
         getEventosParaNotificar: () => {
           const { eventos } = get();
           const agora = new Date();
-          const amanha = new Date();
-          amanha.setDate(agora.getDate() + 1);
-          
+
           return eventos.filter(evento => {
-            if (!evento.notificarPorEmail || evento.emailNotificado) {
-              return false;
-            }
-            
             const dataEvento = new Date(evento.dataInicio);
-            const dataNotificacao = new Date(dataEvento);
-            dataNotificacao.setMinutes(dataNotificacao.getMinutes() - (evento.lembrarAntes || 1440));
-            
-            return dataNotificacao <= agora && dataEvento > agora;
+            const diasAteEvento = Math.ceil((dataEvento.getTime() - agora.getTime()) / (1000 * 60 * 60 * 24));
+
+            // Verificar se está dentro do período de lembrete e se deve notificar por email
+            return diasAteEvento <= evento.diasLembrarAntes &&
+                   diasAteEvento >= 0 &&
+                   evento.notificarPorEmail &&
+                   evento.status !== 'CANCELADO';
           });
         }
-      }),
-      {
-        name: 'agenda-storage',
-        partialize: (state) => ({
-          eventos: state.eventos,
-          filtros: state.filtros
-        }),
-      }
+      })
     )
-  )
-); 
+  ) 

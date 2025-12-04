@@ -1,4 +1,5 @@
 import { StatusProcesso, TipoProcesso } from '@/types/enums';
+import { Evento } from './Evento';
 
 /**
  * Interface que representa um processo jurídico
@@ -10,7 +11,7 @@ export interface Processo {
   descricao?: string;
   dataInicio?: string;
   dataConclusao?: string;
-  status?: ProcessoStatus;
+  status?: StatusProcesso;
   advogadoId?: string;
   advogadoNome?: string;
   clienteId?: string;
@@ -18,7 +19,6 @@ export interface Processo {
   concluido?: boolean;
   mensagensNaoLidas?: number;
   prazosVencidos?: number;
-  steps?: ProcessoStep[];
   isDraft?: boolean;
 }
 
@@ -31,6 +31,7 @@ export interface ProcessoDTO {
   descricao: string;
   status: StatusProcesso;
   tipoProcesso: TipoProcesso;
+  urgencia: "BAIXA" | "MEDIA" | "ALTA";
   dataAbertura: string;
   cliente: ClienteDTO;
   advogado: AdvogadoDTO;
@@ -70,15 +71,50 @@ export interface StatusUpdateDTO {
 }
 
 /**
- * Interface que representa uma etapa do processo
+ * Interface para processo do cliente
  */
-export interface ProcessoStep {
+export interface ProcessoCliente extends Omit<ProcessoDTO, 'linhaDoTempo' | 'id'> {
   id: string;
-  titulo: string;
+  situacaoAtual: StatusProcesso;
+  dataSolicitacao: string;
+  urgencia: "BAIXA" | "MEDIA" | "ALTA";
+  timeline: TimelineEntry[];
+  objetivos: string;
+  documentosDisponiveis?: string;
+  documentosAnexados: any[];
+  motivoRejeicao?: string;
+  eventos?: Evento[];
+}
+
+/**
+ * Interface para processo do advogado
+ */
+export interface ProcessoAdvogado extends Omit<ProcessoDTO, 'linhaDoTempo' | 'id'> {
+  id: string;
+  situacaoAtual: StatusProcesso;
+  dataSolicitacao: string;
+  dataAceite: string;
+  advogado: AdvogadoDTO;
+  urgencia: "BAIXA" | "MEDIA" | "ALTA";
+  timeline: TimelineEntry[];
+  objetivos: string;
+  documentosDisponiveis?: string;
+  documentosAnexados: any[];
+  motivoRejeicao?: string;
+  eventos?: Evento[];
+}
+
+/**
+ * Entrada do timeline
+ */
+export interface TimelineEntry {
+  id: string;
+  data: string;
+  statusAnterior?: StatusProcesso;
+  novoStatus: StatusProcesso;
   descricao: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  dataPrevista?: string;
-  dataConclusao?: string;
+  autor: "cliente" | "advogado" | "sistema";
+  observacoes?: string;
 }
 
 /**
@@ -87,7 +123,7 @@ export interface ProcessoStep {
 export enum ProcessoStatus {
   RASCUNHO = 'RASCUNHO',
   EM_ANDAMENTO = 'EM_ANDAMENTO',
-  AGUARDANDO_DOCUMENTOS = 'AGUARDANDO_DOCUMENTOS',
+  AGUARDANDO_DADOS = 'AGUARDANDO_DADOS',
   EM_JULGAMENTO = 'EM_JULGAMENTO',
   CONCLUIDO = 'CONCLUIDO',
   ARQUIVADO = 'ARQUIVADO'

@@ -1,4 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Especialidade } from '../enums';
+import { Documento } from './Documento';
+import { Processo } from './Processo';
+
 /**
  * Interface base para perfil
  */
@@ -10,15 +13,19 @@ export interface BaseProfile {
   telefone?: string;
   cpf?: string;
   dataNascimento?: string;
-  endereco?: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
   cidade?: string;
   estado?: string;
   cep?: string;
   foto?: string;
-  documentos?: any;
+  documentos?: Documento[];
   fotoPerfil?: string;
-  processosFinalizados?: any;
-  processosAtivos?: any;
+  processosFinalizados?: Processo[];
+  processosAtivos?: Processo[];
+  processos?: Processo[];
 }
 
 /**
@@ -31,7 +38,7 @@ export interface AdvogadoProfile extends BaseProfile {
   faculdade?: string;
   areasAtuacao?: string[];
   avaliacao?: number;
-  especialidades?: string[];
+  especialidades?: Especialidade[];
   custoHora?: number;
 }
 

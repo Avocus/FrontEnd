@@ -106,7 +106,7 @@ export default function Home() {
               <Card className="h-full hover:shadow-xl transition-shadow">
                 <CardHeader>
                   <div className="bg-secondary p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4">
-                    <feature.icon className="text-aw==secondary-foreground" />
+                    <feature.icon className="text-primary" />
                   </div>
                   <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>
@@ -308,7 +308,7 @@ export default function Home() {
 const features = [
   {
     icon: Gavel,
-    title: "Gestão de Casos",
+    title: "Gestão de Processos",
     description: "Controle completo de prazos, documentos e comunicação com clientes."
   },
   {
@@ -319,7 +319,7 @@ const features = [
   {
     icon: FileText,
     title: "Documentos Seguros",
-    description: "Armazene e compartilhe documentos com criptografia de ponta a ponta."
+    description: "Armazene e compartilhe documentos com segurança."
   },
   {
     icon: MessageCircle,
@@ -344,8 +344,8 @@ const steps = [
     description: "Crie sua conta em menos de 2 minutos."
   },
   {
-    title: "Perfil",
-    description: "Complete seu perfil para melhor recomendação."
+    title: "Plataforma",
+    description: "Aproveite todos os recursos disponíveis."
   },
   {
     title: "Conexão",
@@ -361,20 +361,20 @@ const testimonials = [
   {
     name: "Dr. Ana Silva",
     role: "Advogada Trabalhista",
-    quote: "A plataforma revolucionou minha produtividade. Consigo gerenciar todos os casos em um só lugar e ainda captar novos clientes qualificados.",
-    avatar: "/avatar-advogada.jpg"
+    quote: "A plataforma revolucionou minha produtividade. Consigo gerenciar todos os processos em um só lugar e ainda captar novos clientes qualificados.",
+    avatar: "/avatar-advogada.webp"
   },
   {
     name: "Carlos Mendes",
     role: "Cliente",
     quote: "Finalmente encontrei um advogado que realmente entende do meu caso. A plataforma tornou tudo tão simples e transparente!",
-    avatar: "/avatar-cliente.jpg"
+    avatar: "/avatar-cliente.webp"
   },
   {
     name: "Dra. Mariana Oliveira",
     role: "Advogada de Família",
     quote: "As ferramentas de gestão de tempo e documentos me poupam horas de trabalho burocrático. Recomendo para todos os colegas!",
-    avatar: "/avatar-advogada2.jpg"
+    avatar: "/avatar-advogada2.webp"
   }
 ];
 
@@ -403,11 +403,10 @@ const clientBenefits = [
   {
     icon: FileText,
     title: "Transparência Total",
-    description: "Controle completo sobre seus casos",
+    description: "Controle completo sobre seus processos",
     features: [
       "Notificações sobre prazos importantes",
       "Histórico completo das movimentações",
-      "Custos sempre claros e antecipados"
     ]
   }
 ];
@@ -421,15 +420,11 @@ const lawyerBenefits = [
     features: [
       {
         title: "Controle de Processos",
-        description: "Visualize prazos, andamentos e documentos de todos os casos"
+        description: "Visualize prazos, andamentos e documentos de todos os processos"
       },
       {
         title: "Automatização de Rotinas",
-        description: "Petições automáticas, cálculos de prazos e alertas inteligentes"
-      },
-      {
-        title: "Relatórios Financeiros",
-        description: "Acompanhe receitas, despesas e honorários com gráficos detalhados"
+        description: "Petições automáticas, IA jurídica e alertas inteligentes"
       }
     ]
   },
@@ -443,12 +438,8 @@ const lawyerBenefits = [
         description: "Perfil profissional visível para potenciais clientes"
       },
       {
-        title: "Modelos de Documentos",
-        description: "Biblioteca com mais de 500 modelos de peças jurídicas"
-      },
-      {
         title: "Agenda Integrada",
-        description: "Sincronização com Google Calendar e lembretes automáticos"
+        description: "Agenda avançada para gerenciar audiências, prazos e compromissos"
       }
     ]
   }

@@ -13,8 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useCallback, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { auth, sendPasswordResetEmail } from "../../../firebaseConfig";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { useAuthStore, useProfileStore } from "@/store";
 import { ArrowLeft } from "lucide-react";
@@ -24,6 +23,7 @@ import { getFieldValidationClass } from "../../utils/formValidation";
 import { useToast } from "@/hooks/useToast";
 import { PrivacyPolicy } from "@/components/login/PrivacyPolicy";
 import { ServiceTerms } from "@/components/login/ServiceTerms";
+import { resetPasswordRequest } from "@/services/user/RedefinirSenhaService";
 
 export function LoginForm({
   className,
@@ -73,6 +73,9 @@ export function LoginForm({
 
   const handleLoginEmail = useCallback(async (data: LoginFormData) => {
     try {
+      // Resetar último erro exibido para garantir que mensagens repetidas sejam mostradas novamente
+      setLastErrorShown(null);
+
       // Usar a função login do useAuthStore
       await login({
         email: data.email,
@@ -86,13 +89,15 @@ export function LoginForm({
     }
   }, [login]);
 
-  const handleForgotPassword = useCallback(async (data: ResetPasswordData) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleForgotPassword = useCallback(async (_data: ResetPasswordData) => {
     try {
-      await sendPasswordResetEmail(auth, data.resetEmail);
+      await resetPasswordRequest(_data.resetEmail);
       setResetEmailSent(true);
-      setError(null); // Limpar erros anteriores
+      setError(null);
     } catch (error) {
       console.error("Erro na recuperação de senha:", error);
+      setResetEmailSent(false);
       setError("Erro ao enviar email de recuperação. Verifique o email e tente novamente.");
     }
   }, [setError]);
@@ -118,50 +123,43 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(handleLoginEmail)}>
-            <div className="grid gap-6">
-              <div className="grid gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    className={getFieldValidationClassLocal("email")}
-                    {...register("email")}
-                  />
-                  {errors.email && touchedFields.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Senha</Label>
-                    <Link
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                      onClick={() => document.getElementById("dialog-trigger")?.click()}
-                    >
-                      Esqueci minha senha
-                    </Link>
-                  </div>
-                  <Input id="password" type="password" className={getFieldValidationClassLocal("password")} {...register("password")} />
-                  {errors.password && touchedFields.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
-                </div>
-                <div className="grid gap-2">
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-secondary text-secondary-foreground" 
-                    disabled={!isValid || isLoading}
-                  >
-                    {isLoading ? "Entrando..." : "Entrar"}
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  className={getFieldValidationClassLocal("email")}
+                  {...register("email")}
+                />
+                {errors.email && touchedFields.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
               </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Senha</Label>
+                  <Link
+                    href="#"
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                    onClick={() => document.getElementById("dialog-trigger")?.click()}
+                  >
+                    Esqueci minha senha
+                  </Link>
+                </div>
+                <Input id="password" type="password" className={getFieldValidationClassLocal("password")} {...register("password")} />
+                {errors.password && touchedFields.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
+              </div>
+              <Button 
+                type="submit" 
+                variant={"primary"} 
+                disabled={!isValid || isLoading}
+              >
+                {isLoading ? "Entrando..." : "Entrar"}
+              </Button>
               <div className="text-center text-sm">
                 Não possui conta?{" "}
                 <Link
-                  href="/cadastro"
-                  className="underline underline-offset-4"
-                  onClick={handleRegister}
-                >
+                  onClick={handleRegister} href={"/cadastro"}>
                   Cadastrar
                 </Link>
               </div>
@@ -205,13 +203,6 @@ export function LoginForm({
               </Button>
             </div>
           </form>
-          <DialogFooter className="sm:justify-start">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Fechar
-              </Button>
-            </DialogClose>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

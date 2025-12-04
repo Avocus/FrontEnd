@@ -39,7 +39,7 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
   // Usar useMemo para evitar recálculos desnecessários
   const initialConfig = useMemo(() => ({
     ...defaultConfig,
-    showSidebar: (isAdvogado || isCliente) && !isMobile,
+    showSidebar: (isAdvogado || isCliente),
     // Evitamos acessar window durante SSR
     sidebarCollapsed: isMobile
   }), [isAdvogado, isCliente, isMobile]);
@@ -66,14 +66,8 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
       const newConfig = { ...prevConfig };
       
       // Só atualizar se mudou para evitar re-renders em cascata
-      if (prevConfig.showSidebar !== ((isAdvogado || isCliente) && !isMobile)) {
-        newConfig.showSidebar = (isAdvogado || isCliente) && !isMobile;
-      }
-      
-      // Atualizar collapse da sidebar baseado no dispositivo
-      const shouldCollapse = isMobile || window.innerWidth < 1024;
-      if (prevConfig.sidebarCollapsed !== shouldCollapse) {
-        newConfig.sidebarCollapsed = shouldCollapse;
+      if (prevConfig.showSidebar !== ((isAdvogado || isCliente))) {
+        newConfig.showSidebar = (isAdvogado || isCliente);
       }
       
       return newConfig;

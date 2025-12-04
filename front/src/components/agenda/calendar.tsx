@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { format, startOfWeek, addDays, startOfMonth, endOfMonth, isSameDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as DatePicker } from "@/components/ui/calendar";
@@ -15,7 +16,7 @@ export function CustomCalendar() {
     const [selectedDate, setSelectedDate] = useState(new Date());
 
     const addEvent = (date: Date) => {
-        const eventTitle = prompt("Enter event title:");
+        const eventTitle = prompt("Digite o título do evento:");
         if (eventTitle) {
             setEvents((prevEvents) => [...prevEvents, { date, title: eventTitle }]);
         }
@@ -32,7 +33,7 @@ export function CustomCalendar() {
                 <div key={index} className="p-2 bg-muted rounded-xl flex justify-between">
                     <p className="text-primary font-medium">{event.title}</p>
                     <Button variant="ghost" size="sm" onClick={() => deleteEvent(index)}>
-                        Delete
+                        Excluir
                     </Button>
                 </div>
             ));
@@ -103,13 +104,13 @@ export function CustomCalendar() {
         <Card className="p-4">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex gap-2">
-                    <Button variant="ghost" onClick={() => changeViewMode("day")}>Day</Button>
-                    <Button variant="ghost" onClick={() => changeViewMode("week")}>Week</Button>
-                    <Button variant="ghost" onClick={() => changeViewMode("month")}>Month</Button>
+                    <Button variant="ghost" onClick={() => changeViewMode("day")}>Dia</Button>
+                    <Button variant="ghost" onClick={() => changeViewMode("week")}>Semana</Button>
+                    <Button variant="ghost" onClick={() => changeViewMode("month")}>Mês</Button>
                 </div>
                 <Popover>
                     <PopoverTrigger asChild>
-                        <Button variant="outline">Select Date</Button>
+                        <Button variant="outline">Selecionar Data</Button>
                     </PopoverTrigger>
                     <PopoverContent>
                         <DatePicker
@@ -119,6 +120,7 @@ export function CustomCalendar() {
                                 if (date) setSelectedDate(date);
                                 if (date) setCurrentDate(date);
                             }}
+                            locale={ptBR}
                         />
                     </PopoverContent>
                 </Popover>
@@ -127,7 +129,7 @@ export function CustomCalendar() {
                         <ChevronLeft />
                     </Button>
                     <h2 className="text-xl font-semibold text-primary">
-                        {format(currentDate, "MMMM yyyy")}
+                        {format(currentDate, "MMMM yyyy", { locale: ptBR }).toUpperCase()}
                     </h2>
                     <Button variant="ghost" onClick={() => setCurrentDate(addDays(currentDate, 7))}>
                         <ChevronRight />

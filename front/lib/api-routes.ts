@@ -45,5 +45,15 @@ export const ADVOGADO_ROUTES = {
   MEUS_CLIENTES: `${API_BASE_URL}/advogado/meus-clientes`,
 };
 
+// Rotas de tickets
+export const TICKET_ROUTES = {
+  LIST: `${API_BASE_URL}/ticket`,
+  DETAIL: (id: string) => `${API_BASE_URL}/ticket/${id}`,
+  ASSIGN: (id: string) => `${API_BASE_URL}/ticket/${id}/pegar`,
+  COMPLETE: (id: string) => `${API_BASE_URL}/ticket/${id}/complete`,
+  ASSIGNED: `${API_BASE_URL}/ticket/assigned`,
+  GENERATE_PROCESS: (id: string) => `${API_BASE_URL}/ticket/${id}/process`,
+  MESSAGES: (id: string) => `${API_BASE_URL}/ticket/${id}/messages`,
+};
 
 // Adicione outras categorias de rotas conforme necessário 

@@ -1,12 +1,16 @@
 "use client";
-import { Calendario } from "@/components/agenda/calendario";
+import React, { Suspense } from "react";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
+
+const AgendaCompleta = React.lazy(() => import("@/components/agenda/AgendaCompleta").then(module => ({ default: module.AgendaCompleta })));
 
 export default function AgendaPage() {
-  const { updateConfig, isAdvogado } = useLayout();
+  const { updateConfig } = useLayout();
 
   const { updateAuth } = useAuth();
   useEffect(() => {
@@ -19,14 +23,23 @@ export default function AgendaPage() {
   useEffect(() => {
     updateConfig({
       showNavbar: true,
-      showSidebar: isAdvogado,
+      showSidebar: true,
       showFooter: true
     });
-  }, [isAdvogado, updateConfig]);
+  }, [updateConfig]);
 
   return (
     <AuthGuard>
-      <Calendario />
+      <ErrorBoundary>
+        <Suspense fallback={
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span className="ml-2">Carregando agenda...</span>
+          </div>
+        }>
+          <AgendaCompleta />
+        </Suspense>
+      </ErrorBoundary>
     </AuthGuard>
   );
 }

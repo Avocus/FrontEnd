@@ -4,6 +4,7 @@ import { HomeCliente } from "@/components/home/homeCliente/HomeCliente";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
 import { useAuthStore } from '@/store';
+import AuthGuard from '@/components/auth/AuthGuard';
 
 export default function Home() {
   const { updateConfig } = useLayout();
@@ -19,6 +20,8 @@ export default function Home() {
   }, [updateConfig]);
 
   return (
-    isCliente ? <HomeCliente /> : <HomeAdvogado />
+    <AuthGuard>
+      {isCliente ? <HomeCliente /> : <HomeAdvogado />}
+    </AuthGuard>
   );
 }

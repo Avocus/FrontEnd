@@ -170,23 +170,11 @@ export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
-    // Verifica se a pergunta é relacionada ao contexto jurídico
-    if (!isLegalContext(inputMessage)) {
-      const nonLegalMessage: Message = {
-        sender: "bot",
-        text: "🚫 Desculpe, sou especializada apenas em questões jurídicas. Por favor, faça uma pergunta relacionada ao direito brasileiro (civil, penal, trabalhista, etc.).",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, { 
-        sender: "user", 
-        text: inputMessage,
-        timestamp: new Date()
-      }, nonLegalMessage]);
-      setInputMessage("");
-      return;
-    }
+    // Pré-checagem heurística (apenas referência). Mesmo que suspeite não-jurídico,
+    // NÃO bloqueamos o envio ao Gemini — apenas marcamos o flag para o prompt.
+    const preCheckSuspectedNonLegal = !isLegalContext(inputMessage);
 
-    // Identifica o tipo de caso jurídico
+    // Identifica o tipo de caso jurídico (usado como orientação inicial)
     const caseType = identifyCaseType(inputMessage);
     
     // Busca referências legais relevantes
@@ -205,7 +193,7 @@ export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
     setIsTyping(true);
 
     try {
-      const botResponse = await getBotResponse(inputMessage, caseType);
+      const botResponse = await getBotResponse(inputMessage, caseType, preCheckSuspectedNonLegal);
       setMessages(prev => [...prev, { 
         sender: "bot", 
         text: botResponse,
@@ -223,9 +211,12 @@ export function ChatAvocuss({ open, onOpenChange, onClose }: ChatAvocussProps) {
     }
   };
 
-  const getBotResponse = async (msg: string, caseType: LegalCase['type']) => {
+  const getBotResponse = async (msg: string, caseType: LegalCase['type'], preCheckSuspectedNonLegal: boolean = false) => {
+    // Cria um resumo curto do histórico recente para passar ao modelo
+    const historySummary = messages.slice(-6).map(m => `${m.sender}:${m.text}`).join(' || ').substring(0, 800);
+
     // Gera o prompt especializado baseado no tipo de caso (agora mais conciso)
-    const specializedPrompt = generateLegalPrompt(caseType, msg);
+    const specializedPrompt = generateLegalPrompt(caseType, msg, { preCheckSuspectedNonLegal, historySummary });
     
     // Busca jurisprudências relevantes (limitando para respostas mais concisas)
     const relevantJurisprudence = searchJurisprudence(caseType);

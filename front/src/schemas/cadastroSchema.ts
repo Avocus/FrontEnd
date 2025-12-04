@@ -2,6 +2,27 @@ import { z } from "zod";
 
 export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+const addressSchema = z.object({
+  rua: z.string().min(1, "Rua é obrigatória"),
+  numero: z.string().min(1, "Número é obrigatório"),
+  bairro: z.string().min(1, "Bairro é obrigatório"),
+  cidade: z.string().min(1, "Cidade é obrigatória"),
+  estado: z.string().min(1, "Estado é obrigatório"),
+  pais: z.string().min(1, "País é obrigatório"),
+  cep: z.string().min(1, "CEP é obrigatório"),
+  complemento: z.string().optional(),
+});
+
+const dadosContatoSchema = z.object({
+  site: z.string().optional(),
+  instagram: z.string().optional(),
+  facebook: z.string().optional(),
+  linkedin: z.string().optional(),
+  youtube: z.string().optional(),
+  twitter: z.string().optional(),
+  telefone: z.string().optional(),
+});
+
 export const cadastroSchema = z.object({
   name: z.string().min(3, "Nome é obrigatório"),
   email: z.string().email("Email inválido"),
@@ -12,10 +33,29 @@ export const cadastroSchema = z.object({
   confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
   role: z.enum(["cliente", "advogado"], {
     required_error: "Selecione o tipo de usuário",
-  })
-}).refine(data => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
+  }),
+
+  // Campos adicionais
+  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF deve estar no formato XXX.XXX.XXX-XX"),
+  oab: z.string().optional(),
+  dateOfBirth: z.string().min(1, "Data de nascimento é obrigatória"),
+  telefone: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Telefone deve estar no formato (XX) XXXXX-XXXX"),
+  address: addressSchema,
+
+  // Campos específicos para advogado
+  bio: z.string().optional(),
+  especialidades: z.array(z.enum(["DIREITO_CIVIL", "DIREITO_PENAL", "DIREITO_TRABALHISTA", "DIREITO_TRIBUTARIO", "DIREITO_FAMILIAR", "DIREITO_CONSUMIDOR", "DIREITO_AMBIENTAL", "DIREITO_ADMINISTRATIVO", "DIREITO_PREVIDENCIARIO", "DIREITO_IMOBILIARIO"])).optional(),
+  dadosContato: dadosContatoSchema.optional(),
+}).superRefine((data, ctx) => {
+  // senha
+  if (data.password !== data.confirmPassword) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "As senhas não coincidem", path: ["confirmPassword"] });
+  }
+
+  // Se for advogado, OAB é obrigatório
+  if (data.role === 'advogado' && (!data.oab || data.oab.trim().length === 0)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "OAB é obrigatória para advogados", path: ["oab"] });
+  }
 });
 
 export type CadastroFormData = z.infer<typeof cadastroSchema>;

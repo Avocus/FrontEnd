@@ -1,127 +1,334 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, FileIcon, MapPinIcon, MailIcon, PhoneIcon, Clock, User, Save, X } from "lucide-react";
+import { CalendarIcon, MailIcon, PhoneIcon, User, Save, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react";
-import Link from "next/link";
-import { PerfilCliente } from "@/types/entities/Cliente";
-import { ClienteProfile } from "@/types/entities/Profile";
-import { getToken } from "@/utils/authUtils";
-import { useProfileStore, useAuthStore } from "@/store";
+import { useState, useEffect } from "react";
+import { getProfileData, UserDadosDTO } from '@/services/user/profileService';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import toast from "react-hot-toast";
+import { useProfileStore, useAuthStore, useProcessoStore } from "@/store";
+import { ClienteProfile, AdvogadoProfile } from "@/types/entities/Profile";
+import { StatusProcesso, getEspecialidadeLabel, Especialidade } from "@/types/enums";
+import { Configs } from "@/components/perfil/configs";
+import { updateClienteProfile } from "@/services/cliente/clienteService";
+import { updateAdvogadoProfile } from "@/services/advogado/advogadoService";
+import { IMaskInput } from 'react-imask';
+
+const formatTelefone = (value: string | undefined) => {
+    if (!value) return '';
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 11) {
+        return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+    }
+    return value;
+};
+
+const formatCpf = (value: string | undefined) => {
+    if (!value) return '';
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 11) {
+        return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
+    }
+    return value;
+};
+
+const formatOab = (value: string | undefined) => {
+    if (!value) return '';
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 6) {
+        return `${cleaned.slice(0, 2)}.${cleaned.slice(2)}`;
+    } else if (cleaned.length === 7) {
+        return `${cleaned.slice(0, 3)}.${cleaned.slice(3)}`;
+    }
+    return value;
+};
 
 export function DadosUsuario() {
     const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
     const { user } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
+    const [cepLoading, setCepLoading] = useState(false);
     const [error, setError] = useState("");
     const [activeTab, setActiveTab] = useState("informacoes");
 
     const form = useForm<ProfileFormData>({
         resolver: zodResolver(profileSchema),
-        defaultValues: profile as unknown as PerfilCliente
+        defaultValues: profile as unknown as ClienteProfile
     });
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const token = getToken();
+    const isAdvogado = profile && 'oab' in profile;
+
+    // processos da store (declarar antes de qualquer return condicional)
+    const { processosCliente, processosAdvogado, carregarProcessosCliente, carregarProcessosAdvogado } = useProcessoStore();
+
+
+    const fetchProfile = async () => {
+        try {
+            const perfilData: UserDadosDTO = await getProfileData();
+            if (perfilData.advogado) {
+                // É advogado
+                const advogadoProfile: AdvogadoProfile = {
+                    id: perfilData.advogado.id.toString(),
+                    userId: perfilData.advogado.id.toString(),
+                    nome: perfilData.advogado.nome,
+                    email: perfilData.email,
+                    telefone: perfilData.advogado.telefone,
+                    cpf: perfilData.advogado.cpf,
+                    dataNascimento: perfilData.advogado.dataNascimento,
+                    rua: perfilData.endereco?.rua,
+                    numero: perfilData.endereco?.numero,
+                    complemento: perfilData.endereco?.complemento,
+                    bairro: perfilData.endereco?.bairro,
+                    cidade: perfilData.endereco?.cidade,
+                    estado: perfilData.endereco?.estado,
+                    cep: perfilData.endereco?.cep,
+                    foto: undefined, // TODO: add fotoPerfil if available
+                    oab: perfilData.advogado.oab,
+                    bio: perfilData.advogado.bio,
+                    especialidades: perfilData.advogado.especialidades,
+                };
                 
-                if (!token) {
-                  throw new Error('Usuário não autenticado');
-                }
-                
-                const response = await fetch('/api/profile/dados-gerais', {
-                  method: 'GET',
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                  },
+                updateProfileStore(advogadoProfile);
+
+                form.reset({
+                    id: advogadoProfile.id || "",
+                    nome: advogadoProfile.nome || "",
+                    email: advogadoProfile.email || "",
+                    telefone: advogadoProfile.telefone || "",
+                    cpf: advogadoProfile.cpf || "",
+                    dataNascimento: advogadoProfile.dataNascimento || "",
+                    rua: advogadoProfile.rua || "",
+                    numero: advogadoProfile.numero || "",
+                    complemento: advogadoProfile.complemento || "",
+                    bairro: advogadoProfile.bairro || "",
+                    cidade: advogadoProfile.cidade || "",
+                    estado: advogadoProfile.estado || "",
+                    cep: advogadoProfile.cep || "",
+                    fotoPerfil: undefined,
+                    oab: advogadoProfile.oab || "",
+                    especialidades: advogadoProfile.especialidades || []
                 });
-                
-                if (!response.ok) {
-                  const errorData = await response.json().catch(() => ({}));
-                  throw new Error(errorData.error || 'Erro ao carregar dados do perfil');
-                }
-                
-                const responseData = await response.json();
-                const perfilData: PerfilCliente = responseData.data;
-                
+            } else {
+                // É cliente
                 const clienteProfile: ClienteProfile = {
-                    id: user?.id || '',
-                    userId: user?.id || '',
+                    id: perfilData.cliente?.id?.toString() || '',
+                    userId: perfilData.cliente?.id?.toString() || '',
                     nome: perfilData.nome,
                     email: perfilData.email,
                     telefone: perfilData.telefone,
                     cpf: perfilData.cpf,
                     dataNascimento: perfilData.dataNascimento,
-                    endereco: perfilData.endereco,
-                    cidade: perfilData.cidade,
-                    estado: perfilData.estado,
-                    foto: perfilData.fotoPerfil,
+                    rua: perfilData.endereco?.rua,
+                    numero: perfilData.endereco?.numero,
+                    complemento: perfilData.endereco?.complemento,
+                    bairro: perfilData.endereco?.bairro,
+                    cidade: perfilData.endereco?.cidade,
+                    estado: perfilData.endereco?.estado,
+                    cep: perfilData.endereco?.cep,
+                    foto: undefined, // TODO: add fotoPerfil if available
                 };
                 
                 updateProfileStore(clienteProfile);
-                form.reset(perfilData);
-            } catch (err) {
-                setError("Não foi possível carregar os dados do perfil");
-                console.error(err);
+                
+                // Reset form with cliente data
+                const formData = {
+                    id: clienteProfile.id,
+                    nome: perfilData.nome,
+                    email: perfilData.email,
+                    telefone: perfilData.telefone || '',
+                    cpf: perfilData.cpf || '',
+                    dataNascimento: perfilData.dataNascimento,
+                    rua: perfilData.endereco?.rua || '',
+                    numero: perfilData.endereco?.numero || '',
+                    complemento: perfilData.endereco?.complemento || '',
+                    bairro: perfilData.endereco?.bairro || '',
+                    cidade: perfilData.endereco?.cidade || '',
+                    estado: perfilData.endereco?.estado || '',
+                    cep: perfilData.endereco?.cep || '',
+                    fotoPerfil: undefined,
+                };
+                form.reset(formData);
+            }
+        } catch (err) {
+            setError("Não foi possível carregar os dados do perfil");
+            console.error(err);
+        }
+    };
+
+    async function updateCliente(data: ProfileFormData) {
+        const unformatTelefone = (tel: string) => tel.replace(/\D/g, '');
+        const unformatCpf = (cpf: string) => cpf.replace(/\D/g, '');
+
+        const payload = {
+            id: data.id ?? "",
+            nome: data.nome,
+            telefone: unformatTelefone(data.telefone ?? ''),
+            cpf: unformatCpf(data.cpf ?? ''),
+            dataNascimento: data.dataNascimento ?? '',
+            endereco: {
+                rua: data.rua ?? "",
+                numero: data.numero ?? "",
+                complemento: data.complemento ?? "",
+                bairro: data.bairro ?? "",
+                cidade: data.cidade ?? "",
+                estado: data.estado ?? "",
+                cep: data.cep ?? ""
             }
         };
 
+        await updateClienteProfile(payload);
+        return payload;
+    }
+
+    async function updateAdvogado(data: ProfileFormData) {
+        const payload = {
+            id: data.id ?? "",
+            nome: data.nome ?? "",
+            cpf: data.cpf ?? "",
+            email: data.email ?? "",
+            endereco: {
+                rua: data.rua ?? "",
+                numero: data.numero ?? "",
+                complemento: data.complemento ?? "",
+                bairro: data.bairro ?? "",
+                cidade: data.cidade ?? "",
+                estado: data.estado ?? "",
+                cep: data.cep ?? ""
+            },
+            dadosContato: {
+                telefone: data.telefone ?? ""
+            },
+            dataNascimento: data.dataNascimento ?? "",
+            oab: data.oab ?? "",
+            especialidades: data.especialidades ?? []
+        };
+
+        await updateAdvogadoProfile(payload);
+        return payload;
+    }
+
+    const handleCepBlur = async (rawCep?: string) => {
+        const cep = (rawCep || '').replace(/\D/g, '');
+        if (!cep || cep.length !== 8) return;
+
+        setCepLoading(true);
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            if (!res.ok) {
+                toast.error('Erro ao buscar CEP');
+                return;
+            }
+
+            const data = await res.json();
+            if (data.erro) {
+                toast.error('CEP não encontrado');
+                return;
+            }
+
+            // Preencher campos do formulário com os dados retornados
+            form.setValue('rua', data.logradouro || '');
+            form.setValue('bairro', data.bairro || '');
+            form.setValue('cidade', data.localidade || '');
+            form.setValue('estado', data.uf || '');
+            form.setValue('complemento', data.complemento || '');
+            form.setValue('cep', data.cep || cep);
+        } catch (err) {
+            toast.error('Erro ao consultar CEP');
+            console.error('Erro ao consultar CEP:', err);
+        } finally {
+            setCepLoading(false);
+        }
+    };
+
+
+    // Carregar processos quando o componente monta ou quando o tipo de perfil/usuário muda
+    useEffect(() => {
+        const carregar = async () => {
+            if (!user) return;
+            try {
+                if (isAdvogado) {
+                    await carregarProcessosAdvogado();
+                } else {
+                    await carregarProcessosCliente();
+                }
+            } catch (err) {
+                console.error('Erro ao carregar processos na tela de perfil:', err);
+            }
+        };
+
+        carregar();
+    }, [user, isAdvogado, carregarProcessosCliente, carregarProcessosAdvogado]);
+
+    // Carregar dados do perfil quando o componente monta
+    useEffect(() => {
         fetchProfile();
-    }, [updateProfileStore, form, user]);
+    }, []);
 
     const onSubmit = async (data: ProfileFormData) => {
-        try {
-            const token = getToken();
-            if (!token) throw new Error('Usuário não autenticado');
+    try {
+        let updatedProfileData;
 
-            const response = await fetch('/api/profile/dados-gerais', {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
+        if (isAdvogado) {
 
-            if (!response.ok) {
-                throw new Error('Erro ao atualizar perfil');
-            }
+            updatedProfileData = await updateAdvogado(data);
+
+            const updatedProfile: AdvogadoProfile = {
+                ...(profile as AdvogadoProfile),
+                nome: updatedProfileData.nome,
+                email: updatedProfileData.email,
+                telefone: updatedProfileData.dadosContato.telefone,
+                cpf: updatedProfileData.cpf,
+                dataNascimento: updatedProfileData.dataNascimento,
+                rua: updatedProfileData.endereco.rua,
+                numero: updatedProfileData.endereco.numero,
+                complemento: updatedProfileData.endereco.complemento,
+                bairro: updatedProfileData.endereco.bairro,
+                cidade: updatedProfileData.endereco.cidade,
+                estado: updatedProfileData.endereco.estado,
+                cep: updatedProfileData.endereco.cep,
+                especialidades: updatedProfileData.especialidades
+            };
+
+            updateProfileStore(updatedProfile);
+
+        } else {
+            updatedProfileData = await updateCliente(data);
 
             const updatedProfile: ClienteProfile = {
                 id: user?.id || '',
                 userId: user?.id || '',
-                nome: data.nome,
-                email: data.email,
-                telefone: data.telefone,
-                cpf: data.cpf,
-                dataNascimento: data.dataNascimento,
-                endereco: data.endereco,
-                cidade: data.cidade,
-                estado: data.estado,
-                foto: data.fotoPerfil,
+                nome: updatedProfileData.nome,
+                email: '',
+                telefone: updatedProfileData.telefone,
+                cpf: updatedProfileData.cpf,
+                dataNascimento: updatedProfileData.dataNascimento,
+                rua: updatedProfileData.endereco.rua,
+                numero: updatedProfileData.endereco.numero,
+                complemento: updatedProfileData.endereco.complemento,
+                bairro: updatedProfileData.endereco.bairro,
+                cidade: updatedProfileData.endereco.cidade,
+                estado: updatedProfileData.endereco.estado,
+                cep: updatedProfileData.endereco.cep
             };
-            
+
             updateProfileStore(updatedProfile);
-            setIsEditing(false);
-            toast.success('Perfil atualizado com sucesso!');
-        } catch (error) {
-            toast.error('Erro ao atualizar perfil');
-            console.error(error);
         }
-    };
+
+        setIsEditing(false);
+        toast.success("Perfil atualizado com sucesso!");
+    } catch (error) {
+        console.error(error);
+        toast.error("Erro ao atualizar perfil");
+    }
+};
 
     if (profileLoading) {
         return (
@@ -130,6 +337,7 @@ export function DadosUsuario() {
             </div>
         );
     }
+
 
     const renderInformacoesTab = () => (
         <Card>
@@ -149,7 +357,7 @@ export function DadosUsuario() {
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input {...field} />
+                                                <Input {...field} value={field.value ?? ''} />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <MailIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
@@ -170,11 +378,16 @@ export function DadosUsuario() {
                                         <FormLabel>Telefone</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input {...field} />
+                                                <IMaskInput
+                                                    mask="(00) 00000-0000"
+                                                    value={field.value || ''}
+                                                    onAccept={(value) => field.onChange(value)}
+                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <PhoneIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                    <p className="text-muted-foreground">{formatTelefone(field.value) || "Não informado"}</p>
                                                 </div>
                                             )}
                                         </FormControl>
@@ -191,7 +404,7 @@ export function DadosUsuario() {
                                         <FormLabel>Data de Nascimento</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input type="date" {...field} />
+                                                <Input type="date" {...field} value={field.value ?? ''} />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <CalendarIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
@@ -216,11 +429,16 @@ export function DadosUsuario() {
                                         <FormLabel>CPF</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input {...field} />
+                                                <IMaskInput
+                                                    mask="000.000.000-00"
+                                                    value={field.value || ''}
+                                                    onAccept={(value) => field.onChange(value)}
+                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                    <p className="text-muted-foreground">{formatCpf(field.value) || "Não informado"}</p>
                                                 </div>
                                             )}
                                         </FormControl>
@@ -228,24 +446,21 @@ export function DadosUsuario() {
                                     </FormItem>
                                 )}
                             />
-                        </div>
 
-                        <div className="pt-4 border-t">
-                            <h3 className="text-lg font-medium mb-4">Endereço</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {isAdvogado && (
                                 <FormField
                                     control={form.control}
-                                    name="endereco"
+                                    name="oab"
                                     render={({ field }) => (
-                                        <FormItem className="md:col-span-2">
-                                            <FormLabel>Endereço</FormLabel>
+                                        <FormItem>
+                                            <FormLabel>OAB</FormLabel>
                                             <FormControl>
                                                 {isEditing ? (
-                                                    <Input {...field} />
+                                                    <Input {...field} value={field.value ?? ''} />
                                                 ) : (
                                                     <div className="flex items-start gap-3">
-                                                        <MapPinIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                                                        <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                        <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                                        <p className="text-muted-foreground">{formatOab(field.value) || "Não informado"}</p>
                                                     </div>
                                                 )}
                                             </FormControl>
@@ -253,43 +468,210 @@ export function DadosUsuario() {
                                         </FormItem>
                                     )}
                                 />
+                            )}
+                        </div>
 
-                                <FormField
-                                    control={form.control}
-                                    name="cidade"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Cidade</FormLabel>
-                                            <FormControl>
+                        {isAdvogado && (
+                            <div className="pt-4 border-t">
+                                <h3 className="text-lg font-medium mb-4">Informações Profissionais</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={form.control}
+                                        name="especialidades"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Especialidades</FormLabel>
                                                 {isEditing ? (
-                                                    <Input {...field} />
+                                                    <div className="space-y-2">
+                                                        {Object.values(Especialidade).map((esp) => (
+                                                            <div key={esp} className="flex items-center space-x-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id={esp}
+                                                                    checked={field.value?.includes(esp) || false}
+                                                                    onChange={(e) => {
+                                                                        const checked = e.target.checked;
+                                                                        const current = field.value || [];
+                                                                        if (checked) {
+                                                                            field.onChange([...current, esp]);
+                                                                        } else {
+                                                                            field.onChange(current.filter((e: Especialidade) => e !== esp));
+                                                                        }
+                                                                    }}
+                                                                    className="h-4 w-4"
+                                                                />
+                                                                <label htmlFor={esp} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                                    {getEspecialidadeLabel(esp)}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 ) : (
-                                                    <p className="text-muted-foreground">{field.value || "Não informada"}</p>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {field.value?.map((esp: Especialidade) => (
+                                                            <Badge key={esp} variant="outline">{getEspecialidadeLabel(esp)}</Badge>
+                                                        )) || <p className="text-muted-foreground">Nenhuma especialidade informada</p>}
+                                                    </div>
                                                 )}
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                                <FormField
-                                    control={form.control}
-                                    name="estado"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Estado</FormLabel>
-                                            <FormControl>
-                                                {isEditing ? (
-                                                    <Input {...field} />
-                                                ) : (
-                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
-                                                )}
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
+                                    {(profile as AdvogadoProfile).bio && (
+                                        <div>
+                                            <FormLabel>Biografia</FormLabel>
+                                            <p className="text-muted-foreground mt-2">{(profile as AdvogadoProfile).bio}</p>
+                                        </div>
                                     )}
-                                />
+                                </div>
                             </div>
+                        )}
+
+                        <div className="pt-6 border-t">
+                        <h3 className="text-lg font-medium mb-4">Endereço</h3>
+
+                        {/* GRID PRINCIPAL */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                            {/* CEP */}
+                            <FormField
+                            control={form.control}
+                            name="cep"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>CEP</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input
+                                        {...field}
+                                        value={field.value ?? ''}
+                                        onBlur={(e) => { field.onBlur(e); handleCepBlur(e.target.value); }}
+                                    />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Estado */}
+                            <FormField
+                            control={form.control}
+                            name="estado"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Estado</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} value={field.value ?? ''} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Cidade */}
+                            <FormField
+                            control={form.control}
+                            name="cidade"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Cidade</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} value={field.value ?? ''} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informada"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Bairro */}
+                            <FormField
+                            control={form.control}
+                            name="bairro"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Bairro</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} value={field.value ?? ''} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Rua — ocupa 2 colunas */}
+                            <FormField
+                            control={form.control}
+                            name="rua"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Rua</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} value={field.value ?? ''} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informada"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Número */}
+                            <FormField
+                            control={form.control}
+                            name="numero"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Número</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} value={field.value ?? ''} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                            {/* Complemento */}
+                            <FormField
+                            control={form.control}
+                            name="complemento"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Complemento</FormLabel>
+                                <FormControl>
+                                    {isEditing ? (
+                                    <Input {...field} value={field.value ?? ''} />
+                                    ) : (
+                                    <p className="text-muted-foreground">{field.value || "—"}</p>
+                                    )}
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+
+                        </div>
                         </div>
 
                         <CardFooter className="flex justify-end gap-2 p-0">
@@ -299,7 +681,7 @@ export function DadosUsuario() {
                                         <X className="h-4 w-4 mr-2" />
                                         Cancelar
                                     </Button>
-                                    <Button type="submit">
+                                    <Button type="submit"variant={"primary"}>
                                         <Save className="h-4 w-4 mr-2" />
                                         Salvar
                                     </Button>
@@ -316,76 +698,13 @@ export function DadosUsuario() {
         </Card>
     );
 
-    // Função para renderizar a tab de processos
-    const renderProcessosTab = () => (
-        <Card>
-            <CardHeader>
-                <CardTitle>Meus Processos</CardTitle>
-                <CardDescription>Acompanhe todos os seus processos</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-5">
-                    {profile && (profile as any).processos && (profile as any).processos.map((processo: any) => (
-                        <div key={processo.id} className="flex items-center justify-between p-4 rounded-lg border">
-                            <div>
-                                <h3 className="font-medium">{processo.titulo}</h3>
-                                <div className="flex items-center gap-1 mt-1">
-                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">{processo.data}</span>
-                                </div>
-                            </div>
-                            <Badge variant={processo.status === "Ativo" ? "outline" : "default"}>
-                                {processo.status}
-                            </Badge>
-                        </div>
-                    ))}
-                </div>
-            </CardContent>
-            <CardFooter>
-                <Button variant="outline" className="w-full">Ver todos os processos</Button>
-            </CardFooter>
-        </Card>
-    );
-
-    // Função para renderizar a tab de documentos
-    const renderDocumentosTab = () => (
-        <Card>
-            <CardHeader>
-                <CardTitle>Meus Documentos</CardTitle>
-                <CardDescription>Todos os documentos enviados</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    {profile!.documentos.map((documento: { id: Key | null | undefined; nome: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; }) => (
-                        <div key={documento.id} className="flex items-center justify-between p-4 rounded-lg border">
-                            <div className="flex items-center gap-3">
-                                <FileIcon className="h-8 w-8 text-secondary" />
-                                <div>
-                                    <h3 className="font-medium">{documento.nome}</h3>
-                                    <p className="text-sm text-muted-foreground">Enviado via aplicativo</p>
-                                </div>
-                            </div>
-                            <Button variant="ghost" size="sm">Visualizar</Button>
-                        </div>
-                    ))}
-                </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-                <Button variant="outline">Enviar novo documento</Button>
-                <Button variant="ghost">Ver todos</Button>
-            </CardFooter>
-        </Card>
-    );
-
     // Função que seleciona a tab correta
     const renderTabContent = () => {
         switch (activeTab) {
             case "informacoes":
                 return renderInformacoesTab();
-            case "processos":
-                return renderProcessosTab();
-            case "documentos":
-                return renderDocumentosTab();
+            case "configuracoes":
+                return renderConfiguracoesTab();
             default:
                 return null;
         }
@@ -416,14 +735,7 @@ export function DadosUsuario() {
                         </div>
                     </Avatar>
                     <h2 className="mt-3 text-2xl font-bold">{profile?.nome || 'Usuário'}</h2>
-                    <p className="text-muted-foreground">Cliente</p>
-
-                    <div className="flex gap-3 mt-4">
-                        <Button size="sm" variant="outline" asChild>
-                            <Link href="/perfil/editar">Editar Perfil</Link>
-                        </Button>
-                        <Button size="sm" variant="outline">Mensagens</Button>
-                    </div>
+                    <p className="text-muted-foreground">{isAdvogado ? 'Advogado' : 'Cliente'}</p>
                 </div>
             </CardContent>
         </Card>
@@ -433,21 +745,34 @@ export function DadosUsuario() {
     const renderEstastisticas = () => (
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>Estatísticas</CardTitle>
+                <CardTitle>Estatísticas de Processos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-primary/10">
-                        <h3 className="font-medium text-muted-foreground">Processos Ativos</h3>
-                        <p className="text-3xl font-bold">{profile?.processosAtivos || 0}</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-primary/10">
-                        <h3 className="font-medium text-muted-foreground">Finalizados</h3>
-                        <p className="text-3xl font-bold">{profile?.processosFinalizados || 0}</p>
-                    </div>
-                </div>
+                {(() => {
+                    const processos = isAdvogado ? processosAdvogado : processosCliente;
+                    const total = processos?.length || 0;
+                    const finalizados = (processos || []).filter(p => p.status === StatusProcesso.CONCLUIDO).length;
+
+                    return (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg bg-primary/10">
+                                <h3 className="font-medium text-muted-foreground">Total</h3>
+                                <p className="text-3xl font-bold">{total}</p>
+                            </div>
+                            <div className="p-4 rounded-lg bg-primary/10">
+                                <h3 className="font-medium text-muted-foreground">Finalizados</h3>
+                                <p className="text-3xl font-bold">{finalizados}</p>
+                            </div>
+                        </div>
+                    );
+                })()}
             </CardContent>
         </Card>
+    );
+
+    const renderConfiguracoesTab = () => (
+        <Configs />
+
     );
 
     // Função para renderizar as tabs
@@ -461,21 +786,21 @@ export function DadosUsuario() {
             >
                 Informações
             </button>
-            <button
+            {/* <button
                 onClick={() => setActiveTab("processos")}
                 className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "processos" 
                     ? "border-b-2 border-primary text-secondary" 
                     : "text-muted-foreground hover:text-foreground"}`}
             >
                 Processos
-            </button>
+            </button> */}
             <button
-                onClick={() => setActiveTab("documentos")}
-                className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "documentos" 
+                onClick={() => setActiveTab("configuracoes")}
+                className={`py-2 px-4 font-medium text-sm transition-colors ${activeTab === "configuracoes" 
                     ? "border-b-2 border-primary text-secondary" 
                     : "text-muted-foreground hover:text-foreground"}`}
             >
-                Documentos
+                Configurações
             </button>
         </div>
     );

@@ -1,12 +1,11 @@
 "use client";
 import { useLayout } from "@/contexts/LayoutContext";
 import { useEffect } from "react";
-import { BibliotecaMobile } from "@/components/biblioteca/bibliotecaMobile";
-import { BibliotecaWeb } from "@/components/biblioteca/bibliotecaWeb";
+import { Biblioteca } from "@/components/biblioteca/biblioteca";
 
 
 export default function BibliotecaPage() {
-  const { updateConfig, isMobile, isAdvogado } = useLayout();
+  const { updateConfig, isAdvogado } = useLayout();
   
   useEffect(() => {
     updateConfig({
@@ -19,7 +18,7 @@ export default function BibliotecaPage() {
   
   return (
     <>
-      {isMobile ? <BibliotecaMobile /> : <BibliotecaWeb />}
+      <Biblioteca />
     </>
   );
 }
