@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon,  MapPinIcon, MailIcon, PhoneIcon, User, Save, X } from "lucide-react";
+import { CalendarIcon, MailIcon, PhoneIcon, User, Save, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { getProfileData, updateProfileData, UserDadosDTO } from '@/services/user/profileService';
+import { getProfileData, UserDadosDTO } from '@/services/user/profileService';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { profileSchema, ProfileFormData } from "@/schemas/profileSchema";
@@ -56,6 +55,7 @@ export function DadosUsuario() {
     const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
     const { user } = useAuthStore();
     const [isEditing, setIsEditing] = useState(false);
+    const [cepLoading, setCepLoading] = useState(false);
     const [error, setError] = useState("");
     const [activeTab, setActiveTab] = useState("informacoes");
 
@@ -214,6 +214,39 @@ export function DadosUsuario() {
         await updateAdvogadoProfile(payload);
         return payload;
     }
+
+    const handleCepBlur = async (rawCep?: string) => {
+        const cep = (rawCep || '').replace(/\D/g, '');
+        if (!cep || cep.length !== 8) return;
+
+        setCepLoading(true);
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            if (!res.ok) {
+                toast.error('Erro ao buscar CEP');
+                return;
+            }
+
+            const data = await res.json();
+            if (data.erro) {
+                toast.error('CEP não encontrado');
+                return;
+            }
+
+            // Preencher campos do formulário com os dados retornados
+            form.setValue('rua', data.logradouro || '');
+            form.setValue('bairro', data.bairro || '');
+            form.setValue('cidade', data.localidade || '');
+            form.setValue('estado', data.uf || '');
+            form.setValue('complemento', data.complemento || '');
+            form.setValue('cep', data.cep || cep);
+        } catch (err) {
+            toast.error('Erro ao consultar CEP');
+            console.error('Erro ao consultar CEP:', err);
+        } finally {
+            setCepLoading(false);
+        }
+    };
 
 
     // Carregar processos quando o componente monta ou quando o tipo de perfil/usuário muda
@@ -510,7 +543,11 @@ export function DadosUsuario() {
                                 <FormLabel>CEP</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} value={field.value ?? ''} />
+                                    <Input
+                                        {...field}
+                                        value={field.value ?? ''}
+                                        onBlur={(e) => { field.onBlur(e); handleCepBlur(e.target.value); }}
+                                    />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informado"}</p>
                                     )}

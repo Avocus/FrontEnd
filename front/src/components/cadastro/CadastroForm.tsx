@@ -534,7 +534,7 @@ export function CadastroForm({
                       control={control}
                       render={({ field }) => (
                         <IMaskInput
-                          mask="AA999999"
+                          mask="000000"
                           value={field.value || ''}
                           onAccept={(value) => field.onChange(value)}
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -558,7 +558,7 @@ export function CadastroForm({
                     <Label>Especialidades</Label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {ESPECIALIDADES.map((tipo) => (
-                        <div key={tipo} className="flex items-center space-x-2 px-2 py-1 rounded hover:bg-gray-50">
+                        <div key={tipo} className="flex items-center space-x-2 px-2 py-1 rounded hover:bg-primary cursor-pointer">
                           <input
                             type="checkbox"
                             id={`especialidade-${tipo}`}
@@ -580,7 +580,7 @@ export function CadastroForm({
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       <div className="flex flex-col gap-2">
                         <Label htmlFor="dadosContato.site">Site</Label>
-                        <Input id="dadosContato.site" type="url" {...register("dadosContato.site")} />
+                        <Input id="dadosContato.site" type="text" {...register("dadosContato.site")} />
                       </div>
 
                       <div className="flex flex-col gap-2">
@@ -655,7 +655,7 @@ export function CadastroForm({
                 ) : (
                   <Button 
                     type="submit" 
-                    className="bg-secondary text-white hover:bg-gray-300 hover:text-secondary-foreground transition-colors duration-200"
+                    variant={"primary"}
                     disabled={!isValid || isLoading}
                   >
                     {isLoading ? "Cadastrando..." : "Cadastrar"}
