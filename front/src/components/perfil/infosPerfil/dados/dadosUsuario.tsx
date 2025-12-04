@@ -546,7 +546,7 @@ export function DadosUsuario() {
                                     <Input
                                         {...field}
                                         value={field.value ?? ''}
-                                        onBlur={(e) => { field.onBlur(e); handleCepBlur(e.target.value); }}
+                                        onBlur={(e) => { field.onBlur(); handleCepBlur(e.target.value); }}
                                     />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informado"}</p>
