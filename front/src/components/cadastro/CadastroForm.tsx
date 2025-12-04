@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useCallback, useState, useEffect, type FocusEvent } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { cadastroSchema, type CadastroFormData } from '../../schemas/cadastroSchema';
 import { cadastrarUsuario } from '../../services/user/cadastroService';
@@ -23,6 +23,7 @@ import { useToast } from '../../hooks/useToast';
 import { getFieldValidationClass } from '../../utils/formValidation';
 import { ESPECIALIDADES, Especialidade } from '../../constants/processo';
 import { getEspecialidadeLabel } from '../../types/enums';
+import { IMaskInput } from 'react-imask';
 
 type InviteData = { isInvite: boolean; token: string } | null;
 
@@ -48,7 +49,8 @@ export function CadastroForm({
     formState: { errors, isValid, touchedFields, dirtyFields },
     setValue,
     watch,
-    trigger
+    trigger,
+    control
   } = useForm<CadastroFormData>({
     resolver: zodResolver(cadastroSchema),
     mode: "onChange",
@@ -408,7 +410,18 @@ export function CadastroForm({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
                       <Label htmlFor="cpf">CPF</Label>
-                      <Input id="cpf" type="text" {...register("cpf")} />
+                      <Controller
+                        name="cpf"
+                        control={control}
+                        render={({ field }) => (
+                          <IMaskInput
+                            mask="000.000.000-00"
+                            value={field.value || ''}
+                            onAccept={(value) => field.onChange(value)}
+                            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${getFieldValidationClassLocal("cpf")}`}
+                          />
+                        )}
+                      />
                       <div className="min-h-[20px]">
                         {errors.cpf && <span className="text-red-500 text-sm">{errors.cpf.message}</span>}
                       </div>
@@ -425,7 +438,18 @@ export function CadastroForm({
 
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="telefone">Telefone</Label>
-                    <Input id="telefone" type="tel" {...register("telefone")} />
+                    <Controller
+                      name="telefone"
+                      control={control}
+                      render={({ field }) => (
+                        <IMaskInput
+                          mask="(00) 00000-0000"
+                          value={field.value || ''}
+                          onAccept={(value) => field.onChange(value)}
+                          className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${getFieldValidationClassLocal("telefone")}`}
+                        />
+                      )}
+                    />
                     <div className="min-h-[20px]">
                       {errors.telefone && <span className="text-red-500 text-sm">{errors.telefone.message}</span>}
                     </div>
@@ -503,9 +527,20 @@ export function CadastroForm({
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
                     <Label htmlFor="oab">OAB</Label>
-                    <Input id="oab" type="text" {...register("oab")} />
+                    <Controller
+                      name="oab"
+                      control={control}
+                      render={({ field }) => (
+                        <IMaskInput
+                          mask="AA999999"
+                          value={field.value || ''}
+                          onAccept={(value) => field.onChange(value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                      )}
+                    />
                     <div className="min-h-[20px]">
                       {errors.oab && <span className="text-red-500 text-sm">{errors.oab.message}</span>}
                     </div>
@@ -575,7 +610,18 @@ export function CadastroForm({
 
                       <div className="flex flex-col gap-2">
                         <Label htmlFor="dadosContato.telefone">Telefone Profissional</Label>
-                        <Input id="dadosContato.telefone" type="tel" {...register("dadosContato.telefone")} />
+                        <Controller
+                          name="dadosContato.telefone"
+                          control={control}
+                          render={({ field }) => (
+                            <IMaskInput
+                              mask="(00) 00000-0000"
+                              value={field.value || ''}
+                              onAccept={(value) => field.onChange(value)}
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            />
+                          )}
+                        />
                       </div>
                     </div>
                   </div>

@@ -36,10 +36,10 @@ export const cadastroSchema = z.object({
   }),
 
   // Campos adicionais
-  cpf: z.string().min(11, "CPF inválido"),
+  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF deve estar no formato XXX.XXX.XXX-XX"),
   oab: z.string().optional(),
   dateOfBirth: z.string().min(1, "Data de nascimento é obrigatória"),
-  telefone: z.string().min(8, "Telefone inválido"),
+  telefone: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Telefone deve estar no formato (XX) XXXXX-XXXX"),
   address: addressSchema,
 
   // Campos específicos para advogado

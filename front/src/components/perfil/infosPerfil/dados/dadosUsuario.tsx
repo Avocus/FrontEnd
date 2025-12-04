@@ -17,10 +17,40 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import toast from "react-hot-toast";
 import { useProfileStore, useAuthStore, useProcessoStore } from "@/store";
 import { ClienteProfile, AdvogadoProfile } from "@/types/entities/Profile";
-import { StatusProcesso, getEspecialidadeLabel } from "@/types/enums";
+import { StatusProcesso, getEspecialidadeLabel, Especialidade } from "@/types/enums";
 import { Configs } from "@/components/perfil/configs";
 import { updateClienteProfile } from "@/services/cliente/clienteService";
 import { updateAdvogadoProfile } from "@/services/advogado/advogadoService";
+import { IMaskInput } from 'react-imask';
+
+const formatTelefone = (value: string | undefined) => {
+    if (!value) return '';
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 11) {
+        return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`;
+    }
+    return value;
+};
+
+const formatCpf = (value: string | undefined) => {
+    if (!value) return '';
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 11) {
+        return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6, 9)}-${cleaned.slice(9)}`;
+    }
+    return value;
+};
+
+const formatOab = (value: string | undefined) => {
+    if (!value) return '';
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length === 6) {
+        return `${cleaned.slice(0, 2)}.${cleaned.slice(2)}`;
+    } else if (cleaned.length === 7) {
+        return `${cleaned.slice(0, 3)}.${cleaned.slice(3)}`;
+    }
+    return value;
+};
 
 export function DadosUsuario() {
     const { profile, isLoading: profileLoading, updateProfile: updateProfileStore } = useProfileStore();
@@ -82,7 +112,9 @@ export function DadosUsuario() {
                     cidade: advogadoProfile.cidade || "",
                     estado: advogadoProfile.estado || "",
                     cep: advogadoProfile.cep || "",
-                    fotoPerfil: undefined
+                    fotoPerfil: undefined,
+                    oab: advogadoProfile.oab || "",
+                    especialidades: advogadoProfile.especialidades || []
                 });
             } else {
                 // É cliente
@@ -111,12 +143,16 @@ export function DadosUsuario() {
                     id: clienteProfile.id,
                     nome: perfilData.nome,
                     email: perfilData.email,
-                    telefone: perfilData.telefone,
-                    cpf: perfilData.cpf,
+                    telefone: perfilData.telefone || '',
+                    cpf: perfilData.cpf || '',
                     dataNascimento: perfilData.dataNascimento,
-                    endereco: perfilData.endereco ? `${perfilData.endereco.numero || ''} ${perfilData.endereco.complemento || ''} ${perfilData.endereco.bairro || ''}`.trim() : '',
+                    rua: perfilData.endereco?.rua || '',
+                    numero: perfilData.endereco?.numero || '',
+                    complemento: perfilData.endereco?.complemento || '',
+                    bairro: perfilData.endereco?.bairro || '',
                     cidade: perfilData.endereco?.cidade || '',
                     estado: perfilData.endereco?.estado || '',
+                    cep: perfilData.endereco?.cep || '',
                     fotoPerfil: undefined,
                 };
                 form.reset(formData);
@@ -128,12 +164,15 @@ export function DadosUsuario() {
     };
 
     async function updateCliente(data: ProfileFormData) {
+        const unformatTelefone = (tel: string) => tel.replace(/\D/g, '');
+        const unformatCpf = (cpf: string) => cpf.replace(/\D/g, '');
+
         const payload = {
             id: data.id ?? "",
             nome: data.nome,
-            telefone: data.telefone ?? "",
-            cpf: data.cpf ?? "",
-            dataNascimento: data.dataNascimento ?? "",
+            telefone: unformatTelefone(data.telefone ?? ''),
+            cpf: unformatCpf(data.cpf ?? ''),
+            dataNascimento: data.dataNascimento ?? '',
             endereco: {
                 rua: data.rua ?? "",
                 numero: data.numero ?? "",
@@ -167,7 +206,9 @@ export function DadosUsuario() {
             dadosContato: {
                 telefone: data.telefone ?? ""
             },
-            dataNascimento: data.dataNascimento ?? ""
+            dataNascimento: data.dataNascimento ?? "",
+            oab: data.oab ?? "",
+            especialidades: data.especialidades ?? []
         };
 
         await updateAdvogadoProfile(payload);
@@ -193,6 +234,11 @@ export function DadosUsuario() {
         carregar();
     }, [user, isAdvogado, carregarProcessosCliente, carregarProcessosAdvogado]);
 
+    // Carregar dados do perfil quando o componente monta
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
     const onSubmit = async (data: ProfileFormData) => {
     try {
         let updatedProfileData;
@@ -214,7 +260,8 @@ export function DadosUsuario() {
                 bairro: updatedProfileData.endereco.bairro,
                 cidade: updatedProfileData.endereco.cidade,
                 estado: updatedProfileData.endereco.estado,
-                cep: updatedProfileData.endereco.cep
+                cep: updatedProfileData.endereco.cep,
+                especialidades: updatedProfileData.especialidades
             };
 
             updateProfileStore(updatedProfile);
@@ -277,7 +324,7 @@ export function DadosUsuario() {
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input {...field} />
+                                                <Input {...field} value={field.value ?? ''} />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <MailIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
@@ -298,11 +345,16 @@ export function DadosUsuario() {
                                         <FormLabel>Telefone</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input {...field} />
+                                                <IMaskInput
+                                                    mask="(00) 00000-0000"
+                                                    value={field.value || ''}
+                                                    onAccept={(value) => field.onChange(value)}
+                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <PhoneIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                    <p className="text-muted-foreground">{formatTelefone(field.value) || "Não informado"}</p>
                                                 </div>
                                             )}
                                         </FormControl>
@@ -319,7 +371,7 @@ export function DadosUsuario() {
                                         <FormLabel>Data de Nascimento</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input type="date" {...field} />
+                                                <Input type="date" {...field} value={field.value ?? ''} />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <CalendarIcon className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
@@ -344,11 +396,16 @@ export function DadosUsuario() {
                                         <FormLabel>CPF</FormLabel>
                                         <FormControl>
                                             {isEditing ? (
-                                                <Input {...field} />
+                                                <IMaskInput
+                                                    mask="000.000.000-00"
+                                                    value={field.value || ''}
+                                                    onAccept={(value) => field.onChange(value)}
+                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                />
                                             ) : (
                                                 <div className="flex items-start gap-3">
                                                     <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                                                    <p className="text-muted-foreground">{field.value || "Não informado"}</p>
+                                                    <p className="text-muted-foreground">{formatCpf(field.value) || "Não informado"}</p>
                                                 </div>
                                             )}
                                         </FormControl>
@@ -358,13 +415,26 @@ export function DadosUsuario() {
                             />
 
                             {isAdvogado && (
-                                <div>
-                                    <FormLabel>OAB</FormLabel>
-                                    <div className="flex items-start gap-3 mt-2">
-                                        <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                                        <p className="text-muted-foreground">{(profile as AdvogadoProfile).oab || "Não informado"}</p>
-                                    </div>
-                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="oab"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>OAB</FormLabel>
+                                            <FormControl>
+                                                {isEditing ? (
+                                                    <Input {...field} value={field.value ?? ''} />
+                                                ) : (
+                                                    <div className="flex items-start gap-3">
+                                                        <User className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
+                                                        <p className="text-muted-foreground">{formatOab(field.value) || "Não informado"}</p>
+                                                    </div>
+                                                )}
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             )}
                         </div>
 
@@ -372,14 +442,48 @@ export function DadosUsuario() {
                             <div className="pt-4 border-t">
                                 <h3 className="text-lg font-medium mb-4">Informações Profissionais</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <FormLabel>Especialidades</FormLabel>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {(profile as AdvogadoProfile).especialidades?.map((esp, index) => (
-                                                <Badge key={index} variant="outline">{getEspecialidadeLabel(esp)}</Badge>
-                                            )) || <p className="text-muted-foreground">Nenhuma especialidade informada</p>}
-                                        </div>
-                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="especialidades"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Especialidades</FormLabel>
+                                                {isEditing ? (
+                                                    <div className="space-y-2">
+                                                        {Object.values(Especialidade).map((esp) => (
+                                                            <div key={esp} className="flex items-center space-x-2">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id={esp}
+                                                                    checked={field.value?.includes(esp) || false}
+                                                                    onChange={(e) => {
+                                                                        const checked = e.target.checked;
+                                                                        const current = field.value || [];
+                                                                        if (checked) {
+                                                                            field.onChange([...current, esp]);
+                                                                        } else {
+                                                                            field.onChange(current.filter((e: Especialidade) => e !== esp));
+                                                                        }
+                                                                    }}
+                                                                    className="h-4 w-4"
+                                                                />
+                                                                <label htmlFor={esp} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                                    {getEspecialidadeLabel(esp)}
+                                                                </label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {field.value?.map((esp: Especialidade) => (
+                                                            <Badge key={esp} variant="outline">{getEspecialidadeLabel(esp)}</Badge>
+                                                        )) || <p className="text-muted-foreground">Nenhuma especialidade informada</p>}
+                                                    </div>
+                                                )}
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
                                     {(profile as AdvogadoProfile).bio && (
                                         <div>
@@ -406,7 +510,7 @@ export function DadosUsuario() {
                                 <FormLabel>CEP</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value ?? ''} />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informado"}</p>
                                     )}
@@ -425,7 +529,7 @@ export function DadosUsuario() {
                                 <FormLabel>Estado</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value ?? ''} />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informado"}</p>
                                     )}
@@ -444,7 +548,7 @@ export function DadosUsuario() {
                                 <FormLabel>Cidade</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value ?? ''} />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informada"}</p>
                                     )}
@@ -463,7 +567,7 @@ export function DadosUsuario() {
                                 <FormLabel>Bairro</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value ?? ''} />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informado"}</p>
                                     )}
@@ -482,7 +586,7 @@ export function DadosUsuario() {
                                 <FormLabel>Rua</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value ?? ''} />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informada"}</p>
                                     )}
@@ -501,7 +605,7 @@ export function DadosUsuario() {
                                 <FormLabel>Número</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value ?? ''} />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "Não informado"}</p>
                                     )}
@@ -520,7 +624,7 @@ export function DadosUsuario() {
                                 <FormLabel>Complemento</FormLabel>
                                 <FormControl>
                                     {isEditing ? (
-                                    <Input {...field} />
+                                    <Input {...field} value={field.value ?? ''} />
                                     ) : (
                                     <p className="text-muted-foreground">{field.value || "—"}</p>
                                     )}
