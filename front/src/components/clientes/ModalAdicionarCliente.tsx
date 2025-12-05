@@ -158,10 +158,10 @@ export function ModalAdicionarCliente({ isOpen, onClose, onClienteVinculado }: M
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="ghost" className="border border-gray-300" onClick={handleClose}>
+                <Button type="button" variant={"secondary"} onClick={handleClose}>
                   Cancelar
                 </Button>
-                <Button type="submit" className="border border-gray-300" disabled={!isValidExisting || isLoading}>
+                <Button type="submit" variant={"primary"} disabled={!isValidExisting || isLoading}>
                   {isLoading ? "Buscando..." : "Buscar e Vincular"}
                 </Button>
               </DialogFooter>
