@@ -13,20 +13,20 @@ import Link from 'next/link'
 
 
 export default function TicketsPage() {
-  const { tickets, fetchTickets, assignTicket, isLoading } = useTickets()
+  const { tickets, fetchTickets, isLoading } = useTickets()
   const { user } = useAuthStore()
 
   useEffect(() => {
     fetchTickets()
   }, [])
 
-  const handlePegarTicket = async (ticketId: number) => {
-    try {
-      await assignTicket(ticketId.toString())
-    } catch (error) {
-      console.error('Erro ao pegar ticket:', error)
-    }
-  }
+  // const handlePegarTicket = async (ticketId: number) => {
+  //   try {
+  //     await assignTicket(ticketId.toString())
+  //   } catch (error) {
+  //     console.error('Erro ao pegar ticket:', error)
+  //   }
+  // }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -93,14 +93,14 @@ export default function TicketsPage() {
                   >
                     Ver Detalhes
                   </Link>
-                  {ticket.status === 'PENDING' && (
+                  {/* {ticket.status === 'PENDING' && (
                     <Button
                       onClick={() => handlePegarTicket(ticket.id)}
                       variant={"primary"}
                     >
                       Pegar Caso
                     </Button>
-                  )}
+                  )} */}
                   {ticket.status === 'ASSIGNED' && (
                     <Button variant="outline" disabled>
                       Caso já atribuído
