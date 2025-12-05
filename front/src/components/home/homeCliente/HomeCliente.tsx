@@ -8,7 +8,6 @@ import {
     Briefcase, 
     FileText, 
     Plus,
-    // Download,
     Timer
 } from "lucide-react";
 import { getEventosFuturos } from "@/services/eventoService";
@@ -16,7 +15,6 @@ import { listarProcessos } from "@/services/processo/processoService";
 import { Evento, ProcessoDTO } from "@/types/entities";
 import { getStatusProcessoLabel, StatusProcesso } from "@/types";
 import { getNumeroDocumentosPendentes } from "@/services/cliente/clienteService";
-import { se } from "date-fns/locale";
 
 export function HomeCliente() {
 

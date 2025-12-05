@@ -48,8 +48,8 @@ export const getPerfilAdvogado = async (advogadoId: string) => {
 export const getNumeroDocumentosPendentes = async (): Promise<number> => {
   try {
     const response = await api.get('/cliente/documentos-pendentes');
-    const responseData = response.data as number;
-    return responseData || 0;
+    const responseData = response.data as { data?: number };
+    return responseData.data || 0;
   } catch (error) {
     console.error('Erro ao obter número de documentos pendentes:', error);
     throw error;
