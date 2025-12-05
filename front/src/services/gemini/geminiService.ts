@@ -141,7 +141,7 @@ function obterDocumentosPadrao(tipoProcesso: string): string[] {
       'Fotos',
       'Vídeos',
     ],
-    FAMILIA: [
+    FAMILIAR: [
       'Certidão de Casamento',
       'Certidão de Nascimento',
       'Documentos Pessoais',

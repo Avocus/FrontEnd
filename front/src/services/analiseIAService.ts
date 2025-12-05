@@ -28,7 +28,7 @@ function mapCaseTypeToApi(type: string) {
     penal: "PENAL",
     trabalhista: "TRABALHISTA",
     tributario: "TRIBUTARIO",
-    familia: "FAMILIA",
+    familia: "FAMILIAR",
     constitucional: "CONSTITUCIONAL",
     administrativo: "ADMINISTRATIVO",
     consumidor: "CONSUMIDOR",
@@ -132,7 +132,7 @@ export async function analiseIAService(payload: Record<string, unknown>): Promis
 Receba o texto abaixo (título + descrição) e responda estritamente em JSON com as chaves:
   - isLegal: true|false
   - reason: explicação curta (quando false explique o que falta)
-  - tipoProcesso: uma das (CIVIL,PENAL,TRABALHISTA,TRIBUTARIO,FAMILIA,CONSTITUCIONAL,ADMINISTRATIVO,CONSUMIDOR) ou null
+  - tipoProcesso: uma das (CIVIL,PENAL,TRABALHISTA,TRIBUTARIO,FAMILIAR,CONSTITUCIONAL,ADMINISTRATIVO,CONSUMIDOR) ou null
   - titulo: título corrigido e resumido (máx 80 chars) quando isLegal=true
   - descricao: descrição corrigida, coerente e gramaticamente correta (máx 2000 chars) quando isLegal=true
 

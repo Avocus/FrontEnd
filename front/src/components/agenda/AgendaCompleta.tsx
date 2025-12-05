@@ -253,6 +253,7 @@ export function AgendaCompleta() {
       setIsDialogOpen(false)
       resetForm()
     } catch (error) {
+      setIsDialogOpen(false)
       console.error('Erro ao salvar evento:', error)
     }
   }

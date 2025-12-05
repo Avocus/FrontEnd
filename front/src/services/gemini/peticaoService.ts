@@ -153,7 +153,7 @@ export async function obterTemplatePeticao(tipoProcesso: string): Promise<string
   const templates: Record<string, string> = {
     TRABALHISTA: 'Template de Reclamação Trabalhista',
     CIVIL: 'Template de Ação Civil',
-    FAMILIA: 'Template de Ação de Família',
+    FAMILIAR: 'Template de Ação de Família',
     CONSUMIDOR: 'Template de Ação de Defesa do Consumidor',
     PREVIDENCIARIO: 'Template de Ação Previdenciária',
     CRIMINAL: 'Template de Denúncia/Queixa-Crime',
