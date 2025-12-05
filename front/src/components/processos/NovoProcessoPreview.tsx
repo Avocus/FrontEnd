@@ -80,10 +80,6 @@ export default function NovoProcessoPreview({
               <p className="text-muted-foreground">Revise todas as informações antes de enviar</p>
             </div>
           </div>
-          <Badge variant="secondary" className="px-3 py-1">
-            <FileText className="h-3 w-3 mr-1" />
-            Revisão
-          </Badge>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -154,7 +150,7 @@ export default function NovoProcessoPreview({
             </Card>
 
             {/* Card de Documentos Sugeridos pela IA */}
-            {payload.documentosSugeridos && payload.documentosSugeridos.length > 0 && (
+            {payload.documentosSugeridos && payload.documentosSugeridos.length > 0 && isAdvogado && (
               <Card className="border-2 border-primary/20 bg-primary/5">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
